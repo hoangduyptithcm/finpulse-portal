@@ -8,9 +8,9 @@ export default function SignOutButton() {
     <form action={handleSignOut}>
       <button
         type="submit"
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-400 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-600 rounded-sm hover:bg-stone-100 hover:text-stone-900 transition-colors cursor-pointer"
       >
-        <LogOut className="w-4 h-4" />
+        <LogOut className="w-3.5 h-3.5" />
         <span>Đăng xuất</span>
       </button>
     </form>

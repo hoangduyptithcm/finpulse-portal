@@ -6,17 +6,15 @@ import { createPost, updatePost } from "@/app/admin/actions";
 import { slugify } from "@/lib/slugify";
 import TipTapEditor from "./TipTapEditor";
 import CoverImageUploader from "./CoverImageUploader";
+import { PostStatus } from "@prisma/client";
 import {
   Save,
   ArrowLeft,
   Loader2,
-  Sparkles,
   Share2,
   FileCheck,
 } from "lucide-react";
 import Link from "next/link";
-
-import { PostStatus } from "@prisma/client";
 
 interface CategoryOption {
   id: string;
@@ -109,46 +107,46 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
       {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/posts"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-sm bg-white border border-stone-200 text-stone-600 hover:text-stone-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <h2 className="text-xl font-bold text-white">
-              {isEditing ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}
+            <h2 className="font-serif text-xl font-bold text-stone-900">
+              {isEditing ? "Chỉnh sửa bài viết" : "Soạn bài viết mới"}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-500">
               Định dạng chuẩn SEO bài báo, tự động tạo preview chia sẻ Facebook
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href="/admin/posts"
-            className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            className="px-3.5 py-2 rounded-sm border border-stone-300 bg-white text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors"
           >
             Hủy bỏ
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 text-xs font-semibold text-slate-950 shadow-md shadow-emerald-500/20 hover:opacity-95 transition-all disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-sm bg-stone-900 hover:bg-stone-800 px-4 py-2 text-xs font-medium text-white transition-colors disabled:opacity-50 cursor-pointer"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 <span>Đang lưu...</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 text-slate-950" />
+                <Save className="w-3.5 h-3.5" />
                 <span>{isEditing ? "Cập nhật bài viết" : "Xuất bản bài viết"}</span>
               </>
             )}
@@ -157,7 +155,7 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-xs text-red-400">
+        <div className="p-3 rounded-sm border border-red-200 bg-red-50 text-xs text-red-700">
           {error}
         </div>
       )}
@@ -165,34 +163,30 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
       {/* 2 Columns Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Main Content (8 cols) */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-5">
           {/* Title */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-stone-800">
               Tiêu đề bài viết *
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              placeholder="VD: Giá Bitcoin vượt mốc 100,000 USD sau dòng tiền ETF kỷ lục..."
+              placeholder="VD: Tổng quan thị trường Crypto và chu kỳ mới năm 2026..."
               required
-              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-base font-semibold text-white placeholder-slate-600 outline-none focus:border-emerald-500/60"
+              className="w-full rounded-sm border border-stone-300 bg-white px-3.5 py-2.5 text-base font-semibold text-stone-900 placeholder-stone-400 outline-none focus:border-stone-800"
             />
           </div>
 
           {/* Slug */}
           <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="text-[11px] font-medium text-slate-400">
-                Đường dẫn URL SEO (Slug)
-              </label>
-              {!isSlugManual && (
-                <span className="text-[10px] text-emerald-400">Tự động sinh từ tiêu đề</span>
-              )}
+            <div className="flex items-center justify-between text-[11px] text-stone-500">
+              <span>Đường dẫn URL SEO (Slug)</span>
+              {!isSlugManual && <span className="text-blue-700">Tự động sinh</span>}
             </div>
-            <div className="flex items-center rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs font-mono text-slate-400">
-              <span className="text-slate-600 shrink-0">/posts/</span>
+            <div className="flex items-center rounded-sm border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-mono text-stone-500">
+              <span className="shrink-0">/posts/</span>
               <input
                 type="text"
                 value={slug}
@@ -200,19 +194,19 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
                   setIsSlugManual(true);
                   setSlug(e.target.value);
                 }}
-                className="w-full bg-transparent text-emerald-400 outline-none pl-1"
+                className="w-full bg-transparent text-stone-900 outline-none pl-1"
               />
             </div>
           </div>
 
-          {/* Excerpt / Tóm tắt */}
-          <div className="space-y-1.5">
+          {/* Excerpt */}
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Share2 className="w-3.5 h-3.5 text-emerald-400" />
+              <label className="text-xs font-semibold text-stone-800 flex items-center gap-1.5">
+                <Share2 className="w-3.5 h-3.5 text-blue-700" />
                 <span>Tóm tắt bài viết (Mô tả Facebook Preview)</span>
               </label>
-              <span className="text-[11px] text-slate-500 font-mono">
+              <span className="text-[11px] text-stone-400 font-mono">
                 {excerpt.length}/250 ký tự
               </span>
             </div>
@@ -220,15 +214,15 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
               rows={3}
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Nhập 1-2 câu tóm tắt hấp dẫn. Nội dung này sẽ hiển thị làm phần mô tả khi dán link lên Fanpage Facebook."
-              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 p-3 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-emerald-500/60 resize-none leading-relaxed"
+              placeholder="Nhập 1-2 câu tóm tắt nội dung để hiển thị trên Facebook Preview..."
+              className="w-full rounded-sm border border-stone-300 bg-white p-3 text-xs text-stone-800 placeholder-stone-400 outline-none focus:border-stone-800 resize-none leading-relaxed"
             />
           </div>
 
-          {/* TipTap Rich Text Editor */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
+          {/* TipTap Editor */}
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-stone-800 flex items-center gap-1.5">
+              <FileCheck className="w-3.5 h-3.5 text-stone-600" />
               <span>Nội dung chi tiết bài viết</span>
             </label>
             <TipTapEditor content={content} onChange={setContent} />
@@ -236,30 +230,30 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
         </div>
 
         {/* Right Column: Settings & Media (4 cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Cover Image Upload */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 space-y-3">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-              Ảnh bìa bài viết (Cover Image)
+        <div className="lg:col-span-4 space-y-5">
+          {/* Cover Image */}
+          <div className="border border-stone-200 bg-white p-4 rounded-sm space-y-2">
+            <label className="block text-xs font-semibold text-stone-800">
+              Ảnh bìa bài viết
             </label>
             <CoverImageUploader value={coverImage} onChange={setCoverImage} />
           </div>
 
-          {/* Publishing Settings */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 space-y-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+          {/* Settings Box */}
+          <div className="border border-stone-200 bg-white p-4 rounded-sm space-y-4">
+            <h3 className="text-xs font-semibold text-stone-800 uppercase tracking-wider pb-2 border-b border-stone-100">
               Cài đặt Xuất bản
             </h3>
 
             {/* Category Select */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-400">
-                Chuyên mục bài viết *
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-stone-600">
+                Chuyên mục *
               </label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-xs text-slate-200 outline-none focus:border-emerald-500/50 cursor-pointer"
+                className="w-full rounded-sm border border-stone-300 bg-white px-3 py-2 text-xs text-stone-800 outline-none focus:border-stone-800 cursor-pointer"
               >
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -270,29 +264,29 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
             </div>
 
             {/* Status Select */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-400">
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-stone-600">
                 Trạng thái hiển thị
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => setStatus("PUBLISHED")}
-                  className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                    status === "PUBLISHED"
-                      ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400"
-                      : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
+                  onClick={() => setStatus(PostStatus.PUBLISHED)}
+                  className={`py-1.5 px-3 rounded-sm text-xs font-medium border transition-colors cursor-pointer ${
+                    status === PostStatus.PUBLISHED
+                      ? "bg-stone-900 border-stone-900 text-white"
+                      : "bg-white border-stone-300 text-stone-600 hover:bg-stone-50"
                   }`}
                 >
                   Xuất bản ngay
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStatus("DRAFT")}
-                  className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                    status === "DRAFT"
-                      ? "bg-amber-500/10 border-amber-500/40 text-amber-400"
-                      : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
+                  onClick={() => setStatus(PostStatus.DRAFT)}
+                  className={`py-1.5 px-3 rounded-sm text-xs font-medium border transition-colors cursor-pointer ${
+                    status === PostStatus.DRAFT
+                      ? "bg-stone-900 border-stone-900 text-white"
+                      : "bg-white border-stone-300 text-stone-600 hover:bg-stone-50"
                   }`}
                 >
                   Lưu bản nháp
@@ -301,22 +295,21 @@ export default function PostForm({ initialData, categories }: PostFormProps) {
             </div>
 
             {/* Featured Post Toggle */}
-            <div className="pt-2 border-t border-slate-800/80">
+            <div className="pt-2 border-t border-stone-100">
               <label className="flex items-center justify-between cursor-pointer">
                 <div className="space-y-0.5">
-                  <span className="text-xs font-medium text-slate-200 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Bài viết tiêu điểm (Featured)</span>
+                  <span className="text-xs font-medium text-stone-800">
+                    Bài viết tiêu điểm (Hero)
                   </span>
-                  <p className="text-[11px] text-slate-500">
-                    Hiển thị ở vị trí to nhất đầu trang chủ
+                  <p className="text-[10px] text-stone-400">
+                    Hiển thị ở vị trí lớn nhất đầu trang chủ
                   </p>
                 </div>
                 <input
                   type="checkbox"
                   checked={featured}
                   onChange={(e) => setFeatured(e.target.checked)}
-                  className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-slate-950 border-slate-800 cursor-pointer"
+                  className="w-4 h-4 rounded text-stone-900 focus:ring-stone-800 border-stone-300 cursor-pointer"
                 />
               </label>
             </div>

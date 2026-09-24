@@ -27,11 +27,11 @@ export default function DeletePostButton({ id, title }: { id: string; title: str
       type="button"
       onClick={handleDelete}
       disabled={isDeleting}
-      className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 cursor-pointer"
+      className="p-1.5 rounded-sm text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
       title="Xóa bài viết"
     >
       {isDeleting ? (
-        <Loader2 className="w-3.5 h-3.5 animate-spin text-red-400" />
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-red-600" />
       ) : (
         <Trash2 className="w-3.5 h-3.5" />
       )}

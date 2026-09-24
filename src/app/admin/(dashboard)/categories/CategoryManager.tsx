@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createCategory, deleteCategory } from "@/app/admin/actions";
-import { Plus, Trash2, Loader2, FolderTree, Hash } from "lucide-react";
+import { Plus, Trash2, Loader2, FolderTree } from "lucide-react";
 
 interface CategoryItem {
   id: string;
@@ -62,25 +62,25 @@ export default function CategoryManager({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      {/* Create form (4 cols) */}
+      {/* Create form (5 cols) */}
       <div className="lg:col-span-5">
         <form
           onSubmit={handleCreate}
-          className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4 shadow-xl"
+          className="border border-stone-200 bg-white p-5 rounded-sm space-y-4"
         >
-          <div className="flex items-center gap-2 text-white font-bold text-sm">
-            <Plus className="w-4 h-4 text-emerald-400" />
+          <div className="flex items-center gap-2 text-stone-900 font-serif font-bold text-sm pb-2 border-b border-stone-100">
+            <Plus className="w-4 h-4 text-stone-700" />
             <span>Thêm Chuyên mục mới</span>
           </div>
 
           {error && (
-            <p className="text-xs text-red-400 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
+            <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-sm border border-red-200">
               {error}
             </p>
           )}
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-stone-800">
               Tên chuyên mục *
             </label>
             <input
@@ -89,42 +89,42 @@ export default function CategoryManager({
               onChange={(e) => setName(e.target.value)}
               placeholder="VD: Phân tích Kỹ thuật"
               required
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-emerald-500/50"
+              className="w-full rounded-sm border border-stone-300 bg-white px-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 outline-none focus:border-stone-800"
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-stone-800">
               Mô tả ngắn
             </label>
             <textarea
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Mô tả về chủ đề của chuyên mục..."
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-emerald-500/50 resize-none"
+              placeholder="Mô tả về chủ đề..."
+              className="w-full rounded-sm border border-stone-300 bg-white p-2.5 text-xs text-stone-900 placeholder-stone-400 outline-none focus:border-stone-800 resize-none"
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-stone-800">
               Thứ tự hiển thị
             </label>
             <input
               type="number"
               value={order}
               onChange={(e) => setOrder(Number(e.target.value))}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-500/50"
+              className="w-full rounded-sm border border-stone-300 bg-white px-3 py-1.5 text-xs text-stone-900 outline-none focus:border-stone-800"
             />
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-2.5 px-4 text-xs font-semibold text-slate-950 shadow-md shadow-emerald-500/20 hover:opacity-95 transition-all disabled:opacity-50 cursor-pointer"
+            className="w-full flex items-center justify-center gap-1.5 rounded-sm bg-stone-900 hover:bg-stone-800 py-2 px-4 text-xs font-medium text-white transition-colors disabled:opacity-50 cursor-pointer"
           >
             {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <span>Lưu Chuyên mục</span>
             )}
@@ -134,33 +134,33 @@ export default function CategoryManager({
 
       {/* Categories List (7 cols) */}
       <div className="lg:col-span-7">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-slate-800/80 flex items-center gap-2 font-bold text-xs text-slate-300">
-            <FolderTree className="w-4 h-4 text-emerald-400" />
+        <div className="border border-stone-200 bg-white rounded-sm overflow-hidden">
+          <div className="p-3.5 border-b border-stone-200 flex items-center gap-2 font-serif font-bold text-xs text-stone-900">
+            <FolderTree className="w-4 h-4 text-stone-500" />
             <span>Danh sách Chuyên mục hiện có</span>
           </div>
 
-          <div className="divide-y divide-slate-800/60">
+          <div className="divide-y divide-stone-100">
             {initialCategories.map((cat) => (
               <div
                 key={cat.id}
-                className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                className="p-3.5 flex items-center justify-between hover:bg-stone-50/60 transition-colors"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-slate-200">
+                    <span className="font-semibold text-sm text-stone-900">
                       {cat.name}
                     </span>
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/30">
+                    <span className="text-[10px] font-mono text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded-sm border border-stone-200">
                       /{cat.slug}
                     </span>
                   </div>
                   {cat.description && (
-                    <p className="text-xs text-slate-400 line-clamp-1">
+                    <p className="text-xs text-stone-500 line-clamp-1">
                       {cat.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                  <div className="flex items-center gap-3 text-[11px] text-stone-400">
                     <span>Thứ tự: {cat.order}</span>
                     <span>•</span>
                     <span>{cat._count.posts} bài viết</span>
@@ -172,13 +172,13 @@ export default function CategoryManager({
                     type="button"
                     onClick={() => handleDelete(cat.id, cat.name, cat._count.posts)}
                     disabled={deletingId === cat.id}
-                    className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="p-1.5 rounded-sm text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
                     title="Xóa chuyên mục"
                   >
                     {deletingId === cat.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-red-600" />
                     ) : (
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     )}
                   </button>
                 </div>
