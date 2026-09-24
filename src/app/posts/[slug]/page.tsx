@@ -3,18 +3,13 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import MarketTicker from "@/components/public/MarketTicker";
+import TopBar from "@/components/public/TopBar";
 import Navbar from "@/components/public/Navbar";
+import MarketTicker from "@/components/public/MarketTicker";
 import Footer from "@/components/public/Footer";
 import ShareButtons from "@/components/public/ShareButtons";
-import {
-  Clock,
-  Eye,
-  ChevronRight,
-  ShieldAlert,
-  ArrowRight,
-  UserCheck,
-} from "lucide-react";
+import AdminBottomBar from "@/components/public/AdminBottomBar";
+import { Clock, Eye, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +17,6 @@ interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// 1. GENERATE DYNAMIC METADATA CHO FACEBOOK OPENGRAPH (CỰC KỲ QUAN TRỌNG)
 export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
@@ -33,9 +27,7 @@ export async function generateMetadata({
   });
 
   if (!post) {
-    return {
-      title: "Không tìm thấy bài viết | FinPulse Portal",
-    };
+    return { title: "Không tìm thấy bài viết | FinPulse" };
   }
 
   const siteUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
@@ -47,13 +39,13 @@ export async function generateMetadata({
     : `${siteUrl}/og-fallback.png`;
 
   return {
-    title: `${post.title} | FinPulse Portal`,
+    title: `${post.title} | FinPulse`,
     description: post.excerpt || post.title,
     openGraph: {
       title: post.title,
       description: post.excerpt || post.title,
       url: postUrl,
-      siteName: "FinPulse Portal - Phân Tích Crypto & Thị Trường VN",
+      siteName: "FinPulse - Tin tức và Phân tích Tài chính",
       images: [
         {
           url: coverImageUrl,
@@ -64,7 +56,7 @@ export async function generateMetadata({
       ],
       type: "article",
       publishedTime: post.createdAt.toISOString(),
-      authors: [post.author?.name || "FinPulse Analyst"],
+      authors: [post.author?.name || "Minh Anh"],
     },
     twitter: {
       card: "summary_large_image",
@@ -78,7 +70,6 @@ export async function generateMetadata({
 export default async function PostDetailPage({ params }: PostPageProps) {
   const { slug } = await params;
 
-  // Lấy bài viết & đồng thời tăng lượt xem (views)
   const post = await prisma.post.findUnique({
     where: { slug },
     include: {
@@ -91,13 +82,12 @@ export default async function PostDetailPage({ params }: PostPageProps) {
     notFound();
   }
 
-  // Tăng lượt xem trong nền (không làm chậm trang)
+  // Tăng lượt xem
   await prisma.post.update({
     where: { id: post.id },
     data: { views: { increment: 1 } },
   });
 
-  // Lấy các bài viết liên quan (cùng chuyên mục) và danh mục cho Navbar
   const [categories, relatedPosts] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
     prisma.post.findMany({
@@ -106,7 +96,7 @@ export default async function PostDetailPage({ params }: PostPageProps) {
         status: "PUBLISHED",
         NOT: { id: post.id },
       },
-      take: 3,
+      take: 4,
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -115,80 +105,67 @@ export default async function PostDetailPage({ params }: PostPageProps) {
   const currentUrl = `${siteUrl}/posts/${post.slug}`;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-      {/* 1. Ticker */}
+    <div className="min-h-screen bg-white text-stone-900 font-sans selection:bg-stone-200">
+      <TopBar />
+      <Navbar categories={categories} />
       <MarketTicker />
 
-      {/* 2. Navbar */}
-      <Navbar categories={categories} />
-
-      {/* 3. Article Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-xs text-slate-400">
-          <Link href="/" className="hover:text-emerald-400 transition-colors">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Breadcrumb */}
+        <nav className="flex items-center space-x-2 text-xs text-stone-500">
+          <Link href="/" className="hover:text-stone-900 transition-colors">
             Trang chủ
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+          <ChevronRight className="w-3.5 h-3.5 text-stone-300" />
           <Link
             href={`/categories/${post.category?.slug}`}
-            className="text-emerald-400 font-medium hover:underline"
+            className="text-blue-700 font-medium hover:underline"
           >
             {post.category?.name}
           </Link>
         </nav>
 
-        {/* Article Header */}
-        <header className="space-y-5">
-          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-            <span className="font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-              {post.category?.name}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-slate-500" />
-              {new Date(post.createdAt).toLocaleDateString("vi-VN", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1 font-mono">
-              <Eye className="w-3.5 h-3.5 text-slate-500" />
-              {post.views + 1} lượt xem
-            </span>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+        {/* Title & Metadata */}
+        <header className="space-y-4">
+          <h1 className="font-serif text-2xl sm:text-4xl font-bold text-stone-900 leading-tight">
             {post.title}
           </h1>
 
-          {/* Excerpt Lead Box */}
-          {post.excerpt && (
-            <div className="p-4 sm:p-5 rounded-2xl border-l-4 border-emerald-400 bg-slate-900/70 text-slate-300 text-sm sm:text-base leading-relaxed italic font-serif">
-              &quot;{post.excerpt}&quot;
-            </div>
-          )}
-
-          {/* Social Share Bar Top */}
-          <div className="pt-2 pb-4 border-b border-slate-800/80 flex items-center justify-between">
-            <div className="flex items-center gap-2.5 text-xs text-slate-300">
-              <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
-                {post.author?.name?.[0] || "A"}
-              </div>
-              <span>
-                Biên tập: <strong>{post.author?.name || "FinPulse Team"}</strong>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-2 pb-4 border-b border-stone-200">
+            <div className="flex items-center space-x-3">
+              <span className="font-semibold text-stone-900">
+                {post.author?.name || "Minh Anh"}
+              </span>
+              <span>·</span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
+                {new Date(post.createdAt).toLocaleDateString("vi-VN", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                })}
+              </span>
+              <span>·</span>
+              <span className="flex items-center gap-1">
+                <Eye className="w-3.5 h-3.5" />
+                {post.views + 1} lượt đọc
               </span>
             </div>
+
             <ShareButtons title={post.title} url={currentUrl} />
           </div>
+
+          {/* Excerpt Lead */}
+          {post.excerpt && (
+            <p className="text-base sm:text-lg font-serif italic text-stone-700 leading-relaxed bg-stone-50 p-4 border-l-2 border-stone-800">
+              {post.excerpt}
+            </p>
+          )}
         </header>
 
-        {/* Cover Image (Facebook 1200x630 format) */}
+        {/* Cover Image */}
         {post.coverImage && (
-          <div className="relative aspect-[1200/630] w-full rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
+          <div className="relative aspect-[16/9] w-full overflow-hidden bg-stone-100 rounded-sm">
             <Image
               src={post.coverImage}
               alt={post.title}
@@ -199,79 +176,52 @@ export default async function PostDetailPage({ params }: PostPageProps) {
           </div>
         )}
 
-        {/* Article Body HTML Content */}
+        {/* Content Body */}
         <article
-          className="prose prose-invert prose-emerald max-w-none text-slate-200 text-base leading-relaxed pt-4
-          prose-headings:font-bold prose-headings:text-white prose-headings:tracking-tight
-          prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-slate-800 prose-h2:pb-2
+          className="prose prose-stone max-w-none text-stone-800 text-base leading-relaxed pt-2
+          prose-headings:font-serif prose-headings:font-bold prose-headings:text-stone-900
+          prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-stone-200 prose-h2:pb-2
           prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3
           prose-p:mb-5 prose-p:leading-8
-          prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:bg-slate-900/60 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-xl prose-blockquote:italic
-          prose-img:rounded-2xl prose-img:border prose-img:border-slate-800 prose-img:shadow-xl
-          prose-a:text-emerald-400 prose-a:underline prose-a:underline-offset-4 hover:prose-a:text-emerald-300"
+          prose-blockquote:border-l-2 prose-blockquote:border-stone-800 prose-blockquote:bg-stone-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:italic
+          prose-a:text-blue-700 prose-a:underline hover:prose-a:text-blue-900"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
-        {/* Social Share Bar Bottom */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <UserCheck className="w-4 h-4 text-emerald-400" />
-            <span>Nguồn tin tức: FinPulse Financial Research Desk</span>
-          </div>
+        {/* Share buttons bottom */}
+        <div className="pt-6 border-t border-stone-200 flex items-center justify-between">
+          <span className="text-xs text-stone-500">FinPulse Newsroom</span>
           <ShareButtons title={post.title} url={currentUrl} />
         </div>
 
-        {/* Disclaimer Warning */}
-        <div className="p-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 flex items-start gap-3.5 text-xs text-amber-300/90 leading-relaxed">
-          <ShieldAlert className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
-          <p>
-            <strong>Cảnh báo rủi ro tài chính:</strong> Bài viết trên chỉ nhằm cung cấp góc nhìn thông tin thị trường, hoàn toàn không được xem là lời khuyên mua bán hay kêu gọi đầu tư. Hãy tự nghiên cứu kỹ lưỡng trước khi đưa ra bất kỳ quyết định tài chính nào.
-          </p>
-        </div>
-
-        {/* Related Articles Section */}
+        {/* Related Stories */}
         {relatedPosts.length > 0 && (
-          <section className="pt-8 space-y-5 border-t border-slate-800/80">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="w-2 h-4 bg-emerald-400 rounded-full" />
-              <span>Bài Viết Cùng Chuyên Mục</span>
+          <div className="pt-8 border-t border-stone-200 space-y-4">
+            <h3 className="font-serif font-bold text-base text-stone-900">
+              Cùng chuyên mục {post.category?.name}
             </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {relatedPosts.map((item) => (
                 <Link
                   key={item.id}
                   href={`/posts/${item.slug}`}
-                  className="group rounded-2xl border border-slate-800 bg-slate-900/40 p-4 hover:bg-slate-900 hover:border-slate-700 transition-all flex flex-col justify-between"
+                  className="group p-3 border border-stone-200 rounded-sm hover:bg-stone-50 transition-colors block space-y-1.5"
                 >
-                  <div className="space-y-2">
-                    {item.coverImage && (
-                      <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-slate-800">
-                        <Image
-                          src={item.coverImage}
-                          alt={item.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    )}
-                    <h4 className="text-xs font-bold text-slate-200 group-hover:text-emerald-400 line-clamp-2 transition-colors">
-                      {item.title}
-                    </h4>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-800/60">
-                    <span>{new Date(item.createdAt).toLocaleDateString("vi-VN")}</span>
-                    <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                  </div>
+                  <h4 className="text-xs font-bold text-stone-900 group-hover:text-blue-700 transition-colors line-clamp-2">
+                    {item.title}
+                  </h4>
+                  <p className="text-[11px] text-stone-400">
+                    {new Date(item.createdAt).toLocaleDateString("vi-VN")} · {item.views} đọc
+                  </p>
                 </Link>
               ))}
             </div>
-          </section>
+          </div>
         )}
       </main>
 
-      {/* 4. Footer */}
       <Footer />
+      <AdminBottomBar />
     </div>
   );
 }

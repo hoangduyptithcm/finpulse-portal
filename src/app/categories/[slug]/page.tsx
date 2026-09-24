@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import MarketTicker from "@/components/public/MarketTicker";
+import TopBar from "@/components/public/TopBar";
 import Navbar from "@/components/public/Navbar";
+import MarketTicker from "@/components/public/MarketTicker";
 import Footer from "@/components/public/Footer";
-import { Clock, Eye, FolderTree, BookmarkCheck } from "lucide-react";
+import AdminBottomBar from "@/components/public/AdminBottomBar";
 
 export const dynamic = "force-dynamic";
 
@@ -23,12 +23,12 @@ export async function generateMetadata({
   });
 
   if (!category) {
-    return { title: "Chuyên mục không tồn tại | FinPulse Portal" };
+    return { title: "Chuyên mục không tồn tại | FinPulse" };
   }
 
   return {
-    title: `${category.name} | FinPulse Portal`,
-    description: category.description || `Bản tin và phân tích chuyên mục ${category.name}`,
+    title: `${category.name} | FinPulse`,
+    description: category.description || `Bản tin tài chính chuyên mục ${category.name}`,
   };
 }
 
@@ -55,83 +55,53 @@ export default async function CategoryDetailPage({ params }: CategoryPageProps) 
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-      <MarketTicker />
+    <div className="min-h-screen bg-white text-stone-900 font-sans selection:bg-stone-200">
+      <TopBar />
       <Navbar categories={allCategories} />
+      <MarketTicker />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
-        {/* Category Header Banner */}
-        <div className="rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/80 to-emerald-950/30 p-8 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
-            <FolderTree className="w-3.5 h-3.5" />
-            <span>Chuyên mục tin tức</span>
-          </div>
-          <h1 className="text-3xl font-black text-white">{category.name}</h1>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Category Header */}
+        <div className="border-b border-stone-200 pb-4 space-y-1">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900">
+            {category.name}
+          </h1>
           {category.description && (
-            <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
-              {category.description}
-            </p>
+            <p className="text-xs text-stone-600 max-w-2xl">{category.description}</p>
           )}
-          <p className="text-xs text-slate-500 font-mono">
-            {posts.length} bài viết đã xuất bản
-          </p>
+          <p className="text-[11px] text-stone-400 font-sans">{posts.length} bài viết</p>
         </div>
 
-        {/* Posts Grid */}
+        {/* List of articles */}
         {posts.length === 0 ? (
-          <div className="text-center py-16 bg-slate-900/40 rounded-3xl border border-slate-800 space-y-2">
-            <BookmarkCheck className="w-10 h-10 text-slate-600 mx-auto" />
-            <p className="text-slate-400 text-sm">Chưa có bài viết nào trong chuyên mục này.</p>
+          <div className="py-12 text-center text-stone-500 text-xs">
+            Chưa có bài viết nào trong chuyên mục này.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="divide-y divide-stone-200 max-w-4xl">
             {posts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/posts/${post.slug}`}
-                className="group rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden hover:border-slate-700 hover:bg-slate-900/80 transition-all flex flex-col justify-between shadow-lg"
-              >
-                <div>
-                  {post.coverImage && (
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-800">
-                      <Image
-                        src={post.coverImage}
-                        alt={post.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
+              <article key={post.id} className="py-4 space-y-1.5">
+                <Link href={`/posts/${post.slug}`} className="group block space-y-1">
+                  <h2 className="font-serif text-lg font-bold text-stone-900 group-hover:text-blue-700 transition-colors">
+                    {post.title}
+                  </h2>
+                  {post.excerpt && (
+                    <p className="text-xs text-stone-600 leading-relaxed line-clamp-2">
+                      {post.excerpt}
+                    </p>
                   )}
-
-                  <div className="p-5 space-y-2.5">
-                    <h3 className="font-bold text-base text-white group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
-                      {post.title}
-                    </h3>
-                    {post.excerpt && (
-                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                        {post.excerpt}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="px-5 pb-5 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {new Date(post.createdAt).toLocaleDateString("vi-VN")}
-                  </span>
-                  <span className="flex items-center gap-1 font-mono">
-                    <Eye className="w-3 h-3" />
-                    {post.views}
-                  </span>
-                </div>
-              </Link>
+                  <p className="text-[11px] text-stone-400 font-sans">
+                    {post.author?.name || "Minh Anh"} · {new Date(post.createdAt).toLocaleDateString("vi-VN")} · {post.views} lượt đọc
+                  </p>
+                </Link>
+              </article>
             ))}
           </div>
         )}
       </main>
 
       <Footer />
+      <AdminBottomBar />
     </div>
   );
 }

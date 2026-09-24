@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, ArrowUpRight, ShieldCheck, Flame } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 
 interface CategoryNav {
   id: string;
@@ -12,76 +12,72 @@ interface CategoryNav {
 
 export default function Navbar({ categories }: { categories: CategoryNav[] }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+    <header className="border-b border-stone-200 bg-white sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo Brand */}
+        <div className="flex items-center justify-between h-14">
+          {/* Brand Logo */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-base shadow-lg shadow-emerald-500/20">
-                FP
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-black tracking-wider text-white">
-                  FINPULSE
-                </span>
-                <span className="text-[9px] uppercase tracking-widest text-emerald-400 font-bold -mt-1">
-                  Crypto & VN Market
-                </span>
-              </div>
+            <Link href="/" className="font-serif text-2xl font-bold tracking-tight text-stone-900 hover:opacity-90">
+              FinPulse
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center space-x-1">
-              <Link
-                href="/"
-                className="px-3 py-2 text-xs font-semibold text-white rounded-lg hover:bg-slate-900 transition-colors"
-              >
-                Trang chủ
+            {/* Desktop Categories Menu */}
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-stone-700">
+              <Link href="/categories/crypto" className="hover:text-stone-950 transition-colors">
+                Crypto
               </Link>
-              {categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/categories/${cat.slug}`}
-                  className="px-3 py-2 text-xs font-medium text-slate-300 rounded-lg hover:text-white hover:bg-slate-900 transition-colors"
+              <Link href="/categories/chung-khoan" className="hover:text-stone-950 transition-colors">
+                Chứng khoán
+              </Link>
+              <Link href="/categories/vi-mo" className="hover:text-stone-950 transition-colors">
+                Vĩ mô
+              </Link>
+              <Link href="/categories/kien-thuc-dau-tu" className="hover:text-stone-950 transition-colors">
+                Kiến thức đầu tư
+              </Link>
+            </nav>
+          </div>
+
+          {/* Right: Search */}
+          <div className="flex items-center gap-3">
+            {showSearch ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm tin tức, cổ phiếu, crypto..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="rounded-lg border border-stone-300 px-3 py-1 text-xs text-stone-900 outline-none focus:border-stone-800 w-48 sm:w-64"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSearch(false)}
+                  className="text-stone-400 hover:text-stone-700"
                 >
-                  {cat.name}
-                </Link>
-              ))}
-            </div>
-          </div>
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowSearch(true)}
+                className="flex items-center gap-1.5 text-xs text-stone-600 hover:text-stone-950 cursor-pointer font-medium"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Tìm kiếm</span>
+              </button>
+            )}
 
-          {/* Right Action buttons */}
-          <div className="hidden sm:flex items-center gap-3">
-            {/* Fanpage CTA */}
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 text-xs font-semibold transition-all"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-              <span>Cộng đồng Fanpage</span>
-              <ArrowUpRight className="w-3 h-3" />
-            </a>
-
-            {/* Admin entry shortcut */}
-            <Link
-              href="/admin"
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-900 transition-colors"
-              title="Quản trị viên"
-            >
-              <ShieldCheck className="w-4 h-4" />
-            </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="flex lg:hidden items-center gap-2">
+            {/* Mobile menu trigger */}
             <button
+              type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
+              className="md:hidden p-1.5 text-stone-600 hover:text-stone-950"
             >
               {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -91,45 +87,37 @@ export default function Navbar({ categories }: { categories: CategoryNav[] }) {
 
       {/* Mobile Menu Dropdown */}
       {isOpen && (
-        <div className="lg:hidden border-b border-slate-800 bg-slate-950 px-4 pt-2 pb-6 space-y-2">
+        <div className="md:hidden border-t border-stone-200 bg-white px-4 py-3 space-y-2 text-sm font-medium text-stone-800">
           <Link
-            href="/"
+            href="/categories/crypto"
             onClick={() => setIsOpen(false)}
-            className="block px-3 py-2 text-sm font-semibold text-emerald-400 rounded-lg hover:bg-slate-900"
+            className="block py-1.5 hover:text-stone-950"
           >
-            Trang chủ
+            Crypto
           </Link>
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/categories/${cat.slug}`}
-              onClick={() => setIsOpen(false)}
-              className="block px-3 py-2 text-sm font-medium text-slate-300 rounded-lg hover:bg-slate-900"
-            >
-              {cat.name}
-            </Link>
-          ))}
-          <div className="pt-3 border-t border-slate-800 flex flex-col gap-2">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600/20 text-blue-400 text-xs font-semibold"
-            >
-              <span>Theo dõi Fanpage Facebook</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
-            <Link
-              href="/admin"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 py-2 text-slate-500 text-xs hover:text-slate-300"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Đăng nhập Quản trị viên</span>
-            </Link>
-          </div>
+          <Link
+            href="/categories/chung-khoan"
+            onClick={() => setIsOpen(false)}
+            className="block py-1.5 hover:text-stone-950"
+          >
+            Chứng khoán
+          </Link>
+          <Link
+            href="/categories/vi-mo"
+            onClick={() => setIsOpen(false)}
+            className="block py-1.5 hover:text-stone-950"
+          >
+            Vĩ mô
+          </Link>
+          <Link
+            href="/categories/kien-thuc-dau-tu"
+            onClick={() => setIsOpen(false)}
+            className="block py-1.5 hover:text-stone-950"
+          >
+            Kiến thức đầu tư
+          </Link>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

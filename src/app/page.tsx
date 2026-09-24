@@ -1,329 +1,325 @@
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
-import MarketTicker from "@/components/public/MarketTicker";
+import TopBar from "@/components/public/TopBar";
 import Navbar from "@/components/public/Navbar";
+import MarketTicker from "@/components/public/MarketTicker";
+import MarketBox from "@/components/public/MarketBox";
+import TopTrending from "@/components/public/TopTrending";
+import NewsletterBox from "@/components/public/NewsletterBox";
 import Footer from "@/components/public/Footer";
-import {
-  Sparkles,
-  Clock,
-  Eye,
-  ArrowRight,
-  TrendingUp,
-  Share2,
-  BookmarkCheck,
-} from "lucide-react";
+import AdminBottomBar from "@/components/public/AdminBottomBar";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "FinPulse Portal | Tin Tức & Phân Tích Crypto, Chứng Khoán Việt Nam",
+  title: "FinPulse | Tin tức và phân tích tài chính cho nhà đầu tư Việt Nam",
   description:
-    "Cổng thông tin chuyên sâu về Tiền mã hóa, thị trường chứng khoán VN-Index và kiến thức đầu tư tài chính thực chiến.",
+    "Cổng thông tin chuyên sâu về Crypto, Chứng khoán Việt Nam, Kinh tế Vĩ mô và Kiến thức đầu tư.",
 };
 
 export default async function HomePage() {
-  const [categories, featuredPost, latestPosts] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: { order: "asc" },
-      include: {
-        _count: { select: { posts: { where: { status: "PUBLISHED" } } } },
-      },
-    }),
-    prisma.post.findFirst({
-      where: { featured: true, status: "PUBLISHED" },
-      include: { category: true, author: true },
-      orderBy: { createdAt: "desc" },
-    }),
+  const [categories, allPosts] = await Promise.all([
+    prisma.category.findMany({ orderBy: { order: "asc" } }),
     prisma.post.findMany({
       where: { status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
-      take: 9,
       include: { category: true, author: true },
     }),
   ]);
 
-  // Fallback if no featured post, take the first post
-  const heroPost = featuredPost || latestPosts[0];
-  const secondaryPosts = latestPosts.filter((p) => p.id !== heroPost?.id).slice(0, 3);
-  const regularPosts = latestPosts.filter((p) => p.id !== heroPost?.id);
+  // Bài tiêu điểm (Hero Article)
+  const heroPost =
+    allPosts.find((p) => p.slug === "tong-quan-thi-truong-crypto-va-chu-ky-moi-nam-2026") ||
+    allPosts.find((p) => p.featured) ||
+    allPosts[0];
+
+  // 2 bài tin con dưới bài chính
+  const subHero1 = allPosts.find((p) => p.slug === "spot-etf-ethereum-ghi-nhan-dong-vao-ky-luc");
+  const subHero2 = allPosts.find((p) => p.slug === "halving-da-qua-2-nam-gia-bitcoin-phan-ung-the-nao");
+
+  // Cột giữa (Sub-stories - 4 bài)
+  const middlePosts = [
+    allPosts.find((p) => p.slug === "khoi-ngoai-quay-lai-mua-rong-nhom-ngan-hang-sau-3-tuan"),
+    allPosts.find((p) => p.slug === "fed-giu-nguyen-lai-suat-phat-tin-hieu-cat-giam-thang-12"),
+    allPosts.find((p) => p.slug === "co-phieu-thep-truoc-mua-bao-cao-quy-iii"),
+    allPosts.find((p) => p.slug === "solana-tang-6-nho-hoat-dong-defi-phuc-hoi"),
+  ].filter(Boolean) as typeof allPosts;
+
+  // Top 10 bài xem nhiều nhất (Cột phải)
+  const trendingArticles = [...allPosts]
+    .sort((a, b) => b.views - a.views)
+    .map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      categoryName: p.category?.name || "Tin tức",
+      views: p.views,
+    }));
+
+  // Chuyên mục: Chứng khoán Việt Nam
+  const vnStockFeatured = allPosts.find(
+    (p) => p.slug === "vn-index-vuot-1290-diem-thanh-khoan-cai-thien-ro-ret"
+  );
+  const vnStockList = [
+    allPosts.find((p) => p.slug === "nhom-ngan-hang-dan-dat-vcb-va-tcb-tang-tren-2-phan-tram"),
+    allPosts.find((p) => p.slug === "co-phieu-thep-truoc-mua-bao-cao-quy-iii"),
+    allPosts.find((p) => p.slug === "ba-ma-ban-le-duoc-khoi-ngoai-gom-manh-tuan-qua"),
+    allPosts.find((p) => p.slug === "lich-chia-co-tuc-tien-mat-tuan-40"),
+  ].filter(Boolean) as typeof allPosts;
+
+  // Chuyên mục: Kiến thức đầu tư
+  const eduFeatured = allPosts.find(
+    (p) => p.slug === "doc-bao-cao-tai-chinh-trong-10-phut-5-chi-so-can-nho"
+  );
+  const eduList = [
+    allPosts.find((p) => p.slug === "dca-la-gi-cach-binh-quan-gia-cho-nguoi-moi"),
+    allPosts.find((p) => p.slug === "quan-ly-von-vi-sao-khong-nen-don-het-vao-mot-ma"),
+    allPosts.find((p) => p.slug === "phan-biet-co-phieu-tang-truong-va-co-phieu-gia-tri"),
+    allPosts.find((p) => p.slug === "vi-lanh-va-vi-nong-nen-giu-tien-ma-hoa-o-dau"),
+  ].filter(Boolean) as typeof allPosts;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-      {/* 1. Market Ticker */}
-      <MarketTicker />
+    <div className="min-h-screen bg-white text-stone-900 font-sans selection:bg-stone-200">
+      {/* 1. Top Bar */}
+      <TopBar />
 
-      {/* 2. Top Navigation */}
+      {/* 2. Header Navbar */}
       <Navbar categories={categories} />
 
-      {/* 3. Main Content Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-12">
-        {/* HERO SECTION */}
-        {heroPost ? (
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Big Hero Post (8 cols) */}
-            <div className="lg:col-span-8">
-              <Link
-                href={`/posts/${heroPost.slug}`}
-                className="group relative flex flex-col rounded-3xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-2xl hover:border-slate-700 transition-all duration-300 h-full"
-              >
+      {/* 3. Market Ticker */}
+      <MarketTicker />
+
+      {/* 4. Main 3-Column Editorial Grid */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* CỘT 1: HERO ARTICLE (~50% width -> 6 cols) */}
+          {heroPost && (
+            <div className="lg:col-span-6 space-y-4">
+              <Link href={`/posts/${heroPost.slug}`} className="group block space-y-3">
                 {heroPost.coverImage && (
-                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-900">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-stone-100 rounded-sm">
                     <Image
                       src={heroPost.coverImage}
                       alt={heroPost.title}
                       fill
                       priority
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-                    <div className="absolute top-4 left-4 flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs shadow-lg">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Tiêu Điểm Hôm Nay
-                      </span>
-                    </div>
                   </div>
                 )}
 
-                <div className="p-6 sm:p-8 flex flex-col justify-between flex-1 space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-xs text-slate-400">
-                      <span className="font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                        {heroPost.category?.name}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-slate-500" />
-                        {new Date(heroPost.createdAt).toLocaleDateString("vi-VN")}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3.5 h-3.5 text-slate-500" />
-                        {heroPost.views} lượt xem
-                      </span>
-                    </div>
-
-                    <h1 className="text-2xl sm:text-3xl font-black text-white group-hover:text-emerald-400 transition-colors leading-tight">
-                      {heroPost.title}
-                    </h1>
-
-                    {heroPost.excerpt && (
-                      <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">
-                        {heroPost.excerpt}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-emerald-400 group-hover:translate-x-1 transition-transform">
-                    <span>Đọc toàn bộ bài phân tích</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-            {/* Trending / Secondary News (4 cols) */}
-            <div className="lg:col-span-4 flex flex-col justify-between space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  <span>Tin Nóng Đang Chú Ý</span>
-                </h3>
-                <span className="text-[11px] text-slate-500">Mới cập nhật</span>
-              </div>
-
-              <div className="flex flex-col gap-4 flex-1 justify-between">
-                {secondaryPosts.map((post) => (
-                  <Link
-                    key={post.id}
-                    href={`/posts/${post.slug}`}
-                    className="group p-4 rounded-2xl border border-slate-800/80 bg-slate-900/40 hover:bg-slate-900 hover:border-slate-700 transition-all flex gap-3.5"
-                  >
-                    {post.coverImage && (
-                      <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-800">
-                        <Image
-                          src={post.coverImage}
-                          alt={post.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    )}
-                    <div className="flex flex-col justify-between flex-1">
-                      <div>
-                        <span className="text-[10px] font-semibold text-emerald-400">
-                          {post.category?.name}
-                        </span>
-                        <h4 className="text-xs font-bold text-slate-200 group-hover:text-white line-clamp-2 mt-0.5 leading-snug">
-                          {post.title}
-                        </h4>
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-2">
-                        <span>{new Date(post.createdAt).toLocaleDateString("vi-VN")}</span>
-                        <span>•</span>
-                        <span>{post.views} xem</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              {/* Fanpage Mini Card */}
-              <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-950/40 to-slate-900/60 p-5 space-y-3">
-                <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
-                  <Share2 className="w-4 h-4" />
-                  <span>Kênh Fanpage Facebook</span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Cập nhật tin tức nhanh nhất, biểu đồ và thảo luận cùng cộng đồng tài chính.
-                </p>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-center py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors shadow-md shadow-blue-600/20"
-                >
-                  Theo dõi Fanpage ngay
-                </a>
-              </div>
-            </div>
-          </section>
-        ) : (
-          <div className="text-center py-16 bg-slate-900/40 rounded-3xl border border-slate-800">
-            <BookmarkCheck className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400 text-sm">Hệ thống đang chuẩn bị các bản tin tài chính mới nhất.</p>
-          </div>
-        )}
-
-        {/* CATEGORIES PILLS BAR */}
-        <section className="pt-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="w-2 h-5 bg-gradient-to-b from-emerald-400 to-teal-500 rounded-full" />
-              <span>Chuyên Mục Nổi Bật</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/categories/${cat.slug}`}
-                className="group rounded-2xl border border-slate-800 bg-slate-900/50 p-4 hover:border-emerald-500/40 hover:bg-slate-900 transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <p className="font-bold text-sm text-slate-200 group-hover:text-emerald-400 transition-colors">
-                    {cat.name}
-                  </p>
-                  <p className="text-[11px] text-slate-500 line-clamp-1 mt-1">
-                    {cat.description || "Phân tích và bài viết mới"}
-                  </p>
-                </div>
-                <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-                  <span className="font-mono text-emerald-400 font-semibold">
-                    {cat._count.posts} bài
+                <div className="space-y-1.5">
+                  <span className="text-xs font-semibold text-blue-700 tracking-wide">
+                    {heroPost.category?.name || "Tiền mã hóa"}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* FEED ALL ARTICLES GRID */}
-        <section className="pt-4 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-2 h-5 bg-gradient-to-b from-emerald-400 to-teal-500 rounded-full" />
-                <span>Bản Tin Mới Cập Nhật</span>
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Các bài phân tích chuyên sâu Crypto và Thị trường Việt Nam
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {regularPosts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/posts/${post.slug}`}
-                className="group rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden hover:border-slate-700 hover:bg-slate-900/80 transition-all flex flex-col justify-between shadow-lg"
-              >
-                <div>
-                  {post.coverImage && (
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-800">
-                      <Image
-                        src={post.coverImage}
-                        alt={post.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <span className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-full bg-slate-950/80 backdrop-blur text-[10px] font-semibold text-emerald-400 border border-slate-800">
-                        {post.category?.name}
-                      </span>
-                    </div>
+                  <h1 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-tight">
+                    {heroPost.title}
+                  </h1>
+                  {heroPost.excerpt && (
+                    <p className="text-sm text-stone-600 leading-relaxed font-sans">
+                      {heroPost.excerpt}
+                    </p>
                   )}
-
-                  <div className="p-5 space-y-2.5">
-                    <h3 className="font-bold text-base text-white group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
-                      {post.title}
-                    </h3>
-                    {post.excerpt && (
-                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                        {post.excerpt}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="px-5 pb-5 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {new Date(post.createdAt).toLocaleDateString("vi-VN")}
-                  </span>
-                  <span className="flex items-center gap-1 font-mono">
-                    <Eye className="w-3 h-3" />
-                    {post.views}
-                  </span>
+                  <p className="text-xs text-stone-400 font-sans pt-1">
+                    {heroPost.author?.name || "Minh Anh"} · 2 giờ trước
+                  </p>
                 </div>
               </Link>
+
+              {/* 2 Sub-bullets underneath */}
+              <div className="pt-3 border-t border-stone-200 space-y-2">
+                {subHero1 && (
+                  <Link
+                    href={`/posts/${subHero1.slug}`}
+                    className="block text-sm font-semibold text-stone-900 hover:text-blue-700 transition-colors"
+                  >
+                    {subHero1.title}
+                  </Link>
+                )}
+                {subHero2 && (
+                  <Link
+                    href={`/posts/${subHero2.slug}`}
+                    className="block text-sm font-semibold text-stone-900 hover:text-blue-700 transition-colors"
+                  >
+                    {subHero2.title}
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* CỘT 2: SUB-STORIES (~25% width -> 3 cols) */}
+          <div className="lg:col-span-3 space-y-4 divide-y divide-stone-200 lg:border-l lg:border-r border-stone-200 lg:px-4">
+            {middlePosts.map((post, idx) => (
+              <div key={post.id} className={idx > 0 ? "pt-4" : ""}>
+                <Link href={`/posts/${post.slug}`} className="group block space-y-1">
+                  <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
+                    {post.category?.name}
+                  </span>
+                  <h3 className="text-sm font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
+                    {post.title}
+                  </h3>
+                  <p className="text-[11px] text-stone-400 font-sans pt-0.5">
+                    {idx === 0
+                      ? "45 phút trước"
+                      : idx === 1
+                      ? "3 giờ trước"
+                      : idx === 2
+                      ? "5 giờ trước"
+                      : "Hôm qua"}
+                  </p>
+                </Link>
+              </div>
             ))}
+          </div>
+
+          {/* CỘT 3: MARKET BOX & TOP 10 TRENDING (~25% width -> 3 cols) */}
+          <div className="lg:col-span-3 space-y-6">
+            <MarketBox />
+            <TopTrending articles={trendingArticles} />
           </div>
         </section>
 
-        {/* FACEBOOK FANPAGE CONVERSION BANNER */}
-        <section className="rounded-3xl border border-blue-500/30 bg-gradient-to-r from-blue-950/60 via-slate-900 to-indigo-950/50 p-8 sm:p-10 relative overflow-hidden shadow-2xl">
-          <div className="max-w-2xl space-y-4 relative z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xs border border-blue-500/30">
-              <Share2 className="w-3.5 h-3.5" />
-              Kết Nối Cộng Đồng Fanpage
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
-              Đón Đọc Tin Nhanh Thị Trường Mỗi Ngày Trên Fanpage Facebook
+        {/* SECTION: CHỨNG KHOÁN VIỆT NAM */}
+        <section className="space-y-4 pt-6 border-t border-stone-200">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-stone-900">
+            <h2 className="font-serif text-lg font-bold text-stone-900">
+              Chứng khoán Việt Nam
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Theo dõi ngay Fanpage để thảo luận cùng hàng nghìn nhà đầu tư, nhận tín hiệu giao dịch Crypto và phân tích cổ phiếu tiềm năng sớm nhất.
-            </p>
-            <div className="pt-2">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-6 py-3 shadow-xl shadow-blue-600/30 transition-all hover:scale-105"
-              >
-                <span>Tham Gia Fanpage Ngay</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
+            <Link
+              href="/categories/chung-khoan"
+              className="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors"
+            >
+              Xem tất cả
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Featured (6 cols) */}
+            {vnStockFeatured && (
+              <div className="lg:col-span-6 space-y-3">
+                <div className="aspect-[16/9] w-full bg-stone-100 rounded-sm relative overflow-hidden">
+                  {vnStockFeatured.coverImage ? (
+                    <Image
+                      src={vnStockFeatured.coverImage}
+                      alt={vnStockFeatured.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : null}
+                </div>
+                <Link href={`/posts/${vnStockFeatured.slug}`} className="group block space-y-1.5">
+                  <h3 className="font-serif text-xl font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
+                    {vnStockFeatured.title}
+                  </h3>
+                  {vnStockFeatured.excerpt && (
+                    <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                      {vnStockFeatured.excerpt}
+                    </p>
+                  )}
+                  <p className="text-[11px] text-stone-400 font-sans">1 giờ trước</p>
+                </Link>
+              </div>
+            )}
+
+            {/* Right 4 List Items (6 cols) */}
+            <div className="lg:col-span-6 divide-y divide-stone-200">
+              {vnStockList.map((post, idx) => (
+                <div key={post.id} className="py-3 first:pt-0 last:pb-0">
+                  <Link href={`/posts/${post.slug}`} className="group block space-y-1">
+                    <h4 className="text-sm font-semibold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
+                      {post.title}
+                    </h4>
+                    <p className="text-[11px] text-stone-400 font-sans">
+                      {idx === 0
+                        ? "2 giờ trước"
+                        : idx === 1
+                        ? "5 giờ trước"
+                        : "Hôm qua"}
+                    </p>
+                  </Link>
+                </div>
+              ))}
             </div>
           </div>
         </section>
+
+        {/* SECTION: KIẾN THỨC ĐẦU TƯ */}
+        <section className="space-y-4 pt-6 border-t border-stone-200">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-stone-900">
+            <h2 className="font-serif text-lg font-bold text-stone-900">
+              Kiến thức đầu tư
+            </h2>
+            <Link
+              href="/categories/kien-thuc-dau-tu"
+              className="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors"
+            >
+              Xem tất cả
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Featured (6 cols) */}
+            {eduFeatured && (
+              <div className="lg:col-span-6 space-y-3">
+                <div className="aspect-[16/9] w-full bg-stone-100 rounded-sm relative overflow-hidden">
+                  {eduFeatured.coverImage ? (
+                    <Image
+                      src={eduFeatured.coverImage}
+                      alt={eduFeatured.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : null}
+                </div>
+                <Link href={`/posts/${eduFeatured.slug}`} className="group block space-y-1.5">
+                  <h3 className="font-serif text-xl font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
+                    {eduFeatured.title}
+                  </h3>
+                  {eduFeatured.excerpt && (
+                    <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                      {eduFeatured.excerpt}
+                    </p>
+                  )}
+                  <p className="text-[11px] text-stone-400 font-sans">23/09</p>
+                </Link>
+              </div>
+            )}
+
+            {/* Right 4 List Items (6 cols) */}
+            <div className="lg:col-span-6 divide-y divide-stone-200">
+              {eduList.map((post, idx) => (
+                <div key={post.id} className="py-3 first:pt-0 last:pb-0">
+                  <Link href={`/posts/${post.slug}`} className="group block space-y-1">
+                    <h4 className="text-sm font-semibold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
+                      {post.title}
+                    </h4>
+                    <p className="text-[11px] text-stone-400 font-sans">
+                      {idx === 0
+                        ? "22/09"
+                        : idx === 1
+                        ? "21/09"
+                        : idx === 2
+                        ? "19/09"
+                        : "17/09"}
+                    </p>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION: NEWSLETTER BANNER */}
+        <NewsletterBox />
       </main>
 
-      {/* 4. Footer */}
+      {/* 5. Footer */}
       <Footer />
+
+      {/* 6. Admin Bottom Bar */}
+      <AdminBottomBar />
     </div>
   );
 }
