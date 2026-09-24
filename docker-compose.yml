@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: finpulse-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: finpulse
+      POSTGRES_PASSWORD: finpulse_password
+      POSTGRES_DB: finpulse_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
