@@ -13,7 +13,7 @@ export default function AboutPage() {
   const { useSrc, noSrc, process } = ABOUT_PAGE_DATA;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F7F5F0] text-[#16181D]">
+    <div className="min-h-screen flex flex-col bg-white text-[#111827]">
       {/* 1. Top Bar */}
       <TopBar />
 

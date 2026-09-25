@@ -12,7 +12,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <header className="border-b border-[#16181D] bg-[#F7F5F0] sticky top-0 z-20">
+    <header className="border-b border-[#E5E7EB] bg-white sticky top-0 z-20">
       <div className="max-w-[1240px] mx-auto px-6 flex items-center justify-between gap-6 sm:gap-8 h-[66px]">
         {/* Brand */}
         <Link
@@ -84,7 +84,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile nav row */}
-      <div className="md:hidden flex items-center gap-4 overflow-x-auto px-6 py-2 border-t border-[#E3E1DC] scrollbar-none whitespace-nowrap bg-[#F7F5F0]">
+      <div className="md:hidden flex items-center gap-4 overflow-x-auto px-6 py-2 border-t border-[#E5E7EB] scrollbar-none whitespace-nowrap bg-white">
         {CATEGORIES.map((cat) => {
           const href = `/categories/${cat.slug}`;
           const isActive = pathname === href;

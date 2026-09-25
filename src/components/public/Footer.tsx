@@ -3,7 +3,7 @@ import { CATEGORIES } from "@/data/portalData";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[#16181D] mt-auto bg-[#F7F5F0]">
+    <footer className="border-t border-[#E5E7EB] mt-auto bg-white">
       <div className="max-w-[1240px] mx-auto px-6 py-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-[14px]">
         {/* Brand Column */}
         <div className="flex flex-col gap-2">

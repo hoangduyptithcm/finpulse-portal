@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F7F5F0;
-  --foreground: #16181D;
-  --color-paper: #F7F5F0;
-  --color-card: #FCFBF8;
-  --color-muted-card: #EEEAE2;
-  --color-border-dark: #16181D;
-  --color-border-light: #E3E1DC;
-  --color-border-input: #C9C5BC;
-  --color-ink: #16181D;
-  --color-body: #2B2F36;
-  --color-subtle: #5E636B;
-  --color-navy: #133A63;
-  --color-navy-hover: #0C2A4A;
+  --background: #FFFFFF;
+  --foreground: #111827;
+  --color-paper: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-muted-card: #F9FAFB;
+  --color-border-dark: #1F2937;
+  --color-border-light: #E5E7EB;
+  --color-border-input: #D1D5DB;
+  --color-ink: #111827;
+  --color-body: #374151;
+  --color-subtle: #6B7280;
+  --color-navy: #1E40AF;
+  --color-navy-hover: #1E3A8A;
 }
 
 @theme inline {
@@ -25,20 +25,20 @@
 
 body {
   margin: 0;
-  background: #F7F5F0;
-  color: #16181D;
+  background: #FFFFFF;
+  color: #111827;
   font-family: var(--font-sans), 'Be Vietnam Pro', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Use :where() so that default link styles have zero specificity and won't override Tailwind classes like text-white */
 :where(a) {
-  color: #133A63;
+  color: #1E40AF;
   text-decoration: none;
 }
 
 :where(a:hover) {
-  color: #0C2A4A;
+  color: #1E3A8A;
   text-decoration: underline;
 }
 
@@ -56,7 +56,7 @@ input, textarea, select, button {
   height: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C9C5BC;
+  background: #D1D5DB;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-track {

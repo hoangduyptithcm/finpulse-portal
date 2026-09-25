@@ -10,8 +10,8 @@ export default function Top10Widget() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-wrap justify-between items-baseline gap-x-3 gap-y-1 pb-2 border-b-2 border-[#16181D]">
-        <h2 className="m-0 text-[14px] font-bold whitespace-nowrap text-[#16181D]">
+      <div className="flex flex-wrap justify-between items-baseline gap-x-3 gap-y-1 pb-2.5 border-b-2 border-[#111827]">
+        <h2 className="m-0 text-[15px] font-bold whitespace-nowrap text-[#111827]">
           Top 10 được đọc nhiều
         </h2>
         <span className="flex gap-3">
@@ -20,8 +20,8 @@ export default function Top10Widget() {
             onClick={() => setRange("month")}
             className={`border-0 bg-transparent p-0 cursor-pointer whitespace-nowrap text-[13px] font-semibold transition-colors ${
               range === "month"
-                ? "text-[#16181D] underline underline-offset-4"
-                : "text-[#5E636B] hover:text-[#16181D]"
+                ? "text-[#111827] underline underline-offset-4"
+                : "text-[#6B7280] hover:text-[#111827]"
             }`}
           >
             30 ngày
@@ -31,8 +31,8 @@ export default function Top10Widget() {
             onClick={() => setRange("all")}
             className={`border-0 bg-transparent p-0 cursor-pointer whitespace-nowrap text-[13px] font-semibold transition-colors ${
               range === "all"
-                ? "text-[#16181D] underline underline-offset-4"
-                : "text-[#5E636B] hover:text-[#16181D]"
+                ? "text-[#111827] underline underline-offset-4"
+                : "text-[#6B7280] hover:text-[#111827]"
             }`}
           >
             Mọi lúc
@@ -45,7 +45,7 @@ export default function Top10Widget() {
           <Link
             key={p.n}
             href={`/posts/${p.slug}`}
-            className="flex gap-3 py-[11px] border-b border-[#E3E1DC] text-[#16181D] hover:text-[#133A63] hover:no-underline transition-colors group"
+            className="flex gap-3 py-3 border-b border-[#E5E7EB] text-[#111827] hover:text-[#1D4ED8] hover:no-underline transition-colors group"
           >
             <span
               className="font-serif font-bold text-[21px] leading-[1.1] w-[26px] flex-shrink-0 tabular-nums"

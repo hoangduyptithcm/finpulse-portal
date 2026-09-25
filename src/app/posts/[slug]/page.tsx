@@ -3,6 +3,7 @@ import TopBar from "@/components/public/TopBar";
 import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import ArticleView from "@/components/public/ArticleView";
+import MarketTickerBar from "@/components/public/MarketTickerBar";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
@@ -63,9 +64,10 @@ export default async function PostDetailPage({ params }: PostPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F7F5F0] text-[#16181D]">
+    <div className="min-h-screen flex flex-col bg-white text-[#111827]">
       <TopBar />
       <Navbar />
+      <MarketTickerBar />
       <ArticleView post={post || undefined} />
       <Footer />
     </div>

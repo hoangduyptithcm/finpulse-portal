@@ -33,7 +33,7 @@ export default function RootLayout({
       lang="vi"
       className={`${beVietnamPro.variable} ${sourceSerif4.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-[#F7F5F0] text-[#16181D]">
+      <body className="min-h-full flex flex-col font-sans bg-white text-[#111827]">
         {children}
       </body>
     </html>
