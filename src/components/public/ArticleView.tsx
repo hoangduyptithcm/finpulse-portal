@@ -12,8 +12,43 @@ const TOC = [
   { id: "muc-4", label: "4. Nguồn số liệu" },
 ];
 
-export default function ArticleView() {
-  const data = VCB_ARTICLE_DATA;
+export interface DynamicPostData {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  content: string;
+  coverImage?: string | null;
+  category?: { name: string; slug: string } | null;
+  author?: { name: string } | null;
+  createdAt: Date | string;
+  views?: number;
+}
+
+interface ArticleViewProps {
+  post?: DynamicPostData;
+}
+
+export default function ArticleView({ post }: ArticleViewProps = {}) {
+  const data = {
+    ...VCB_ARTICLE_DATA,
+    ...(post
+      ? {
+          title: post.title,
+          excerpt: post.excerpt || "",
+          category: post.category?.name || "Đọc BCTC",
+          categorySlug: post.category?.slug || "doc-bctc",
+          author: post.author?.name || "Minh Anh",
+          date: new Date(post.createdAt).toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          }),
+          shortAnswer: post.excerpt || VCB_ARTICLE_DATA.shortAnswer,
+          tags: [post.category?.name || "Phân tích"],
+        }
+      : {}),
+  };
   const [bigFont, setBigFont] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activeSec, setActiveSec] = useState("muc-1");
@@ -175,6 +210,14 @@ export default function ArticleView() {
             </div>
 
             {/* Article Body */}
+            {post ? (
+              <div
+                className={`font-serif leading-[1.72] text-[#16181D] flex flex-col gap-5.5 transition-all prose prose-lg max-w-none py-2 ${
+                  bigFont ? "text-[21px]" : "text-[19px]"
+                }`}
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+            ) : (
             <div
               className={`font-serif leading-[1.72] text-[#16181D] flex flex-col gap-5.5 transition-all ${
                 bigFont ? "text-[21px]" : "text-[19px]"
@@ -409,6 +452,7 @@ export default function ArticleView() {
                 </ol>
               </section>
             </div>
+            )}
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2 pt-2">

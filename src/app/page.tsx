@@ -4,6 +4,7 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import NewsletterForm from "@/components/public/NewsletterForm";
 import Top10Widget from "@/components/public/Top10Widget";
+import { prisma } from "@/lib/prisma";
 import {
   KEY_STATS,
   CATEGORY_COLUMNS,
@@ -12,13 +13,60 @@ import {
   WATCH_LIST,
 } from "@/data/portalData";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "FinPulse | Sổ phân tích của Minh Anh",
   description:
     "Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, trả lời bằng số liệu công bố. Sổ ghi chép cá nhân, không phải tin tức hay lời khuyên đầu tư.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const publishedPosts = await prisma.post
+    .findMany({
+      where: { status: "PUBLISHED" },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+    })
+    .catch(() => []);
+
+  const featuredPost = publishedPosts.find((p) => p.featured) || publishedPosts[0];
+
+  const featuredCard = featuredPost
+    ? {
+        slug: featuredPost.slug,
+        categoryName: featuredPost.category?.name || "Đọc BCTC",
+        date: new Date(featuredPost.createdAt).toLocaleDateString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
+        title: featuredPost.title,
+        excerpt: featuredPost.excerpt || "Phân tích số liệu và báo cáo tài chính công bố.",
+      }
+    : {
+        slug: "vcb-co-dat-sau-bao-cao-quy-2",
+        categoryName: "Đọc BCTC",
+        date: "22/09/2026",
+        title: "VCB có đắt sau báo cáo quý 2?",
+        excerpt: "chưa đắt so với chính nó 5 năm qua, nhưng nợ xấu tăng là lý do tôi chưa coi đây là vùng giá rẻ.",
+      };
+
+  const displayNotes =
+    publishedPosts.length > 0
+      ? publishedPosts.slice(0, 6).map((p) => {
+          const d = new Date(p.createdAt);
+          return {
+            slug: p.slug,
+            day: d.getDate().toString().padStart(2, "0"),
+            month: `T${d.getMonth() + 1}`,
+            title: p.title,
+            text: p.excerpt || "",
+          };
+        })
+      : RECENT_NOTES;
+
   return (
     <div className="min-h-screen flex flex-col bg-[#F7F5F0] text-[#16181D]">
       {/* 1. Disclaimer Top Bar */}
@@ -44,17 +92,17 @@ export default function HomePage() {
 
           {/* Right Column: Featured Article Box */}
           <Link
-            href="/posts/vcb-co-dat-sau-bao-cao-quy-2"
+            href={`/posts/${featuredCard.slug}`}
             className="flex-1 basis-[440px] min-w-0 flex flex-col gap-4 p-7 bg-[#FCFBF8] border border-[#16181D] text-[#16181D] no-underline hover:no-underline transition-all duration-200 hover:shadow-[6px_6px_0_#16181D] group"
           >
             <span className="text-[13px] text-[#5E636B]">
-              <strong className="text-[#133A63]">Bài mới nhất · Đọc BCTC</strong> · 22/09/2026 · 8 phút đọc
+              <strong className="text-[#133A63]">Bài mới nhất · {featuredCard.categoryName}</strong> · {featuredCard.date} · 8 phút đọc
             </span>
             <span className="font-serif font-bold text-[26px] sm:text-[30px] lg:text-[34px] leading-[1.15] tracking-[-0.015em] group-hover:text-[#133A63] transition-colors">
-              VCB có đắt sau báo cáo quý 2?
+              {featuredCard.title}
             </span>
             <span className="text-[16px] leading-[1.55] text-[#2B2F36]">
-              <strong>Trả lời ngắn:</strong> chưa đắt so với chính nó 5 năm qua, nhưng nợ xấu tăng là lý do tôi chưa coi đây là vùng giá rẻ.
+              <strong>Trả lời ngắn:</strong> {featuredCard.excerpt}
             </span>
             <span className="grid grid-cols-3 border-t border-[#E3E1DC] pt-3.5 gap-3">
               {KEY_STATS.map((k) => (
@@ -192,7 +240,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex flex-col">
-                {RECENT_NOTES.map((n) => (
+                {displayNotes.map((n) => (
                   <Link
                     key={n.slug}
                     href={`/posts/${n.slug}`}
