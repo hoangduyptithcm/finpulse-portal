@@ -35,24 +35,24 @@ export default function AboutPage() {
 
         {/* Nguồn số liệu so sánh: Tôi dùng vs Tôi không dùng */}
         <div id="nguon-so-lieu" className="grid grid-cols-1 sm:grid-cols-2 gap-5 scroll-mt-24">
-          <div className="flex flex-col gap-2.5 p-5 bg-[#FCFBF8] border border-[#E3E1DC] rounded-[2px]">
+          <div className="flex flex-col gap-2.5 p-5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-[2px]">
             <strong className="text-[15px] text-[#0A7A45]">Tôi dùng</strong>
             {useSrc.map((x) => (
               <span
                 key={x}
-                className="text-[15px] leading-[1.5] pt-2 border-t border-[#E3E1DC] text-[#2B2F36]"
+                className="text-[15px] leading-[1.5] pt-2 border-t border-[#E5E7EB] text-[#374151]"
               >
                 {x}
               </span>
             ))}
           </div>
 
-          <div className="flex flex-col gap-2.5 p-5 bg-[#FCFBF8] border border-[#E3E1DC] rounded-[2px]">
+          <div className="flex flex-col gap-2.5 p-5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-[2px]">
             <strong className="text-[15px] text-[#C0271D]">Tôi không dùng</strong>
             {noSrc.map((x) => (
               <span
                 key={x}
-                className="text-[15px] leading-[1.5] pt-2 border-t border-[#E3E1DC] text-[#2B2F36]"
+                className="text-[15px] leading-[1.5] pt-2 border-t border-[#E5E7EB] text-[#374151]"
               >
                 {x}
               </span>
@@ -62,19 +62,19 @@ export default function AboutPage() {
 
         {/* Quy trình dùng AI */}
         <section className="flex flex-col gap-3">
-          <h2 className="m-0 text-[22px] font-bold text-[#16181D]">
+          <h2 className="m-0 text-[22px] font-bold text-[#111827]">
             Tôi dùng AI như thế nào
           </h2>
           <ol className="m-0 p-0 list-none flex flex-col">
             {process.map((p) => (
               <li
                 key={p.n}
-                className="flex gap-4 py-3.5 border-t border-[#E3E1DC] text-[16px] leading-[1.55]"
+                className="flex gap-4 py-3.5 border-t border-[#E5E7EB] text-[16px] leading-[1.55]"
               >
-                <span className="font-serif font-bold text-[22px] leading-[1.1] text-[#133A63] w-5 flex-shrink-0">
+                <span className="font-serif font-bold text-[22px] leading-[1.1] text-[#1D4ED8] w-5 flex-shrink-0">
                   {p.n}
                 </span>
-                <span className="text-[#2B2F36]">{p.text}</span>
+                <span className="text-[#374151]">{p.text}</span>
               </li>
             ))}
           </ol>
@@ -83,12 +83,12 @@ export default function AboutPage() {
         {/* Miễn trừ trách nhiệm */}
         <section
           id="mien-tru"
-          className="flex flex-col gap-2.5 p-6 bg-[#EEEAE2] rounded-[2px] scroll-mt-24"
+          className="flex flex-col gap-2.5 p-6 bg-[#F3F4F6] border border-[#E5E7EB] rounded-[2px] scroll-mt-24"
         >
-          <h2 className="m-0 text-[18px] font-bold text-[#16181D]">
+          <h2 className="m-0 text-[18px] font-bold text-[#111827]">
             Miễn trừ trách nhiệm
           </h2>
-          <p className="m-0 text-[16px] leading-[1.6] text-[#2B2F36]">
+          <p className="m-0 text-[16px] leading-[1.6] text-[#374151]">
             Nội dung do tác giả biên soạn với hỗ trợ công cụ AI, mang tính trao
             đổi kiến thức. Không phải thông tin báo chí, không phải khuyến nghị
             mua/bán. Số liệu lấy từ nguồn công bố; nhà đầu tư tự kiểm chứng.

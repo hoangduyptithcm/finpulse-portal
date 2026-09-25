@@ -49,7 +49,7 @@ export default function Navbar() {
         {/* Search & Actions */}
         <div className="flex items-center gap-3 flex-shrink-0">
           {showSearch ? (
-            <div className="flex items-center bg-[#FCFBF8] border border-[#16181D] rounded-[2px] px-2 py-1">
+            <div className="flex items-center bg-white border border-[#111827] rounded-[2px] px-2 py-1">
               <input
                 type="text"
                 value={searchQuery}

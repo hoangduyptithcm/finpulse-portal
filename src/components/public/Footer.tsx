@@ -59,7 +59,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-[1240px] mx-auto px-6 py-4 border-t border-[#E3E1DC] text-[13px] leading-[1.6] text-[#5E636B]">
+      <div className="max-w-[1240px] mx-auto px-6 py-4 border-t border-[#E5E7EB] text-[13px] leading-[1.6] text-[#6B7280]">
         © 2026 FinPulse. Nội dung do tác giả biên soạn với hỗ trợ công cụ AI, mang tính trao đổi kiến thức. Không phải thông tin báo chí, không phải khuyến nghị mua/bán. Số liệu lấy từ nguồn công bố; nhà đầu tư tự kiểm chứng.
       </div>
     </footer>

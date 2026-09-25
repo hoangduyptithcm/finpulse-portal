@@ -139,19 +139,19 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
             </p>
 
             {/* Metadata Bar */}
-            <div className="flex flex-wrap justify-between items-center gap-3 py-3.5 border-t border-b border-[#E3E1DC]">
+            <div className="flex flex-wrap justify-between items-center gap-3 py-3.5 border-t border-b border-[#E5E7EB]">
               <div className="flex gap-3 items-center">
-                <span className="w-10 h-10 rounded-full bg-[#E7E4DD] flex items-center justify-center font-serif font-bold text-[18px] text-[#133A63] flex-shrink-0">
+                <span className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center font-serif font-bold text-[18px] text-[#1E40AF] flex-shrink-0">
                   M
                 </span>
                 <span className="flex flex-col text-[14px]">
                   <Link
                     href="/about"
-                    className="font-bold text-[#16181D] hover:text-[#133A63]"
+                    className="font-bold text-[#111827] hover:text-[#1E40AF]"
                   >
                     {data.author}
                   </Link>
-                  <span className="text-[#5E636B]">
+                  <span className="text-[#6B7280]">
                     {data.date} · {data.readTime} · {data.metaNote}
                   </span>
                 </span>
@@ -161,19 +161,19 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="border-0 bg-transparent cursor-pointer text-[#133A63] hover:underline p-0"
+                  className="border-0 bg-transparent cursor-pointer text-[#1E40AF] hover:underline p-0"
                 >
                   {copied ? "Đã chép link!" : "Sao chép link"}
                 </button>
-                <span className="flex border border-[#C9C5BC] rounded-[3px] overflow-hidden">
+                <span className="flex border border-[#E5E7EB] rounded-[3px] overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setBigFont(false)}
                     title="Cỡ chữ thường"
                     className={`border-0 px-2.5 py-1 text-[13px] font-bold cursor-pointer transition-colors ${
                       !bigFont
-                        ? "bg-[#16181D] text-white"
-                        : "bg-[#FCFBF8] text-[#2B2F36]"
+                        ? "bg-[#111827] text-white"
+                        : "bg-white text-[#374151]"
                     }`}
                   >
                     A
@@ -182,10 +182,10 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                     type="button"
                     onClick={() => setBigFont(true)}
                     title="Cỡ chữ lớn"
-                    className={`border-0 border-l border-[#C9C5BC] px-2.5 py-1 text-[16px] font-bold cursor-pointer transition-colors ${
+                    className={`border-0 border-l border-[#E5E7EB] px-2.5 py-1 text-[16px] font-bold cursor-pointer transition-colors ${
                       bigFont
-                        ? "bg-[#16181D] text-white"
-                        : "bg-[#FCFBF8] text-[#2B2F36]"
+                        ? "bg-[#111827] text-white"
+                        : "bg-white text-[#374151]"
                     }`}
                   >
                     A
@@ -202,7 +202,7 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               <span className="font-serif text-[20px] sm:text-[21px] leading-[1.45] text-white font-medium">
                 {data.shortAnswer}
               </span>
-              <ul className="m-0 mt-1 pl-5 flex flex-col gap-1.5 text-[15px] leading-[1.55] text-[#E3E1DC]">
+              <ul className="m-0 mt-1 pl-5 flex flex-col gap-1.5 text-[15px] leading-[1.55] text-[#E5E7EB]">
                 {data.shortAnswerBullets.map((bullet, i) => (
                   <li key={i}>{bullet}</li>
                 ))}
@@ -245,16 +245,16 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               </p>
 
               {/* 3 Key stats display grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 border-t-2 border-[#16181D] border-b border-[#E3E1DC] font-sans">
+              <div className="grid grid-cols-1 sm:grid-cols-3 border-t-2 border-[#111827] border-b border-[#E5E7EB] font-sans">
                 {KEY_STATS.map((k) => (
                   <div
                     key={k.label}
-                    className="p-4 pl-0 flex flex-col gap-1 border-b sm:border-b-0 sm:border-r border-[#E3E1DC] last:border-none"
+                    className="p-4 pl-0 flex flex-col gap-1 border-b sm:border-b-0 sm:border-r border-[#E5E7EB] last:border-none"
                   >
-                    <span className="text-[28px] sm:text-[30px] font-bold leading-none tabular-nums text-[#16181D]">
+                    <span className="text-[28px] sm:text-[30px] font-bold leading-none tabular-nums text-[#111827]">
                       {k.value}
                     </span>
-                    <span className="text-[14px] leading-[1.4] text-[#2B2F36]">
+                    <span className="text-[14px] leading-[1.4] text-[#374151]">
                       {k.label}
                     </span>
                   </div>
@@ -262,7 +262,7 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               </div>
 
               {/* Bar Chart figure */}
-              <figure className="m-0 flex flex-col gap-3 font-sans bg-[#FCFBF8] p-5 border border-[#E3E1DC] rounded-[2px]">
+              <figure className="m-0 flex flex-col gap-3 font-sans bg-[#F9FAFB] p-5 border border-[#E5E7EB] rounded-[2px]">
                 <figcaption className="flex flex-col gap-0.5">
                   <strong className="text-[16px] text-[#16181D]">
                     Lợi nhuận trước thuế theo quý
@@ -354,17 +354,17 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                   <tbody>
                     {data.compareTable.map((c) => (
                       <tr key={c.k}>
-                        <td className="py-3 pr-3 border-b border-[#E3E1DC] font-semibold text-[#16181D]">
+                        <td className="py-3 pr-3 border-b border-[#E5E7EB] font-semibold text-[#111827]">
                           {c.k}
                         </td>
-                        <td className="py-3 px-3 border-b border-[#E3E1DC] text-right text-[#5E636B]">
+                        <td className="py-3 px-3 border-b border-[#E5E7EB] text-right text-[#6B7280]">
                           {c.avg}
                         </td>
-                        <td className="py-3 px-3 border-b border-[#E3E1DC] text-right font-bold text-[#16181D]">
+                        <td className="py-3 px-3 border-b border-[#E5E7EB] text-right font-bold text-[#111827]">
                           {c.now}
                         </td>
                         <td
-                          className="py-3 pl-3 border-b border-[#E3E1DC] font-medium"
+                          className="py-3 pl-3 border-b border-[#E5E7EB] font-medium"
                           style={{ color: c.color }}
                         >
                           {c.note}
@@ -376,11 +376,11 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               </div>
 
               {/* Blockquote: Quan điểm của tôi */}
-              <blockquote className="my-3 py-6 border-t border-b border-[#16181D] flex flex-col gap-2.5">
-                <span className="font-sans text-[13px] font-bold text-[#133A63]">
+              <blockquote className="my-3 py-6 border-t border-b border-[#111827] flex flex-col gap-2.5">
+                <span className="font-sans text-[13px] font-bold text-[#1D4ED8]">
                   Quan điểm của tôi
                 </span>
-                <span className="text-[22px] sm:text-[24px] leading-[1.4] font-semibold tracking-[-0.01em] text-[#16181D]">
+                <span className="text-[22px] sm:text-[24px] leading-[1.4] font-semibold tracking-[-0.01em] text-[#111827]">
                   {data.quote}
                 </span>
               </blockquote>
@@ -388,7 +388,7 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               {/* Section 3 */}
               <h2
                 id="muc-3"
-                className="mt-5 font-sans text-[22px] sm:text-[24px] font-bold leading-[1.3] tracking-[-0.01em] scroll-mt-24 text-[#16181D]"
+                className="mt-5 font-sans text-[22px] sm:text-[24px] font-bold leading-[1.3] tracking-[-0.01em] scroll-mt-24 text-[#111827]"
               >
                 3. Tôi có thể sai nếu…
               </h2>
@@ -396,19 +396,19 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                 {data.risks.map((r) => (
                   <li
                     key={r.n}
-                    className="flex gap-3.5 py-3.5 border-b border-[#E3E1DC] text-[16px] leading-[1.55]"
+                    className="flex gap-3.5 py-3.5 border-b border-[#E5E7EB] text-[16px] leading-[1.55]"
                   >
-                    <span className="font-bold text-[#C0271D] flex-shrink-0 w-[18px]">
+                    <span className="font-bold text-[#DC2626] flex-shrink-0 w-[18px]">
                       {r.n}
                     </span>
-                    <span>{r.text}</span>
+                    <span className="text-[#374151]">{r.text}</span>
                   </li>
                 ))}
               </ol>
 
               {/* Thuật ngữ trong bài (Glossary) */}
-              <aside className="border border-[#E3E1DC] bg-[#FCFBF8] p-5 sm:p-6 flex flex-col gap-3.5 font-sans rounded-[2px]">
-                <strong className="text-[16px] text-[#16181D]">
+              <aside className="border border-[#E5E7EB] bg-[#F9FAFB] p-5 sm:p-6 flex flex-col gap-3.5 font-sans rounded-[2px]">
+                <strong className="text-[16px] text-[#111827]">
                   Thuật ngữ trong bài
                 </strong>
                 {data.glossary.map((g) => (
@@ -416,8 +416,8 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                     key={g.term}
                     className="flex flex-col gap-0.5 text-[15px] leading-[1.55]"
                   >
-                    <strong className="text-[#16181D]">{g.term}</strong>
-                    <span className="text-[#2B2F36]">{g.def}</span>
+                    <strong className="text-[#111827]">{g.term}</strong>
+                    <span className="text-[#374151]">{g.def}</span>
                   </div>
                 ))}
               </aside>
@@ -427,23 +427,23 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                 id="muc-4"
                 className="scroll-mt-24 flex flex-col gap-2.5 font-sans pt-2"
               >
-                <h2 className="m-0 text-[18px] font-bold text-[#16181D]">
+                <h2 className="m-0 text-[18px] font-bold text-[#111827]">
                   Nguồn số liệu
                 </h2>
                 <ol className="m-0 p-0 list-none flex flex-col">
                   {data.sources.map((s) => (
                     <li
                       key={s.n}
-                      className="flex gap-3 py-2.5 border-t border-[#E3E1DC] text-[15px] leading-[1.5]"
+                      className="flex gap-3 py-2.5 border-t border-[#E5E7EB] text-[15px] leading-[1.5]"
                     >
-                      <span className="font-bold text-[#133A63] flex-shrink-0">
+                      <span className="font-bold text-[#1E40AF] flex-shrink-0">
                         [{s.n}]
                       </span>
                       <span className="flex flex-col">
-                        <span className="font-semibold text-[#16181D]">
+                        <span className="font-semibold text-[#111827]">
                           {s.label}
                         </span>
-                        <span className="text-[13px] text-[#5E636B]">
+                        <span className="text-[13px] text-[#6B7280]">
                           {s.where}
                         </span>
                       </span>
@@ -459,7 +459,7 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               {data.tags.map((t) => (
                 <span
                   key={t}
-                  className="text-[13px] font-semibold text-[#2B2F36] border border-[#C9C5BC] px-2.5 py-1 rounded-[2px]"
+                  className="text-[13px] font-semibold text-[#374151] border border-[#E5E7EB] px-2.5 py-1 rounded-[2px]"
                 >
                   #{t}
                 </span>
@@ -467,8 +467,8 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
             </div>
 
             {/* Reader Feedback Widget */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-4.5 sm:px-5 bg-[#EEEAE2] rounded-[2px]">
-              <span className="text-[15px] font-semibold text-[#16181D]">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4.5 sm:px-5 bg-[#F3F4F6] border border-[#E5E7EB] rounded-[2px]">
+              <span className="text-[15px] font-semibold text-[#111827]">
                 {feedback === null
                   ? "Bài viết có giúp bạn hiểu thêm?"
                   : feedback === "yes"
@@ -480,14 +480,14 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                   <button
                     type="button"
                     onClick={() => setFeedback("yes")}
-                    className="border border-[#16181D] bg-[#FCFBF8] hover:bg-[#F0EEE9] px-4 py-1.5 text-[14px] font-semibold cursor-pointer rounded-[2px] transition-colors text-[#16181D]"
+                    className="border border-[#111827] bg-white hover:bg-[#F9FAFB] px-4 py-1.5 text-[14px] font-semibold cursor-pointer rounded-[2px] transition-colors text-[#111827]"
                   >
                     Có
                   </button>
                   <button
                     type="button"
                     onClick={() => setFeedback("no")}
-                    className="border border-[#C9C5BC] bg-[#FCFBF8] hover:bg-[#F0EEE9] px-4 py-1.5 text-[14px] font-semibold cursor-pointer rounded-[2px] transition-colors text-[#2B2F36]"
+                    className="border border-[#D1D5DB] bg-white hover:bg-[#F9FAFB] px-4 py-1.5 text-[14px] font-semibold cursor-pointer rounded-[2px] transition-colors text-[#374151]"
                   >
                     Chưa
                   </button>
@@ -496,7 +496,7 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
             </div>
 
             {/* AI Disclosure & Disclaimer */}
-            <p className="m-0 py-4 border-t border-b border-[#E3E1DC] text-[14px] leading-[1.6] text-[#2B2F36]">
+            <p className="m-0 py-4 border-t border-b border-[#E5E7EB] text-[14px] leading-[1.6] text-[#374151]">
               Nội dung do tác giả biên soạn với hỗ trợ công cụ AI, mang tính trao
               đổi kiến thức. Không phải thông tin báo chí, không phải khuyến nghị
               mua/bán. Số liệu lấy từ nguồn công bố; nhà đầu tư tự kiểm chứng.
@@ -504,18 +504,18 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
 
             {/* Author Card */}
             <div className="flex gap-4 items-center">
-              <span className="w-14 h-14 rounded-full bg-[#E7E4DD] flex items-center justify-center font-serif font-bold text-[24px] text-[#133A63] flex-shrink-0">
+              <span className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center font-serif font-bold text-[24px] text-[#1E40AF] flex-shrink-0">
                 M
               </span>
               <span className="flex flex-col gap-1 text-[15px] leading-[1.5]">
-                <strong className="text-[#16181D]">Minh Anh</strong>
-                <span className="text-[#2B2F36]">
+                <strong className="text-[#111827]">Minh Anh</strong>
+                <span className="text-[#374151]">
                   Nhà đầu tư cá nhân, ghi chép việc đọc báo cáo tài chính từ
                   2019.
                 </span>
                 <Link
                   href="/about"
-                  className="font-semibold text-[14px] text-[#133A63] hover:underline"
+                  className="font-semibold text-[14px] text-[#1E40AF] hover:underline"
                 >
                   Tôi là ai và viết như thế nào
                 </Link>
@@ -525,12 +525,12 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
             {/* Next Series Card */}
             <Link
               href="/posts/bien-loi-nhuan-gop-nhom-thep-qua-8-quy"
-              className="flex flex-col gap-1 p-4.5 sm:px-5 border border-[#16181D] bg-[#FCFBF8] text-[#16181D] no-underline hover:no-underline transition-all hover:shadow-[4px_4px_0_#16181D] group"
+              className="flex flex-col gap-1 p-4.5 sm:px-5 border border-[#111827] bg-white text-[#111827] no-underline hover:no-underline transition-all hover:shadow-[4px_4px_0_#111827] group"
             >
-              <span className="text-[13px] font-bold text-[#133A63]">
+              <span className="text-[13px] font-bold text-[#1E40AF]">
                 Phần tiếp trong chuỗi · Đọc BCTC ngân hàng
               </span>
-              <span className="font-serif font-bold text-[20px] leading-[1.3] group-hover:text-[#133A63] transition-colors">
+              <span className="font-serif font-bold text-[20px] leading-[1.3] group-hover:text-[#1E40AF] transition-colors">
                 Chi phí dự phòng ăn vào lợi nhuận thế nào
               </span>
             </Link>
@@ -541,8 +541,8 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
             <Top10Widget />
 
             {/* Sticky Table of Contents (TOC) */}
-            <nav className="sticky top-[84px] flex flex-col bg-[#FCFBF8] p-4 border border-[#E3E1DC] rounded-[2px]">
-              <h2 className="m-0 mb-1.5 text-[14px] font-bold pb-2 border-b-2 border-[#16181D] text-[#16181D]">
+            <nav className="sticky top-[84px] flex flex-col bg-white p-4 border border-[#E5E7EB] rounded-[2px]">
+              <h2 className="m-0 mb-1.5 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
                 Trong bài này
               </h2>
               <div className="flex flex-col">
@@ -553,10 +553,10 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                       key={t.id}
                       href={`#${t.id}`}
                       onClick={scrollTo(t.id)}
-                      className={`py-2 pl-3 text-[14px] leading-[1.4] border-l-2 transition-colors hover:no-underline hover:text-[#16181D] ${
+                      className={`py-2 pl-3 text-[14px] leading-[1.4] border-l-2 transition-colors hover:no-underline hover:text-[#111827] ${
                         isActive
-                          ? "border-[#133A63] text-[#16181D] font-semibold"
-                          : "border-[#E3E1DC] text-[#5E636B] font-normal"
+                          ? "border-[#1E40AF] text-[#111827] font-semibold"
+                          : "border-[#E5E7EB] text-[#6B7280] font-normal"
                       }`}
                     >
                       {t.label}
@@ -564,7 +564,7 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
                   );
                 })}
               </div>
-              <span className="mt-3 text-[13px] text-[#5E636B]">
+              <span className="mt-3 text-[13px] text-[#6B7280]">
                 {readLeft}
               </span>
             </nav>
@@ -573,7 +573,7 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
 
         {/* Related Articles Section */}
         <section className="max-w-[1000px] w-full mx-auto flex flex-col gap-4 pt-6">
-          <h2 className="m-0 text-[14px] font-bold pb-2 border-b-2 border-[#16181D] text-[#16181D]">
+          <h2 className="m-0 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
             Bài liên quan
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-7">
@@ -581,15 +581,15 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               <Link
                 key={p.slug}
                 href={`/posts/${p.slug}`}
-                className="flex flex-col gap-2 pt-3.5 border-t border-[#E3E1DC] text-[#16181D] hover:text-[#133A63] hover:no-underline transition-colors group"
+                className="flex flex-col gap-2 pt-3.5 border-t border-[#E5E7EB] text-[#111827] hover:text-[#1E40AF] hover:no-underline transition-colors group"
               >
-                <span className="text-[13px] font-bold text-[#133A63]">
+                <span className="text-[13px] font-bold text-[#1E40AF]">
                   {p.cat}
                 </span>
-                <span className="font-serif font-bold text-[19px] leading-[1.3] group-hover:text-[#133A63]">
+                <span className="font-serif font-bold text-[19px] leading-[1.3] group-hover:text-[#1E40AF]">
                   {p.title}
                 </span>
-                <span className="text-[13px] text-[#5E636B]">{p.date}</span>
+                <span className="text-[13px] text-[#6B7280]">{p.date}</span>
               </Link>
             ))}
           </div>

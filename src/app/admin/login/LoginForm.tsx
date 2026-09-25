@@ -38,7 +38,7 @@ export default function LoginForm() {
         </div>
       )}
 
-      <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#16181D]">
+      <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#111827]">
         Email
         <input
           id="email"
@@ -47,11 +47,11 @@ export default function LoginForm() {
           placeholder="admin@finpulse.vn"
           required
           defaultValue="admin@finpulse.vn"
-          className="border border-[#C9C5BC] bg-white px-3 py-2.5 text-[15px] font-normal rounded-[2px] outline-none focus:border-[#16181D] text-[#16181D]"
+          className="border border-[#D1D5DB] bg-white px-3 py-2.5 text-[15px] font-normal rounded-[4px] outline-none focus:border-[#111827] text-[#111827]"
         />
       </label>
 
-      <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#16181D]">
+      <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#111827]">
         <span className="flex justify-between items-center">
           <span>Mật khẩu</span>
           <a
@@ -60,7 +60,7 @@ export default function LoginForm() {
               e.preventDefault();
               alert("Mật khẩu mặc định trong .env: AdminPassword@2026");
             }}
-            className="text-[13px] font-medium text-[#133A63] hover:underline"
+            className="text-[13px] font-medium text-[#1E40AF] hover:underline"
           >
             Quên mật khẩu?
           </a>
@@ -72,15 +72,15 @@ export default function LoginForm() {
           placeholder="••••••••••••"
           required
           defaultValue="AdminPassword@2026"
-          className="border border-[#C9C5BC] bg-white px-3 py-2.5 text-[15px] font-normal rounded-[2px] outline-none focus:border-[#16181D] text-[#16181D]"
+          className="border border-[#D1D5DB] bg-white px-3 py-2.5 text-[15px] font-normal rounded-[4px] outline-none focus:border-[#111827] text-[#111827]"
         />
       </label>
 
-      <label className="flex gap-2 items-center text-[14px] text-[#2B2F36] cursor-pointer">
+      <label className="flex gap-2 items-center text-[14px] text-[#374151] cursor-pointer">
         <input
           type="checkbox"
           defaultChecked
-          className="rounded-[2px] text-[#133A63] focus:ring-[#133A63]"
+          className="rounded-[2px] text-[#1E40AF] focus:ring-[#1E40AF]"
         />
         <span>Ghi nhớ đăng nhập</span>
       </label>

@@ -39,21 +39,21 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       {/* 3. Main Category View (Screen 02) */}
       <main className="max-w-[1240px] mx-auto px-6 py-9 pb-16 w-full flex flex-col gap-7">
         {/* Category Header */}
-        <div className="flex flex-col gap-2 pb-5 border-b border-[#E3E1DC]">
-          <h1 className="m-0 font-serif font-bold text-[36px] sm:text-[40px] tracking-[-0.015em] text-[#16181D]">
+        <div className="flex flex-col gap-2 pb-5 border-b border-[#E5E7EB]">
+          <h1 className="m-0 font-serif font-bold text-[36px] sm:text-[40px] tracking-[-0.015em] text-[#111827]">
             {currentCategory.name}
           </h1>
-          <p className="m-0 text-[16px] text-[#2B2F36] max-w-[640px] leading-[1.55]">
+          <p className="m-0 text-[16px] text-[#374151] max-w-[640px] leading-[1.55]">
             {currentCategory.desc}
           </p>
           <div className="flex gap-5 mt-2 text-[14px] font-semibold">
-            <span className="text-[#16181D] border-b-2 border-[#16181D] pb-1.5 cursor-pointer">
+            <span className="text-[#111827] border-b-2 border-[#111827] pb-1.5 cursor-pointer">
               Mới nhất
             </span>
-            <span className="text-[#5E636B] hover:text-[#16181D] cursor-pointer transition-colors">
+            <span className="text-[#6B7280] hover:text-[#111827] cursor-pointer transition-colors">
               Được đọc nhiều
             </span>
-            <span className="text-[#5E636B] hover:text-[#16181D] cursor-pointer transition-colors">
+            <span className="text-[#6B7280] hover:text-[#111827] cursor-pointer transition-colors">
               Chuỗi bài
             </span>
           </div>
@@ -67,25 +67,25 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               <Link
                 key={p.slug}
                 href={`/posts/${p.slug}`}
-                className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_150px] gap-4 sm:gap-6 py-5.5 border-b border-[#E3E1DC] text-[#16181D] hover:no-underline group"
+                className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_150px] gap-4 sm:gap-6 py-5.5 border-b border-[#E5E7EB] text-[#111827] hover:no-underline group"
               >
                 <span className="flex flex-col gap-1.5">
-                  <span className="text-[13px] text-[#5E636B]">
+                  <span className="text-[13px] text-[#6B7280]">
                     {p.date} · {p.read}
                   </span>
-                  <span className="font-serif font-bold text-[20px] sm:text-[22px] leading-[1.25] group-hover:text-[#133A63] transition-colors">
+                  <span className="font-serif font-bold text-[20px] sm:text-[22px] leading-[1.25] group-hover:text-[#1D4ED8] transition-colors">
                     {p.title}
                   </span>
-                  <span className="text-[15px] leading-[1.55] text-[#2B2F36]">
+                  <span className="text-[15px] leading-[1.55] text-[#374151]">
                     {p.dek}
                   </span>
                 </span>
 
-                <span className="flex flex-col justify-center gap-1 p-3.5 sm:px-4 bg-[#EEEAE2] self-start rounded-[2px]">
-                  <span className="text-[22px] font-bold tabular-nums leading-[1.1] text-[#16181D]">
+                <span className="flex flex-col justify-center gap-1 p-3.5 sm:px-4 bg-[#F3F4F6] self-start rounded-[2px]">
+                  <span className="text-[22px] font-bold tabular-nums leading-[1.1] text-[#111827]">
                     {p.stat}
                   </span>
-                  <span className="text-[12px] text-[#2B2F36] leading-[1.4]">
+                  <span className="text-[12px] text-[#4B5563] leading-[1.4]">
                     {p.statLabel}
                   </span>
                 </span>
@@ -94,7 +94,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
             <button
               type="button"
-              className="mt-6 self-center border border-[#16181D] bg-[#FCFBF8] hover:bg-[#F0EEE9] px-7 py-2.5 text-[15px] font-semibold cursor-pointer rounded-[2px] transition-colors text-[#16181D]"
+              className="mt-6 self-center border border-[#111827] bg-white hover:bg-[#F9FAFB] px-7 py-2.5 text-[15px] font-semibold cursor-pointer rounded-[2px] transition-colors text-[#111827]"
             >
               Xem thêm bài
             </button>

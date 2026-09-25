@@ -16,25 +16,25 @@ export default function AdminDashboardPage() {
     >
       {/* Welcome Header */}
       <div className="flex flex-col gap-1">
-        <h1 className="m-0 text-[26px] font-bold text-[#16181D]">
+        <h1 className="m-0 text-[26px] font-bold text-[#111827]">
           Chào buổi sáng, Minh Anh
         </h1>
-        <p className="m-0 text-[15px] text-[#5E636B]">
+        <p className="m-0 text-[15px] text-[#6B7280]">
           Thứ Năm, 24/09/2026 · 2 bản nháp đang chờ bạn hoàn thiện.
         </p>
       </div>
 
       {/* 4 Stat Cards Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 bg-[#FCFBF8] border border-[#E3E1DC]">
+      <div className="grid grid-cols-2 lg:grid-cols-4 bg-white border border-[#E5E7EB] rounded-[4px] shadow-sm">
         {stats.map((s, idx) => (
           <div
             key={s.label}
             className={`p-4.5 sm:p-5 flex flex-col gap-1 ${
-              idx < stats.length - 1 ? "border-r border-[#E3E1DC]" : ""
+              idx < stats.length - 1 ? "border-r border-[#E5E7EB]" : ""
             }`}
           >
-            <span className="text-[13px] text-[#5E636B]">{s.label}</span>
-            <span className="text-[28px] font-bold tabular-nums text-[#16181D] leading-tight">
+            <span className="text-[13px] text-[#6B7280]">{s.label}</span>
+            <span className="text-[28px] font-bold tabular-nums text-[#111827] leading-tight">
               {s.value}
             </span>
             <span
@@ -50,14 +50,14 @@ export default function AdminDashboardPage() {
       {/* 2-Column Grid: Drafts & Top Views */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left: Bản nháp của bạn */}
-        <div className="bg-[#FCFBF8] border border-[#E3E1DC] rounded-[2px]">
-          <div className="flex justify-between items-center px-5 py-3.5 border-b border-[#E3E1DC]">
-            <strong className="text-[15px] text-[#16181D]">
+        <div className="bg-white border border-[#E5E7EB] rounded-[4px] shadow-sm">
+          <div className="flex justify-between items-center px-5 py-3.5 border-b border-[#E5E7EB]">
+            <strong className="text-[15px] text-[#111827]">
               Bản nháp của bạn
             </strong>
             <Link
               href="/admin/posts"
-              className="text-[14px] text-[#133A63] hover:underline"
+              className="text-[14px] text-[#1E40AF] hover:underline"
             >
               Tất cả
             </Link>
@@ -67,12 +67,12 @@ export default function AdminDashboardPage() {
               <Link
                 key={d.title}
                 href="/admin/posts/new"
-                className="flex flex-col gap-1 px-5 py-3.5 border-b border-[#EFEDE8] last:border-none text-[#16181D] hover:bg-[#F1EEE8] transition-colors no-underline group"
+                className="flex flex-col gap-1 px-5 py-3.5 border-b border-[#F3F4F6] last:border-none text-[#111827] hover:bg-[#F9FAFB] transition-colors no-underline group"
               >
-                <span className="text-[15px] font-semibold group-hover:text-[#133A63]">
+                <span className="text-[15px] font-semibold group-hover:text-[#1E40AF]">
                   {d.title}
                 </span>
-                <span className="text-[13px] text-[#5E636B]">
+                <span className="text-[13px] text-[#6B7280]">
                   {d.cat} · Sửa lần cuối {d.time}
                 </span>
               </Link>
@@ -81,23 +81,23 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Right: Đọc nhiều 7 ngày qua */}
-        <div className="bg-[#FCFBF8] border border-[#E3E1DC] rounded-[2px]">
-          <div className="flex justify-between items-center px-5 py-3.5 border-b border-[#E3E1DC]">
-            <strong className="text-[15px] text-[#16181D]">
+        <div className="bg-white border border-[#E5E7EB] rounded-[4px] shadow-sm">
+          <div className="flex justify-between items-center px-5 py-3.5 border-b border-[#E5E7EB]">
+            <strong className="text-[15px] text-[#111827]">
               Đọc nhiều 7 ngày qua
             </strong>
-            <span className="text-[13px] text-[#5E636B]">Lượt xem</span>
+            <span className="text-[13px] text-[#6B7280]">Lượt xem</span>
           </div>
           <div className="flex flex-col">
             {topWeek.map((t) => (
               <div
                 key={t.title}
-                className="flex justify-between items-center gap-4 px-5 py-3 border-b border-[#EFEDE8] last:border-none text-[14px]"
+                className="flex justify-between items-center gap-4 px-5 py-3 border-b border-[#F3F4F6] last:border-none text-[14px]"
               >
-                <span className="font-medium text-[#16181D] leading-[1.4]">
+                <span className="font-medium text-[#111827] leading-[1.4]">
                   {t.title}
                 </span>
-                <span className="tabular-nums font-semibold text-[#16181D]">
+                <span className="tabular-nums font-semibold text-[#111827]">
                   {t.views}
                 </span>
               </div>

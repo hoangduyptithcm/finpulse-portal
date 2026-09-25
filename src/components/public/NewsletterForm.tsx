@@ -15,7 +15,7 @@ export default function NewsletterForm() {
   return (
     <div id="newsletter" className="flex flex-col gap-2">
       {status === "success" ? (
-        <div className="bg-[#EEEAE2] border border-[#16181D] p-3 text-[14px] text-[#16181D] font-medium">
+        <div className="bg-[#F3F4F6] border border-[#111827] p-3 text-[14px] text-[#111827] font-medium">
           ✓ Đã đăng ký thành công! Bạn sẽ nhận bài phân tích mới vào mỗi Chủ nhật.
         </div>
       ) : (
@@ -26,7 +26,7 @@ export default function NewsletterForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email của bạn"
-            className="border border-[#C9C5BC] bg-[#FCFBF8] px-3.5 py-3 text-[15px] w-[280px] max-w-full rounded-[2px] outline-none focus:border-[#16181D] transition-colors"
+            className="border border-[#D1D5DB] bg-white px-3.5 py-3 text-[15px] w-[280px] max-w-full rounded-[2px] outline-none focus:border-[#111827] transition-colors"
           />
           <button
             type="submit"

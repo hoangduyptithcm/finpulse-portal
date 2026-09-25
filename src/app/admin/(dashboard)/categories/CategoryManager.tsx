@@ -57,33 +57,33 @@ export default function CategoryManager() {
 
       <div className="flex flex-wrap gap-7 items-start">
         {/* Table of categories */}
-        <div className="flex-[1_1_560px] min-w-0 bg-[#FCFBF8] border border-[#E3E1DC] overflow-x-auto rounded-[2px]">
+        <div className="flex-[1_1_560px] min-w-0 bg-white border border-[#E5E7EB] overflow-x-auto rounded-[4px] shadow-sm">
           <table className="w-full border-collapse text-[14px] min-w-[520px]">
             <thead>
-              <tr className="text-left text-[#5E636B] text-[13px] bg-[#F1EEE8]">
-                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E3E1DC] w-14">
+              <tr className="text-left text-[#6B7280] text-[13px] bg-[#F9FAFB]">
+                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E5E7EB] w-14">
                   Thứ tự
                 </th>
-                <th className="py-2.5 px-4 font-semibold border-b border-[#E3E1DC]">
+                <th className="py-2.5 px-4 font-semibold border-b border-[#E5E7EB]">
                   Tên
                 </th>
-                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E3E1DC]">
+                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E5E7EB]">
                   Đường dẫn
                 </th>
-                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E3E1DC] text-right">
+                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E5E7EB] text-right">
                   Số bài
                 </th>
               </tr>
             </thead>
             <tbody>
               {categories.map((c) => (
-                <tr key={c.slug} className="hover:bg-[#F1EEE8] transition-colors">
-                  <td className="py-3.5 px-4 border-b border-[#EFEDE8] text-[#5E636B]">
+                <tr key={c.slug} className="hover:bg-[#F9FAFB] transition-colors">
+                  <td className="py-3.5 px-4 border-b border-[#F3F4F6] text-[#6B7280]">
                     {c.order}
                   </td>
-                  <td className="py-3.5 px-4 border-b border-[#EFEDE8]">
+                  <td className="py-3.5 px-4 border-b border-[#F3F4F6]">
                     <span className="flex flex-col gap-1">
-                      <strong className="text-[#16181D] font-semibold">
+                      <strong className="text-[#111827] font-semibold">
                         {c.name}
                       </strong>
                       <span className="flex gap-3 text-[13px]">
@@ -102,24 +102,24 @@ export default function CategoryManager() {
                               );
                             }
                           }}
-                          className="text-[#133A63] hover:underline"
+                          className="text-[#1E40AF] hover:underline"
                         >
                           Sửa
                         </a>
                         <button
                           type="button"
                           onClick={() => handleDelete(c.slug, c.name)}
-                          className="border-0 bg-transparent p-0 text-[#C0271D] hover:underline cursor-pointer"
+                          className="border-0 bg-transparent p-0 text-[#DC2626] hover:underline cursor-pointer"
                         >
                           Xóa
                         </button>
                       </span>
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 border-b border-[#EFEDE8] text-[#5E636B]">
+                  <td className="py-3.5 px-4 border-b border-[#F3F4F6] text-[#6B7280]">
                     /{c.slug}
                   </td>
-                  <td className="py-3.5 px-4 border-b border-[#EFEDE8] text-right tabular-nums text-[#16181D] font-medium">
+                  <td className="py-3.5 px-4 border-b border-[#F3F4F6] text-right tabular-nums text-[#111827] font-medium">
                     {c.count}
                   </td>
                 </tr>
@@ -131,13 +131,13 @@ export default function CategoryManager() {
         {/* Add Category Form */}
         <form
           onSubmit={handleAdd}
-          className="flex-[1_1_260px] bg-[#FCFBF8] border border-[#E3E1DC] p-5 flex flex-col gap-3.5 rounded-[2px]"
+          className="flex-[1_1_260px] bg-white border border-[#E5E7EB] p-5 flex flex-col gap-3.5 rounded-[4px] shadow-sm"
         >
-          <strong className="text-[15px] text-[#16181D]">
+          <strong className="text-[15px] text-[#111827]">
             Thêm chuyên mục
           </strong>
 
-          <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#16181D]">
+          <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#111827]">
             Tên
             <input
               type="text"
@@ -145,23 +145,23 @@ export default function CategoryManager() {
               onChange={(e) => setName(e.target.value)}
               placeholder="VD: Vàng và hàng hóa"
               required
-              className="border border-[#C9C5BC] bg-white px-2.5 py-2 text-[14px] font-normal rounded-[3px] outline-none text-[#16181D] focus:border-[#16181D]"
+              className="border border-[#D1D5DB] bg-white px-2.5 py-2 text-[14px] font-normal rounded-[4px] outline-none text-[#111827] focus:border-[#111827]"
             />
           </label>
 
-          <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#16181D]">
+          <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#111827]">
             Mô tả
             <textarea
               rows={3}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              className="border border-[#C9C5BC] bg-white px-2.5 py-2 text-[14px] font-normal rounded-[3px] resize-y outline-none text-[#16181D] focus:border-[#16181D]"
+              className="border border-[#D1D5DB] bg-white px-2.5 py-2 text-[14px] font-normal rounded-[4px] resize-y outline-none text-[#111827] focus:border-[#111827]"
             />
           </label>
 
           <button
             type="submit"
-            className="border-0 bg-[#133A63] hover:bg-[#0C2A4A] !text-white hover:!text-white py-2.5 px-4 text-[14px] font-semibold cursor-pointer rounded-[3px] transition-colors"
+            className="border-0 bg-[#1E40AF] hover:bg-[#1E3A8A] !text-white hover:!text-white py-2.5 px-4 text-[14px] font-semibold cursor-pointer rounded-[4px] transition-colors"
           >
             Thêm
           </button>

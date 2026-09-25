@@ -37,7 +37,7 @@ export default function AdminBottomBar() {
             href={s.href}
             className={`px-2.5 py-1.5 rounded-[4px] text-[12px] font-semibold whitespace-nowrap transition-colors no-underline ${
               isActive
-                ? "bg-[#F7F5F0] text-[#16181D]"
+                ? "bg-white text-[#111827]"
                 : "bg-transparent text-[#D8D6D0] hover:text-white"
             }`}
           >

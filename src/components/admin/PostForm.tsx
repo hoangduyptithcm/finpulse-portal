@@ -189,18 +189,18 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
   return (
     <div
       data-screen-label="07 Soạn bài"
-      className="min-h-screen bg-[#F7F5F0] flex flex-col -m-7 sm:-m-9 -mb-20 text-[#16181D]"
+      className="min-h-screen bg-white flex flex-col -m-7 sm:-m-9 -mb-20 text-[#111827]"
     >
       {/* Top Header */}
-      <header className="h-14 border-b border-[#E3E1DC] flex items-center justify-between px-5 gap-4 sticky top-0 bg-[#F7F5F0] z-10">
+      <header className="h-14 border-b border-[#E5E7EB] flex items-center justify-between px-5 gap-4 sticky top-0 bg-white z-10">
         <span className="flex gap-4 items-center text-[14px]">
           <Link
             href="/admin/posts"
-            className="font-semibold text-[#16181D] hover:text-[#133A63] transition-colors"
+            className="font-semibold text-[#111827] hover:text-[#1E40AF] transition-colors"
           >
             ← Bài viết
           </Link>
-          <span className="text-[#5E636B] text-[13px]">
+          <span className="text-[#6B7280] text-[13px]">
             {initialData?.id ? "Chế độ chỉnh sửa" : "Soạn bài mới"}
           </span>
         </span>
@@ -210,7 +210,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
             <Link
               href={`/posts/${slug}`}
               target="_blank"
-              className="border border-[#C9C5BC] bg-[#FCFBF8] hover:bg-[#F0EEE9] px-3.5 py-2 text-[14px] font-semibold cursor-pointer rounded-[3px] text-[#16181D] no-underline transition-colors"
+              className="border border-[#E5E7EB] bg-white hover:bg-[#F9FAFB] px-3.5 py-2 text-[14px] font-semibold cursor-pointer rounded-[4px] text-[#111827] no-underline transition-colors"
             >
               Xem trước
             </Link>
@@ -219,7 +219,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
             type="button"
             onClick={handlePublish}
             disabled={isBlocked || isSaving}
-            className={`border-0 bg-[#133A63] hover:bg-[#0C2A4A] !text-white hover:!text-white px-5 py-2 text-[14px] font-semibold rounded-[3px] transition-colors flex items-center gap-2 ${
+            className={`border-0 bg-[#1E40AF] hover:bg-[#1E3A8A] !text-white hover:!text-white px-5 py-2 text-[14px] font-semibold rounded-[4px] transition-colors flex items-center gap-2 ${
               isBlocked || isSaving
                 ? "opacity-50 cursor-not-allowed"
                 : "cursor-pointer"
@@ -247,7 +247,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
       {/* Editor Body Grid: Main Content & Aside Settings */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] flex-1">
         {/* Left Column: Writing Area */}
-        <div className="p-8 sm:px-12 sm:py-10 pb-20 flex justify-center">
+        <div className="p-8 sm:px-12 sm:py-10 pb-20 flex justify-center bg-white">
           <div className="w-full max-w-[700px] flex flex-col gap-4">
             {/* Title Textarea */}
             <textarea
@@ -255,7 +255,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
               value={title}
               onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Câu hỏi của bài, VD: VCB có đắt sau báo cáo quý 2?"
-              className="w-full border-0 outline-none resize-none font-serif font-bold text-[32px] sm:text-[38px] leading-[1.15] tracking-[-0.015em] text-[#16181D] bg-transparent p-0 placeholder:text-[#9A9EA5]"
+              className="w-full border-0 outline-none resize-none font-serif font-bold text-[32px] sm:text-[38px] leading-[1.15] tracking-[-0.015em] text-[#111827] bg-transparent p-0 placeholder:text-[#9CA3AF]"
             />
 
             {/* Excerpt Textarea */}
@@ -264,7 +264,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
               placeholder="Câu trả lời ngắn cho câu hỏi của bài, 1–2 câu"
-              className="w-full border-0 outline-none resize-none font-serif text-[19px] sm:text-[20px] leading-[1.45] text-[#2B2F36] bg-transparent p-0 placeholder:text-[#9A9EA5]"
+              className="w-full border-0 outline-none resize-none font-serif text-[19px] sm:text-[20px] leading-[1.45] text-[#374151] bg-transparent p-0 placeholder:text-[#9CA3AF]"
             />
 
             {/* TipTap Rich Editor */}
@@ -275,18 +275,18 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
         </div>
 
         {/* Right Aside: Settings & Checklist */}
-        <aside className="border-t lg:border-t-0 lg:border-l border-[#E3E1DC] bg-[#F1EEE8] p-5 flex flex-col gap-5.5 text-[14px]">
+        <aside className="border-t lg:border-t-0 lg:border-l border-[#E5E7EB] bg-[#F9FAFB] p-5 flex flex-col gap-5.5 text-[14px]">
           {/* Status Toggle */}
           <div className="flex flex-col gap-2">
-            <strong className="text-[#16181D]">Trạng thái</strong>
-            <div className="flex border border-[#C9C5BC] rounded-[3px] overflow-hidden">
+            <strong className="text-[#111827]">Trạng thái</strong>
+            <div className="flex border border-[#E5E7EB] rounded-[4px] overflow-hidden">
               <button
                 type="button"
                 onClick={() => setIsPub(false)}
                 className={`flex-1 py-2 text-[13px] font-semibold border-0 cursor-pointer transition-colors ${
                   !isPub
-                    ? "bg-[#16181D] text-white"
-                    : "bg-[#FCFBF8] text-[#5E636B] hover:text-[#16181D]"
+                    ? "bg-[#111827] text-white"
+                    : "bg-white text-[#6B7280] hover:text-[#111827]"
                 }`}
               >
                 Bản nháp
@@ -296,8 +296,8 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
                 onClick={() => setIsPub(true)}
                 className={`flex-1 py-2 text-[13px] font-semibold border-0 cursor-pointer transition-colors ${
                   isPub
-                    ? "bg-[#133A63] text-white"
-                    : "bg-[#FCFBF8] text-[#5E636B] hover:text-[#16181D]"
+                    ? "bg-[#1E40AF] text-white"
+                    : "bg-white text-[#6B7280] hover:text-[#111827]"
                 }`}
               >
                 Xuất bản
@@ -308,19 +308,19 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
           {/* Pre-Publish Checklist (Gatekeeper) */}
           {isPub && (
             <div
-              className={`flex flex-col gap-2 p-3.5 bg-[#FCFBF8] border rounded-[2px] ${
-                allChecked ? "border-[#E3E1DC]" : "border-[#D9B26A]"
+              className={`flex flex-col gap-2 p-3.5 bg-white border rounded-[4px] shadow-sm ${
+                allChecked ? "border-[#E5E7EB]" : "border-[#D9B26A]"
               }`}
             >
               <div className="flex justify-between items-center">
-                <strong className="text-[#16181D]">
+                <strong className="text-[#111827]">
                   Kiểm tra trước khi xuất bản
                 </strong>
                 {!allChecked && (
                   <button
                     type="button"
                     onClick={checkAll}
-                    className="text-[12px] text-[#133A63] hover:underline bg-transparent border-0 cursor-pointer font-medium p-0"
+                    className="text-[12px] text-[#1E40AF] hover:underline bg-transparent border-0 cursor-pointer font-medium p-0"
                   >
                     Chọn tất cả
                   </button>
@@ -361,11 +361,11 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
 
           {/* Category Selector */}
           <label className="flex flex-col gap-2">
-            <strong className="text-[#16181D]">Chuyên mục</strong>
+            <strong className="text-[#111827]">Chuyên mục</strong>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="border border-[#C9C5BC] bg-[#FCFBF8] p-2.5 text-[14px] rounded-[3px] outline-none text-[#16181D]"
+              className="border border-[#D1D5DB] bg-white p-2.5 text-[14px] rounded-[4px] outline-none text-[#111827] focus:border-[#111827]"
             >
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -377,7 +377,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
 
           {/* Cover Image */}
           <div className="flex flex-col gap-2">
-            <strong className="text-[#16181D]">Ảnh bìa</strong>
+            <strong className="text-[#111827]">Ảnh bìa</strong>
             <input
               type="file"
               ref={fileInputRef}
@@ -386,7 +386,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
               className="hidden"
             />
             {coverImage ? (
-              <div className="relative group rounded-[2px] overflow-hidden border border-[#E3E1DC]">
+              <div className="relative group rounded-[4px] overflow-hidden border border-[#E5E7EB]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={coverImage}
@@ -404,18 +404,18 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="aspect-[1200/630] border border-dashed border-[#B8B4AA] bg-[#FCFBF8] hover:bg-[#F6F4EE] cursor-pointer flex flex-col items-center justify-center text-center text-[#5E636B] text-[13px] p-3 rounded-[2px] transition-colors"
+                className="aspect-[1200/630] border border-dashed border-[#D1D5DB] bg-white hover:bg-[#F9FAFB] cursor-pointer flex flex-col items-center justify-center text-center text-[#6B7280] text-[13px] p-3 rounded-[4px] transition-colors"
               >
                 {isUploading ? (
                   <span className="flex items-center gap-1.5">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#133A63]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#1E40AF]" />
                     <span>Đang nén & tải ảnh...</span>
                   </span>
                 ) : (
                   <>
-                    <Upload className="w-5 h-5 mb-1 text-[#8A867E]" />
+                    <Upload className="w-5 h-5 mb-1 text-[#9CA3AF]" />
                     <span>Bấm để tải ảnh bìa lên</span>
-                    <span className="text-[11px] text-[#8A867E] mt-0.5">Khuyến nghị 1200 × 630</span>
+                    <span className="text-[11px] text-[#9CA3AF] mt-0.5">Khuyến nghị 1200 × 630</span>
                   </>
                 )}
               </div>
@@ -424,14 +424,14 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
 
           {/* Slug input */}
           <label className="flex flex-col gap-2">
-            <strong className="text-[#16181D]">Đường dẫn</strong>
-            <span className="flex border border-[#C9C5BC] bg-[#FCFBF8] rounded-[3px] text-[13px] overflow-hidden">
-              <span className="py-2 pl-2.5 text-[#5E636B]">/posts/</span>
+            <strong className="text-[#111827]">Đường dẫn</strong>
+            <span className="flex border border-[#D1D5DB] bg-white rounded-[4px] text-[13px] overflow-hidden">
+              <span className="py-2 pl-2.5 text-[#6B7280]">/posts/</span>
               <input
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                className="border-0 outline-none py-2 px-1 text-[13px] flex-1 min-w-0 bg-transparent text-[#16181D]"
+                className="border-0 outline-none py-2 px-1 text-[13px] flex-1 min-w-0 bg-transparent text-[#111827]"
               />
             </span>
           </label>
@@ -439,19 +439,19 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
           {/* Sources list */}
           <div className="flex flex-col gap-2">
             <span className="flex justify-between items-center">
-              <strong className="text-[#16181D]">Nguồn số liệu</strong>
-              <span className="text-[13px] text-[#5E636B]">Hiện cuối bài</span>
+              <strong className="text-[#111827]">Nguồn số liệu</strong>
+              <span className="text-[13px] text-[#6B7280]">Hiện cuối bài</span>
             </span>
             <div className="flex flex-col gap-1.5">
               {sources.map((s) => (
                 <div
                   key={s.n}
-                  className="flex gap-2 p-2 px-2.5 bg-[#FCFBF8] border border-[#E3E1DC] text-[13px] leading-[1.4] rounded-[2px]"
+                  className="flex gap-2 p-2 px-2.5 bg-white border border-[#E5E7EB] text-[13px] leading-[1.4] rounded-[4px] shadow-sm"
                 >
-                  <span className="font-bold text-[#133A63]">[{s.n}]</span>
+                  <span className="font-bold text-[#1E40AF]">[{s.n}]</span>
                   <span className="flex flex-col min-w-0">
-                    <span className="font-semibold text-[#16181D]">{s.label}</span>
-                    <span className="text-[#5E636B] truncate">{s.url}</span>
+                    <span className="font-semibold text-[#111827]">{s.label}</span>
+                    <span className="text-[#6B7280] truncate">{s.url}</span>
                   </span>
                 </div>
               ))}
@@ -459,7 +459,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
             <button
               type="button"
               onClick={handleAddSource}
-              className="border border-dashed border-[#B8B4AA] bg-transparent p-2 text-[13px] font-semibold cursor-pointer text-[#2B2F36] hover:bg-[#FCFBF8] rounded-[3px] transition-colors"
+              className="border border-dashed border-[#D1D5DB] bg-transparent p-2 text-[13px] font-semibold cursor-pointer text-[#374151] hover:bg-white rounded-[4px] transition-colors"
             >
               + Thêm nguồn (BCTC, HOSE, SSC…)
             </button>
@@ -474,8 +474,8 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
               className="mt-1 rounded-[2px]"
             />
             <span className="flex flex-col gap-0.5">
-              <strong className="text-[#16181D]">Có dùng AI soạn nháp</strong>
-              <span className="text-[#5E636B] text-[13px]">
+              <strong className="text-[#111827]">Có dùng AI soạn nháp</strong>
+              <span className="text-[#6B7280] text-[13px]">
                 Tự ghi chú &quot;Nháp có hỗ trợ AI&quot; ở phần tác giả. Miễn trừ
                 trách nhiệm luôn được chèn cuối bài.
               </span>
@@ -491,8 +491,8 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
               className="mt-1 rounded-[2px]"
             />
             <span className="flex flex-col gap-0.5">
-              <strong className="text-[#16181D]">Tiêu điểm trang chủ</strong>
-              <span className="text-[#5E636B] text-[13px]">
+              <strong className="text-[#111827]">Tiêu điểm trang chủ</strong>
+              <span className="text-[#6B7280] text-[13px]">
                 Hiện ở ô &quot;Bài mới nhất&quot; trên trang chủ.
               </span>
             </span>
@@ -501,17 +501,17 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
           {/* Facebook Live Preview Card */}
           <div className="flex flex-col gap-2">
             <span className="flex justify-between items-center">
-              <strong className="text-[#16181D]">Xem trước Facebook</strong>
+              <strong className="text-[#111827]">Xem trước Facebook</strong>
               <span
                 className={`text-[13px] ${
-                  exLen > 160 ? "text-[#C0271D] font-bold" : "text-[#5E636B]"
+                  exLen > 160 ? "text-[#DC2626] font-bold" : "text-[#6B7280]"
                 }`}
               >
                 {exLen}/160 ký tự
               </span>
             </span>
-            <div className="bg-[#FCFBF8] border border-[#DADDE1] rounded-[2px] overflow-hidden">
-              <div className="aspect-[1200/630] bg-[#E7E4DD] flex items-center justify-center text-[#5E636B] text-[12px]">
+            <div className="bg-white border border-[#E5E7EB] rounded-[4px] overflow-hidden shadow-sm">
+              <div className="aspect-[1200/630] bg-[#F3F4F6] flex items-center justify-center text-[#6B7280] text-[12px]">
                 {coverImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
@@ -519,14 +519,14 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
                   "Ảnh bìa 1200 × 630"
                 )}
               </div>
-              <div className="p-2.5 sm:p-3 flex flex-col gap-1 bg-[#F0F2F5]">
-                <span className="text-[12px] text-[#65676B] uppercase font-medium">
+              <div className="p-2.5 sm:p-3 flex flex-col gap-1 bg-[#F9FAFB]">
+                <span className="text-[12px] text-[#6B7280] uppercase font-medium">
                   finpulse.vn
                 </span>
-                <span className="text-[15px] font-semibold text-[#050505] leading-[1.3]">
+                <span className="text-[15px] font-semibold text-[#111827] leading-[1.3]">
                   {title || "Tiêu đề bài viết"}
                 </span>
-                <span className="text-[13px] text-[#65676B] leading-[1.35]">
+                <span className="text-[13px] text-[#6B7280] leading-[1.35]">
                   {exShort || "Tóm tắt bài viết hiển thị trên mạng xã hội..."}
                 </span>
               </div>
