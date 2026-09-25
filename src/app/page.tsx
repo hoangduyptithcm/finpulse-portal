@@ -1,325 +1,265 @@
-import { prisma } from "@/lib/prisma";
-import Image from "next/image";
 import Link from "next/link";
 import TopBar from "@/components/public/TopBar";
 import Navbar from "@/components/public/Navbar";
-import MarketTicker from "@/components/public/MarketTicker";
-import MarketBox from "@/components/public/MarketBox";
-import TopTrending from "@/components/public/TopTrending";
-import NewsletterBox from "@/components/public/NewsletterBox";
 import Footer from "@/components/public/Footer";
-import AdminBottomBar from "@/components/public/AdminBottomBar";
-
-export const dynamic = "force-dynamic";
+import NewsletterForm from "@/components/public/NewsletterForm";
+import Top10Widget from "@/components/public/Top10Widget";
+import {
+  KEY_STATS,
+  CATEGORY_COLUMNS,
+  SERIES_LIST,
+  RECENT_NOTES,
+  WATCH_LIST,
+} from "@/data/portalData";
 
 export const metadata = {
-  title: "FinPulse | Tin tức và phân tích tài chính cho nhà đầu tư Việt Nam",
+  title: "FinPulse | Sổ phân tích của Minh Anh",
   description:
-    "Cổng thông tin chuyên sâu về Crypto, Chứng khoán Việt Nam, Kinh tế Vĩ mô và Kiến thức đầu tư.",
+    "Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, trả lời bằng số liệu công bố. Sổ ghi chép cá nhân, không phải tin tức hay lời khuyên đầu tư.",
 };
 
-export default async function HomePage() {
-  const [categories, allPosts] = await Promise.all([
-    prisma.category.findMany({ orderBy: { order: "asc" } }),
-    prisma.post.findMany({
-      where: { status: "PUBLISHED" },
-      orderBy: { createdAt: "desc" },
-      include: { category: true, author: true },
-    }),
-  ]);
-
-  // Bài tiêu điểm (Hero Article)
-  const heroPost =
-    allPosts.find((p) => p.slug === "tong-quan-thi-truong-crypto-va-chu-ky-moi-nam-2026") ||
-    allPosts.find((p) => p.featured) ||
-    allPosts[0];
-
-  // 2 bài tin con dưới bài chính
-  const subHero1 = allPosts.find((p) => p.slug === "spot-etf-ethereum-ghi-nhan-dong-vao-ky-luc");
-  const subHero2 = allPosts.find((p) => p.slug === "halving-da-qua-2-nam-gia-bitcoin-phan-ung-the-nao");
-
-  // Cột giữa (Sub-stories - 4 bài)
-  const middlePosts = [
-    allPosts.find((p) => p.slug === "khoi-ngoai-quay-lai-mua-rong-nhom-ngan-hang-sau-3-tuan"),
-    allPosts.find((p) => p.slug === "fed-giu-nguyen-lai-suat-phat-tin-hieu-cat-giam-thang-12"),
-    allPosts.find((p) => p.slug === "co-phieu-thep-truoc-mua-bao-cao-quy-iii"),
-    allPosts.find((p) => p.slug === "solana-tang-6-nho-hoat-dong-defi-phuc-hoi"),
-  ].filter(Boolean) as typeof allPosts;
-
-  // Top 10 bài xem nhiều nhất (Cột phải)
-  const trendingArticles = [...allPosts]
-    .sort((a, b) => b.views - a.views)
-    .map((p) => ({
-      id: p.id,
-      title: p.title,
-      slug: p.slug,
-      categoryName: p.category?.name || "Tin tức",
-      views: p.views,
-    }));
-
-  // Chuyên mục: Chứng khoán Việt Nam
-  const vnStockFeatured = allPosts.find(
-    (p) => p.slug === "vn-index-vuot-1290-diem-thanh-khoan-cai-thien-ro-ret"
-  );
-  const vnStockList = [
-    allPosts.find((p) => p.slug === "nhom-ngan-hang-dan-dat-vcb-va-tcb-tang-tren-2-phan-tram"),
-    allPosts.find((p) => p.slug === "co-phieu-thep-truoc-mua-bao-cao-quy-iii"),
-    allPosts.find((p) => p.slug === "ba-ma-ban-le-duoc-khoi-ngoai-gom-manh-tuan-qua"),
-    allPosts.find((p) => p.slug === "lich-chia-co-tuc-tien-mat-tuan-40"),
-  ].filter(Boolean) as typeof allPosts;
-
-  // Chuyên mục: Kiến thức đầu tư
-  const eduFeatured = allPosts.find(
-    (p) => p.slug === "doc-bao-cao-tai-chinh-trong-10-phut-5-chi-so-can-nho"
-  );
-  const eduList = [
-    allPosts.find((p) => p.slug === "dca-la-gi-cach-binh-quan-gia-cho-nguoi-moi"),
-    allPosts.find((p) => p.slug === "quan-ly-von-vi-sao-khong-nen-don-het-vao-mot-ma"),
-    allPosts.find((p) => p.slug === "phan-biet-co-phieu-tang-truong-va-co-phieu-gia-tri"),
-    allPosts.find((p) => p.slug === "vi-lanh-va-vi-nong-nen-giu-tien-ma-hoa-o-dau"),
-  ].filter(Boolean) as typeof allPosts;
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white text-stone-900 font-sans selection:bg-stone-200">
-      {/* 1. Top Bar */}
+    <div className="min-h-screen flex flex-col bg-[#F7F5F0] text-[#16181D]">
+      {/* 1. Disclaimer Top Bar */}
       <TopBar />
 
-      {/* 2. Header Navbar */}
-      <Navbar categories={categories} />
+      {/* 2. Brand Sticky Navbar */}
+      <Navbar />
 
-      {/* 3. Market Ticker */}
-      <MarketTicker />
+      {/* 3. Main Page Content */}
+      <main className="max-w-[1240px] mx-auto px-6 py-11 pb-20 w-full flex flex-col gap-14">
+        {/* Section 1: Hero Lead & Featured Article Card */}
+        <section className="flex flex-wrap gap-12 items-center">
+          {/* Left Column: Mission statement & Newsletter */}
+          <div className="flex-1 basis-[420px] flex flex-col gap-5 min-w-0">
+            <h1 className="m-0 font-serif font-bold text-[32px] sm:text-[40px] lg:text-[46px] leading-[1.12] tracking-[-0.02em] text-balance">
+              Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, trả lời bằng số liệu công bố.
+            </h1>
+            <p className="m-0 text-[17px] leading-[1.6] text-[#2B2F36] max-w-[560px]">
+              Tôi đọc báo cáo tài chính, nghị quyết ĐHĐCĐ và dữ liệu HOSE/HNX, rồi ghi lại cách tôi hiểu những con số đó. Đây là sổ ghi chép cá nhân, không phải tin tức hay lời khuyên đầu tư.
+            </p>
+            <NewsletterForm />
+          </div>
 
-      {/* 4. Main 3-Column Editorial Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* CỘT 1: HERO ARTICLE (~50% width -> 6 cols) */}
-          {heroPost && (
-            <div className="lg:col-span-6 space-y-4">
-              <Link href={`/posts/${heroPost.slug}`} className="group block space-y-3">
-                {heroPost.coverImage && (
-                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-stone-100 rounded-sm">
-                    <Image
-                      src={heroPost.coverImage}
-                      alt={heroPost.title}
-                      fill
-                      priority
-                      className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-blue-700 tracking-wide">
-                    {heroPost.category?.name || "Tiền mã hóa"}
+          {/* Right Column: Featured Article Box */}
+          <Link
+            href="/posts/vcb-co-dat-sau-bao-cao-quy-2"
+            className="flex-1 basis-[440px] min-w-0 flex flex-col gap-4 p-7 bg-[#FCFBF8] border border-[#16181D] text-[#16181D] no-underline hover:no-underline transition-all duration-200 hover:shadow-[6px_6px_0_#16181D] group"
+          >
+            <span className="text-[13px] text-[#5E636B]">
+              <strong className="text-[#133A63]">Bài mới nhất · Đọc BCTC</strong> · 22/09/2026 · 8 phút đọc
+            </span>
+            <span className="font-serif font-bold text-[26px] sm:text-[30px] lg:text-[34px] leading-[1.15] tracking-[-0.015em] group-hover:text-[#133A63] transition-colors">
+              VCB có đắt sau báo cáo quý 2?
+            </span>
+            <span className="text-[16px] leading-[1.55] text-[#2B2F36]">
+              <strong>Trả lời ngắn:</strong> chưa đắt so với chính nó 5 năm qua, nhưng nợ xấu tăng là lý do tôi chưa coi đây là vùng giá rẻ.
+            </span>
+            <span className="grid grid-cols-3 border-t border-[#E3E1DC] pt-3.5 gap-3">
+              {KEY_STATS.map((k) => (
+                <span key={k.label} className="flex flex-col gap-0.5">
+                  <span className="text-[24px] font-bold tabular-nums leading-tight">
+                    {k.value}
                   </span>
-                  <h1 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-tight">
-                    {heroPost.title}
-                  </h1>
-                  {heroPost.excerpt && (
-                    <p className="text-sm text-stone-600 leading-relaxed font-sans">
-                      {heroPost.excerpt}
-                    </p>
-                  )}
-                  <p className="text-xs text-stone-400 font-sans pt-1">
-                    {heroPost.author?.name || "Minh Anh"} · 2 giờ trước
-                  </p>
-                </div>
+                  <span className="text-[13px] text-[#5E636B] leading-tight">
+                    {k.label}
+                  </span>
+                </span>
+              ))}
+            </span>
+            <span className="text-[15px] font-bold text-[#133A63] group-hover:underline flex items-center gap-1">
+              Đọc phân tích →
+            </span>
+          </Link>
+        </section>
+
+        {/* Section 2: 4 Category Columns Grid */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {CATEGORY_COLUMNS.map((c) => (
+            <div
+              key={c.slug}
+              className="flex flex-col gap-1.5 border-t-2 border-[#16181D] pt-3"
+            >
+              <Link
+                href={`/categories/${c.slug}`}
+                className="font-serif font-bold text-[22px] text-[#16181D] hover:text-[#133A63] transition-colors"
+              >
+                {c.name}
               </Link>
-
-              {/* 2 Sub-bullets underneath */}
-              <div className="pt-3 border-t border-stone-200 space-y-2">
-                {subHero1 && (
+              <span className="text-[14px] text-[#5E636B] leading-[1.5] mb-1.5">
+                {c.desc}
+              </span>
+              <div className="flex flex-col">
+                {c.items.map((it) => (
                   <Link
-                    href={`/posts/${subHero1.slug}`}
-                    className="block text-sm font-semibold text-stone-900 hover:text-blue-700 transition-colors"
+                    key={it.slug}
+                    href={`/posts/${it.slug}`}
+                    className="flex flex-col gap-1 py-3 border-t border-[#E3E1DC] text-[#16181D] hover:text-[#133A63] hover:no-underline transition-colors group"
                   >
-                    {subHero1.title}
+                    <span className="font-serif font-semibold text-[17px] leading-[1.35] group-hover:text-[#133A63]">
+                      {it.title}
+                    </span>
+                    <span className="text-[13px] text-[#5E636B]">
+                      {it.date}
+                    </span>
                   </Link>
-                )}
-                {subHero2 && (
-                  <Link
-                    href={`/posts/${subHero2.slug}`}
-                    className="block text-sm font-semibold text-stone-900 hover:text-blue-700 transition-colors"
-                  >
-                    {subHero2.title}
-                  </Link>
-                )}
+                ))}
               </div>
             </div>
-          )}
+          ))}
+        </section>
 
-          {/* CỘT 2: SUB-STORIES (~25% width -> 3 cols) */}
-          <div className="lg:col-span-3 space-y-4 divide-y divide-stone-200 lg:border-l lg:border-r border-stone-200 lg:px-4">
-            {middlePosts.map((post, idx) => (
-              <div key={post.id} className={idx > 0 ? "pt-4" : ""}>
-                <Link href={`/posts/${post.slug}`} className="group block space-y-1">
-                  <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
-                    {post.category?.name}
+        {/* Section 3: Middle Split (Series & Recent Notes vs Sidebar) */}
+        <section className="flex flex-wrap gap-12 items-start">
+          {/* Left Column: Series + Recent Notes */}
+          <div className="flex-[2_1_520px] min-w-0 flex flex-col gap-8">
+            {/* Series Box: Đọc BCTC ngân hàng từ con số 0 */}
+            <div className="bg-[#EEEAE2] p-7 flex flex-col gap-4.5">
+              <div className="flex justify-between items-baseline gap-3 flex-wrap">
+                <span className="flex flex-col gap-1">
+                  <span className="text-[13px] font-bold text-[#133A63]">
+                    Chuỗi bài · 3/6 phần
                   </span>
-                  <h3 className="text-sm font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
-                    {post.title}
-                  </h3>
-                  <p className="text-[11px] text-stone-400 font-sans pt-0.5">
-                    {idx === 0
-                      ? "45 phút trước"
-                      : idx === 1
-                      ? "3 giờ trước"
-                      : idx === 2
-                      ? "5 giờ trước"
-                      : "Hôm qua"}
-                  </p>
+                  <span className="font-serif font-bold text-[24px] sm:text-[26px] leading-[1.2]">
+                    Đọc BCTC ngân hàng từ con số 0
+                  </span>
+                </span>
+                <Link
+                  href="/posts/vcb-co-dat-sau-bao-cao-quy-2"
+                  className="text-[14px] font-bold text-[#133A63] hover:underline"
+                >
+                  Bắt đầu từ phần 1
                 </Link>
               </div>
-            ))}
-          </div>
 
-          {/* CỘT 3: MARKET BOX & TOP 10 TRENDING (~25% width -> 3 cols) */}
-          <div className="lg:col-span-3 space-y-6">
-            <MarketBox />
-            <TopTrending articles={trendingArticles} />
-          </div>
-        </section>
+              {/* Progress bar (50%) */}
+              <div className="h-1 bg-[#D9D4C9] w-full overflow-hidden">
+                <div className="w-1/2 h-full bg-[#133A63]" />
+              </div>
 
-        {/* SECTION: CHỨNG KHOÁN VIỆT NAM */}
-        <section className="space-y-4 pt-6 border-t border-stone-200">
-          <div className="flex items-center justify-between pb-2 border-b-2 border-stone-900">
-            <h2 className="font-serif text-lg font-bold text-stone-900">
-              Chứng khoán Việt Nam
-            </h2>
-            <Link
-              href="/categories/chung-khoan"
-              className="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors"
-            >
-              Xem tất cả
-            </Link>
-          </div>
+              {/* 6 parts grid */}
+              <ol className="m-0 p-0 list-none grid grid-cols-1 sm:grid-cols-2 gap-x-7">
+                {SERIES_LIST.map((p) => (
+                  <li
+                    key={p.n}
+                    className="flex gap-3 py-3 border-t border-[#D9D4C9]"
+                  >
+                    <span
+                      className="font-serif font-bold text-[18px] w-[18px] flex-shrink-0"
+                      style={{ color: p.numColor }}
+                    >
+                      {p.n}
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      {p.slug ? (
+                        <Link
+                          href={`/posts/${p.slug}`}
+                          className="text-[15px] font-semibold leading-[1.4] hover:text-[#133A63] transition-colors"
+                          style={{ color: p.color }}
+                        >
+                          {p.title}
+                        </Link>
+                      ) : (
+                        <span
+                          className="text-[15px] font-semibold leading-[1.4]"
+                          style={{ color: p.color }}
+                        >
+                          {p.title}
+                        </span>
+                      )}
+                      <span className="text-[12px] text-[#5E636B]">
+                        {p.status}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Featured (6 cols) */}
-            {vnStockFeatured && (
-              <div className="lg:col-span-6 space-y-3">
-                <div className="aspect-[16/9] w-full bg-stone-100 rounded-sm relative overflow-hidden">
-                  {vnStockFeatured.coverImage ? (
-                    <Image
-                      src={vnStockFeatured.coverImage}
-                      alt={vnStockFeatured.title}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : null}
-                </div>
-                <Link href={`/posts/${vnStockFeatured.slug}`} className="group block space-y-1.5">
-                  <h3 className="font-serif text-xl font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
-                    {vnStockFeatured.title}
-                  </h3>
-                  {vnStockFeatured.excerpt && (
-                    <p className="text-xs text-stone-600 leading-relaxed font-sans">
-                      {vnStockFeatured.excerpt}
-                    </p>
-                  )}
-                  <p className="text-[11px] text-stone-400 font-sans">1 giờ trước</p>
+            {/* Ghi chép gần đây (Recent Notes) */}
+            <div className="flex flex-col">
+              <div className="flex justify-between items-baseline border-t-2 border-[#16181D] pt-2.5 mb-1">
+                <span className="font-serif font-bold text-[24px]">
+                  Ghi chép gần đây
+                </span>
+                <Link
+                  href="/categories/nhat-ky-quan-sat"
+                  className="text-[14px] font-semibold text-[#133A63] hover:underline"
+                >
+                  Tất cả ghi chép
                 </Link>
               </div>
-            )}
 
-            {/* Right 4 List Items (6 cols) */}
-            <div className="lg:col-span-6 divide-y divide-stone-200">
-              {vnStockList.map((post, idx) => (
-                <div key={post.id} className="py-3 first:pt-0 last:pb-0">
-                  <Link href={`/posts/${post.slug}`} className="group block space-y-1">
-                    <h4 className="text-sm font-semibold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
-                      {post.title}
-                    </h4>
-                    <p className="text-[11px] text-stone-400 font-sans">
-                      {idx === 0
-                        ? "2 giờ trước"
-                        : idx === 1
-                        ? "5 giờ trước"
-                        : "Hôm qua"}
-                    </p>
+              <div className="flex flex-col">
+                {RECENT_NOTES.map((n) => (
+                  <Link
+                    key={n.slug}
+                    href={`/posts/${n.slug}`}
+                    className="grid grid-cols-[72px_minmax(0,1fr)] gap-5 py-4.5 border-b border-[#E3E1DC] text-[#16181D] hover:no-underline group"
+                  >
+                    <span className="flex flex-col leading-[1.1]">
+                      <span className="font-serif font-bold text-[28px]">
+                        {n.day}
+                      </span>
+                      <span className="text-[13px] text-[#5E636B]">
+                        {n.month}
+                      </span>
+                    </span>
+                    <span className="flex flex-col gap-1.5">
+                      <span className="font-serif font-bold text-[19px] leading-[1.3] group-hover:text-[#133A63] transition-colors">
+                        {n.title}
+                      </span>
+                      <span className="text-[15px] leading-[1.55] text-[#2B2F36]">
+                        {n.text}
+                      </span>
+                    </span>
                   </Link>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </section>
 
-        {/* SECTION: KIẾN THỨC ĐẦU TƯ */}
-        <section className="space-y-4 pt-6 border-t border-stone-200">
-          <div className="flex items-center justify-between pb-2 border-b-2 border-stone-900">
-            <h2 className="font-serif text-lg font-bold text-stone-900">
-              Kiến thức đầu tư
-            </h2>
-            <Link
-              href="/categories/kien-thuc-dau-tu"
-              className="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors"
-            >
-              Xem tất cả
-            </Link>
-          </div>
+          {/* Right Sidebar: Top 10 & Watchlist */}
+          <aside className="flex-1 basis-[280px] min-w-0 flex flex-col gap-8">
+            {/* Top 10 articles */}
+            <Top10Widget />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Featured (6 cols) */}
-            {eduFeatured && (
-              <div className="lg:col-span-6 space-y-3">
-                <div className="aspect-[16/9] w-full bg-stone-100 rounded-sm relative overflow-hidden">
-                  {eduFeatured.coverImage ? (
-                    <Image
-                      src={eduFeatured.coverImage}
-                      alt={eduFeatured.title}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : null}
-                </div>
-                <Link href={`/posts/${eduFeatured.slug}`} className="group block space-y-1.5">
-                  <h3 className="font-serif text-xl font-bold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
-                    {eduFeatured.title}
-                  </h3>
-                  {eduFeatured.excerpt && (
-                    <p className="text-xs text-stone-600 leading-relaxed font-sans">
-                      {eduFeatured.excerpt}
-                    </p>
-                  )}
-                  <p className="text-[11px] text-stone-400 font-sans">23/09</p>
-                </Link>
-              </div>
-            )}
-
-            {/* Right 4 List Items (6 cols) */}
-            <div className="lg:col-span-6 divide-y divide-stone-200">
-              {eduList.map((post, idx) => (
-                <div key={post.id} className="py-3 first:pt-0 last:pb-0">
-                  <Link href={`/posts/${post.slug}`} className="group block space-y-1">
-                    <h4 className="text-sm font-semibold text-stone-900 group-hover:text-blue-700 transition-colors leading-snug">
-                      {post.title}
-                    </h4>
-                    <p className="text-[11px] text-stone-400 font-sans">
-                      {idx === 0
-                        ? "22/09"
-                        : idx === 1
-                        ? "21/09"
-                        : idx === 2
-                        ? "19/09"
-                        : "17/09"}
-                    </p>
-                  </Link>
-                </div>
-              ))}
+            {/* Số liệu tôi đang theo dõi (Market Watchlist) */}
+            <div className="flex flex-col">
+              <h2 className="m-0 text-[14px] font-bold pb-2 border-b-2 border-[#16181D] text-[#16181D]">
+                Số liệu tôi đang theo dõi
+              </h2>
+              <table className="w-full border-collapse text-[14px] tabular-nums">
+                <tbody>
+                  {WATCH_LIST.map((t) => (
+                    <tr key={t.name}>
+                      <td className="py-[9px] border-b border-[#E3E1DC] font-semibold text-[#16181D]">
+                        {t.name}
+                      </td>
+                      <td className="py-[9px] border-b border-[#E3E1DC] text-right font-medium">
+                        {t.value}
+                      </td>
+                      <td
+                        className="py-[9px] pl-2.5 border-b border-[#E3E1DC] text-right w-[64px] font-semibold"
+                        style={{ color: t.color }}
+                      >
+                        {t.change}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <span className="mt-2 text-[12px] text-[#5E636B] leading-[1.5]">
+                Giá đóng cửa 23/09/2026. Nguồn: HOSE, NHNN.
+              </span>
             </div>
-          </div>
+          </aside>
         </section>
-
-        {/* SECTION: NEWSLETTER BANNER */}
-        <NewsletterBox />
       </main>
 
-      {/* 5. Footer */}
+      {/* 4. Editorial Footer */}
       <Footer />
-
-      {/* 6. Admin Bottom Bar */}
-      <AdminBottomBar />
     </div>
   );
 }

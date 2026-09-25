@@ -1,321 +1,376 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createPost, updatePost } from "@/app/admin/actions";
+import { CATEGORIES } from "@/data/portalData";
 import { slugify } from "@/lib/slugify";
 import TipTapEditor from "./TipTapEditor";
-import CoverImageUploader from "./CoverImageUploader";
-import { PostStatus } from "@prisma/client";
-import {
-  Save,
-  ArrowLeft,
-  Loader2,
-  Share2,
-  FileCheck,
-} from "lucide-react";
-import Link from "next/link";
-
-interface CategoryOption {
-  id: string;
-  name: string;
-}
-
-interface PostData {
-  id?: string;
-  title: string;
-  slug?: string;
-  excerpt?: string | null;
-  content: string;
-  coverImage?: string | null;
-  categoryId: string;
-  status: PostStatus;
-  featured: boolean;
-}
 
 interface PostFormProps {
-  initialData?: PostData;
-  categories: CategoryOption[];
+  initialData?: {
+    id?: string;
+    title?: string;
+    slug?: string;
+    excerpt?: string | null;
+    content?: string;
+    coverImage?: string | null;
+    status?: string;
+    featured?: boolean;
+    categoryId?: string;
+  };
+  categories?: { id: string; name: string }[];
 }
 
-export default function PostForm({ initialData, categories }: PostFormProps) {
+export default function PostForm({ initialData }: PostFormProps = {}) {
   const router = useRouter();
-  const isEditing = Boolean(initialData?.id);
 
-  const [title, setTitle] = useState(initialData?.title || "");
-  const [slug, setSlug] = useState(initialData?.slug || "");
-  const [isSlugManual, setIsSlugManual] = useState(Boolean(initialData?.slug));
-  const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
-  const [content, setContent] = useState(initialData?.content || "");
-  const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
-  const [categoryId, setCategoryId] = useState(
-    initialData?.categoryId || categories[0]?.id || ""
+  const [title, setTitle] = useState(initialData?.title || "VCB có đắt sau báo cáo quý 2?");
+  const [excerpt, setExcerpt] = useState(
+    initialData?.excerpt ||
+      "Tôi so P/B, ROE và nợ xấu của Vietcombank với chính nó trong 5 năm để xem mức giá hiện tại đang phản ánh điều gì."
   );
-  const [status, setStatus] = useState<PostStatus>(
-    initialData?.status || PostStatus.PUBLISHED
+  const [content, setContent] = useState(
+    initialData?.content || `
+<h2>1. Tôi nhìn vào số nào</h2>
+<p>Với ngân hàng, tôi không dùng P/E làm thước đo chính. Lợi nhuận ngân hàng dao động theo chi phí dự phòng, nên tôi xem P/B đặt cạnh ROE. [1]</p>
+<p>Tiếp tục viết…</p>
+  `
   );
-  const [featured, setFeatured] = useState(initialData?.featured || false);
+  const [slug, setSlug] = useState(
+    initialData?.slug || "vcb-co-dat-sau-bao-cao-quy-2"
+  );
+  const [category, setCategory] = useState("Đọc BCTC");
+  const [isPub, setIsPub] = useState(true);
+  const [aiUsed, setAiUsed] = useState(true);
+  const [featured, setFeatured] = useState(true);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Pre-publish checklist
+  const [checks, setChecks] = useState([true, true, false, false]);
+  const checkLabels = [
+    "Số liệu lấy từ nguồn gốc và đã đối chiếu lại",
+    "Có ít nhất 1 nguồn số liệu kèm link",
+    "Luận điểm và kết luận do tôi tự viết",
+    "Không chép hay diễn đạt lại bài báo khác",
+  ];
+  const allChecked = checks.every(Boolean);
+  const nLeft = checks.filter((c) => !c).length;
+  const isBlocked = isPub && !allChecked;
+
+  // Sources
+  const [sources, setSources] = useState([
+    {
+      n: 1,
+      label: "BCTC hợp nhất quý 2/2026 – VCB",
+      url: "hsx.vn/.../VCB_BCTC_Q2_2026.pdf",
+    },
+    {
+      n: 2,
+      label: "Giá đóng cửa 20/09/2026",
+      url: "hsx.vn/Modules/Listed/Web/SymbolView",
+    },
+  ]);
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
-    if (!isSlugManual) {
-      setSlug(slugify(val));
-    }
+    setSlug(slugify(val));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) {
-      setError("Vui lòng nhập tiêu đề bài viết");
-      return;
-    }
-    if (!categoryId) {
-      setError("Vui lòng chọn chuyên mục");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      setError(null);
-
-      const payload = {
-        title,
-        slug,
-        excerpt,
-        content,
-        coverImage,
-        categoryId,
-        status,
-        featured,
-      };
-
-      if (isEditing && initialData?.id) {
-        await updatePost(initialData.id, payload);
-      } else {
-        await createPost(payload);
-      }
-
-      router.push("/admin/posts");
-      router.refresh();
-    } catch (err) {
-      setError((err as Error).message);
-      setIsSubmitting(false);
-    }
+  const handleAddSource = () => {
+    const label = prompt("Tên tài liệu nguồn (VD: Báo cáo tài chính quý 2):");
+    if (!label) return;
+    const url = prompt("Đường dẫn (URL hoặc số hiệu văn bản):") || "";
+    setSources((prev) => [...prev, { n: prev.length + 1, label, url }]);
   };
+
+  const toggleCheck = (idx: number) => {
+    setChecks((prev) => prev.map((c, i) => (i === idx ? !c : c)));
+  };
+
+  const handlePublish = () => {
+    if (isBlocked) {
+      alert("Vui lòng hoàn thành 4 mục trong danh sách kiểm tra trước khi xuất bản.");
+      return;
+    }
+    alert(isPub ? "Xuất bản bài viết thành công!" : "Đã lưu bản nháp thành công!");
+    router.push("/admin/posts");
+  };
+
+  const exLen = excerpt.length;
+  const exShort = exLen > 110 ? excerpt.slice(0, 110) + "…" : excerpt;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200">
-        <div className="flex items-center gap-3">
+    <div
+      data-screen-label="07 Soạn bài"
+      className="min-h-screen bg-[#F7F5F0] flex flex-col -m-7 sm:-m-9 -mb-20 text-[#16181D]"
+    >
+      {/* Top Header */}
+      <header className="h-14 border-b border-[#E3E1DC] flex items-center justify-between px-5 gap-4 sticky top-0 bg-[#F7F5F0] z-10">
+        <span className="flex gap-4 items-center text-[14px]">
           <Link
             href="/admin/posts"
-            className="p-1.5 rounded-sm bg-white border border-stone-200 text-stone-600 hover:text-stone-900 transition-colors"
+            className="font-semibold text-[#16181D] hover:text-[#133A63] transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            ← Bài viết
           </Link>
-          <div>
-            <h2 className="font-serif text-xl font-bold text-stone-900">
-              {isEditing ? "Chỉnh sửa bài viết" : "Soạn bài viết mới"}
-            </h2>
-            <p className="text-xs text-stone-500">
-              Định dạng chuẩn SEO bài báo, tự động tạo preview chia sẻ Facebook
-            </p>
-          </div>
-        </div>
+          <span className="text-[#5E636B]">Đã lưu nháp lúc 10:24</span>
+        </span>
 
-        <div className="flex items-center gap-2">
+        <span className="flex gap-2">
           <Link
-            href="/admin/posts"
-            className="px-3.5 py-2 rounded-sm border border-stone-300 bg-white text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors"
+            href="/posts/vcb-co-dat-sau-bao-cao-quy-2"
+            target="_blank"
+            className="border border-[#C9C5BC] bg-[#FCFBF8] hover:bg-[#F0EEE9] px-3.5 py-2 text-[14px] font-semibold cursor-pointer rounded-[3px] text-[#16181D] no-underline transition-colors"
           >
-            Hủy bỏ
+            Xem trước
           </Link>
           <button
-            type="submit"
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 rounded-sm bg-stone-900 hover:bg-stone-800 px-4 py-2 text-xs font-medium text-white transition-colors disabled:opacity-50 cursor-pointer"
+            type="button"
+            onClick={handlePublish}
+            disabled={isBlocked}
+            className={`border-0 bg-[#133A63] hover:bg-[#0C2A4A] !text-white hover:!text-white px-4 py-2 text-[14px] font-semibold rounded-[3px] transition-colors ${
+              isBlocked
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer"
+            }`}
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Đang lưu...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-3.5 h-3.5" />
-                <span>{isEditing ? "Cập nhật bài viết" : "Xuất bản bài viết"}</span>
-              </>
-            )}
+            {isPub ? "Xuất bản" : "Lưu nháp"}
           </button>
-        </div>
-      </div>
+        </span>
+      </header>
 
-      {error && (
-        <div className="p-3 rounded-sm border border-red-200 bg-red-50 text-xs text-red-700">
-          {error}
-        </div>
-      )}
-
-      {/* 2 Columns Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Main Content (8 cols) */}
-        <div className="lg:col-span-8 space-y-5">
-          {/* Title */}
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold text-stone-800">
-              Tiêu đề bài viết *
-            </label>
-            <input
-              type="text"
+      {/* Editor Body Grid: Main Content & Aside Settings */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] flex-1">
+        {/* Left Column: Writing Area */}
+        <div className="p-8 sm:px-12 sm:py-10 pb-20 flex justify-center">
+          <div className="w-full max-w-[700px] flex flex-col gap-4">
+            {/* Title Textarea */}
+            <textarea
+              rows={2}
               value={title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              placeholder="VD: Tổng quan thị trường Crypto và chu kỳ mới năm 2026..."
-              required
-              className="w-full rounded-sm border border-stone-300 bg-white px-3.5 py-2.5 text-base font-semibold text-stone-900 placeholder-stone-400 outline-none focus:border-stone-800"
+              placeholder="Câu hỏi của bài, VD: VCB có đắt sau báo cáo quý 2?"
+              className="w-full border-0 outline-none resize-none font-serif font-bold text-[32px] sm:text-[38px] leading-[1.15] tracking-[-0.015em] text-[#16181D] bg-transparent p-0 placeholder:text-[#9A9EA5]"
             />
+
+            {/* Excerpt Textarea */}
+            <textarea
+              rows={2}
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              placeholder="Câu trả lời ngắn cho câu hỏi của bài, 1–2 câu"
+              className="w-full border-0 outline-none resize-none font-serif text-[19px] sm:text-[20px] leading-[1.45] text-[#2B2F36] bg-transparent p-0 placeholder:text-[#9A9EA5]"
+            />
+
+            {/* TipTap Rich Editor */}
+            <div className="pt-2">
+              <TipTapEditor content={content} onChange={setContent} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Aside: Settings & Checklist */}
+        <aside className="border-t lg:border-t-0 lg:border-left border-[#E3E1DC] bg-[#F1EEE8] p-5 flex flex-col gap-5.5 text-[14px]">
+          {/* Status Toggle */}
+          <div className="flex flex-col gap-2">
+            <strong className="text-[#16181D]">Trạng thái</strong>
+            <div className="flex border border-[#C9C5BC] rounded-[3px] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setIsPub(false)}
+                className={`flex-1 border-0 p-2 text-[14px] font-semibold cursor-pointer transition-colors ${
+                  !isPub
+                    ? "bg-[#16181D] !text-white"
+                    : "bg-[#FCFBF8] text-[#2B2F36]"
+                }`}
+              >
+                Bản nháp
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPub(true)}
+                className={`flex-1 border-0 border-l border-[#C9C5BC] p-2 text-[14px] font-semibold cursor-pointer transition-colors ${
+                  isPub
+                    ? "bg-[#16181D] !text-white"
+                    : "bg-[#FCFBF8] text-[#2B2F36]"
+                }`}
+              >
+                Xuất bản
+              </button>
+            </div>
           </div>
 
-          {/* Slug */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[11px] text-stone-500">
-              <span>Đường dẫn URL SEO (Slug)</span>
-              {!isSlugManual && <span className="text-blue-700">Tự động sinh</span>}
+          {/* Pre-Publish Checklist (Gatekeeper) */}
+          {isPub && (
+            <div
+              className={`flex flex-col gap-2 p-3.5 bg-[#FCFBF8] border rounded-[2px] ${
+                allChecked ? "border-[#E3E1DC]" : "border-[#D9B26A]"
+              }`}
+            >
+              <strong className="text-[#16181D]">
+                Kiểm tra trước khi xuất bản
+              </strong>
+              <div className="flex flex-col gap-2">
+                {checkLabels.map((lbl, idx) => (
+                  <label
+                    key={idx}
+                    className="flex gap-2 items-start text-[13px] leading-[1.45] cursor-pointer text-[#2B2F36]"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checks[idx]}
+                      onChange={() => toggleCheck(idx)}
+                      className="mt-0.5 rounded-[2px]"
+                    />
+                    <span>{lbl}</span>
+                  </label>
+                ))}
+              </div>
+              <span
+                className={`text-[12px] font-semibold mt-1 ${
+                  allChecked ? "text-[#0A7A45]" : "text-[#8A5A00]"
+                }`}
+              >
+                {allChecked
+                  ? "✓ Đủ điều kiện xuất bản."
+                  : `Còn ${nLeft} mục chưa đánh dấu.`}
+              </span>
             </div>
-            <div className="flex items-center rounded-sm border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-mono text-stone-500">
-              <span className="shrink-0">/posts/</span>
+          )}
+
+          {/* Category Selector */}
+          <label className="flex flex-col gap-2">
+            <strong className="text-[#16181D]">Chuyên mục</strong>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="border border-[#C9C5BC] bg-[#FCFBF8] p-2.5 text-[14px] rounded-[3px] outline-none text-[#16181D]"
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c.slug} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Cover Image */}
+          <div className="flex flex-col gap-2">
+            <strong className="text-[#16181D]">Ảnh bìa</strong>
+            <div className="aspect-[1200/630] border border-dashed border-[#B8B4AA] bg-[#FCFBF8] flex items-center justify-center text-center text-[#5E636B] text-[13px] p-3 rounded-[2px]">
+              Kéo ảnh vào đây hoặc bấm để chọn
+              <br />
+              Khuyến nghị 1200 × 630
+            </div>
+          </div>
+
+          {/* Slug input */}
+          <label className="flex flex-col gap-2">
+            <strong className="text-[#16181D]">Đường dẫn</strong>
+            <span className="flex border border-[#C9C5BC] bg-[#FCFBF8] rounded-[3px] text-[13px] overflow-hidden">
+              <span className="py-2 pl-2.5 text-[#5E636B]">/posts/</span>
               <input
                 type="text"
                 value={slug}
-                onChange={(e) => {
-                  setIsSlugManual(true);
-                  setSlug(e.target.value);
-                }}
-                className="w-full bg-transparent text-stone-900 outline-none pl-1"
+                onChange={(e) => setSlug(e.target.value)}
+                className="border-0 outline-none py-2 px-1 text-[13px] flex-1 min-w-0 bg-transparent text-[#16181D]"
               />
+            </span>
+          </label>
+
+          {/* Sources list */}
+          <div className="flex flex-col gap-2">
+            <span className="flex justify-between items-center">
+              <strong className="text-[#16181D]">Nguồn số liệu</strong>
+              <span className="text-[13px] text-[#5E636B]">Hiện cuối bài</span>
+            </span>
+            <div className="flex flex-col gap-1.5">
+              {sources.map((s) => (
+                <div
+                  key={s.n}
+                  className="flex gap-2 p-2 px-2.5 bg-[#FCFBF8] border border-[#E3E1DC] text-[13px] leading-[1.4] rounded-[2px]"
+                >
+                  <span className="font-bold text-[#133A63]">[{s.n}]</span>
+                  <span className="flex flex-col min-w-0">
+                    <span className="font-semibold text-[#16181D]">{s.label}</span>
+                    <span className="text-[#5E636B] truncate">{s.url}</span>
+                  </span>
+                </div>
+              ))}
             </div>
+            <button
+              type="button"
+              onClick={handleAddSource}
+              className="border border-dashed border-[#B8B4AA] bg-transparent p-2 text-[13px] font-semibold cursor-pointer text-[#2B2F36] hover:bg-[#FCFBF8] rounded-[3px] transition-colors"
+            >
+              + Thêm nguồn (BCTC, HOSE, SSC…)
+            </button>
           </div>
 
-          {/* Excerpt */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-stone-800 flex items-center gap-1.5">
-                <Share2 className="w-3.5 h-3.5 text-blue-700" />
-                <span>Tóm tắt bài viết (Mô tả Facebook Preview)</span>
-              </label>
-              <span className="text-[11px] text-stone-400 font-mono">
-                {excerpt.length}/250 ký tự
-              </span>
-            </div>
-            <textarea
-              rows={3}
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Nhập 1-2 câu tóm tắt nội dung để hiển thị trên Facebook Preview..."
-              className="w-full rounded-sm border border-stone-300 bg-white p-3 text-xs text-stone-800 placeholder-stone-400 outline-none focus:border-stone-800 resize-none leading-relaxed"
+          {/* AI Disclosure check */}
+          <label className="flex gap-2.5 items-start cursor-pointer">
+            <input
+              type="checkbox"
+              checked={aiUsed}
+              onChange={() => setAiUsed(!aiUsed)}
+              className="mt-1 rounded-[2px]"
             />
-          </div>
+            <span className="flex flex-col gap-0.5">
+              <strong className="text-[#16181D]">Có dùng AI soạn nháp</strong>
+              <span className="text-[#5E636B] text-[13px]">
+                Tự ghi chú &quot;Nháp có hỗ trợ AI&quot; ở phần tác giả. Miễn trừ
+                trách nhiệm luôn được chèn cuối bài.
+              </span>
+            </span>
+          </label>
 
-          {/* TipTap Editor */}
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold text-stone-800 flex items-center gap-1.5">
-              <FileCheck className="w-3.5 h-3.5 text-stone-600" />
-              <span>Nội dung chi tiết bài viết</span>
-            </label>
-            <TipTapEditor content={content} onChange={setContent} />
-          </div>
-        </div>
+          {/* Featured on Home */}
+          <label className="flex gap-2.5 items-start cursor-pointer">
+            <input
+              type="checkbox"
+              checked={featured}
+              onChange={() => setFeatured(!featured)}
+              className="mt-1 rounded-[2px]"
+            />
+            <span className="flex flex-col gap-0.5">
+              <strong className="text-[#16181D]">Tiêu điểm trang chủ</strong>
+              <span className="text-[#5E636B] text-[13px]">
+                Hiện ở ô &quot;Bài mới nhất&quot; trên trang chủ.
+              </span>
+            </span>
+          </label>
 
-        {/* Right Column: Settings & Media (4 cols) */}
-        <div className="lg:col-span-4 space-y-5">
-          {/* Cover Image */}
-          <div className="border border-stone-200 bg-white p-4 rounded-sm space-y-2">
-            <label className="block text-xs font-semibold text-stone-800">
-              Ảnh bìa bài viết
-            </label>
-            <CoverImageUploader value={coverImage} onChange={setCoverImage} />
-          </div>
-
-          {/* Settings Box */}
-          <div className="border border-stone-200 bg-white p-4 rounded-sm space-y-4">
-            <h3 className="text-xs font-semibold text-stone-800 uppercase tracking-wider pb-2 border-b border-stone-100">
-              Cài đặt Xuất bản
-            </h3>
-
-            {/* Category Select */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-stone-600">
-                Chuyên mục *
-              </label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full rounded-sm border border-stone-300 bg-white px-3 py-2 text-xs text-stone-800 outline-none focus:border-stone-800 cursor-pointer"
+          {/* Facebook Live Preview Card */}
+          <div className="flex flex-col gap-2">
+            <span className="flex justify-between items-center">
+              <strong className="text-[#16181D]">Xem trước Facebook</strong>
+              <span
+                className={`text-[13px] ${
+                  exLen > 160 ? "text-[#C0271D] font-bold" : "text-[#5E636B]"
+                }`}
               >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Select */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-stone-600">
-                Trạng thái hiển thị
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setStatus(PostStatus.PUBLISHED)}
-                  className={`py-1.5 px-3 rounded-sm text-xs font-medium border transition-colors cursor-pointer ${
-                    status === PostStatus.PUBLISHED
-                      ? "bg-stone-900 border-stone-900 text-white"
-                      : "bg-white border-stone-300 text-stone-600 hover:bg-stone-50"
-                  }`}
-                >
-                  Xuất bản ngay
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatus(PostStatus.DRAFT)}
-                  className={`py-1.5 px-3 rounded-sm text-xs font-medium border transition-colors cursor-pointer ${
-                    status === PostStatus.DRAFT
-                      ? "bg-stone-900 border-stone-900 text-white"
-                      : "bg-white border-stone-300 text-stone-600 hover:bg-stone-50"
-                  }`}
-                >
-                  Lưu bản nháp
-                </button>
+                {exLen}/160 ký tự
+              </span>
+            </span>
+            <div className="bg-[#FCFBF8] border border-[#DADDE1] rounded-[2px] overflow-hidden">
+              <div className="aspect-[1200/630] bg-[#E7E4DD] flex items-center justify-center text-[#5E636B] text-[12px]">
+                Ảnh bìa 1200 × 630
+              </div>
+              <div className="p-2.5 sm:p-3 flex flex-col gap-1 bg-[#F0F2F5]">
+                <span className="text-[12px] text-[#65676B] uppercase font-medium">
+                  finpulse.vn
+                </span>
+                <span className="text-[15px] font-semibold text-[#050505] leading-[1.3]">
+                  {title}
+                </span>
+                <span className="text-[13px] text-[#65676B] leading-[1.35]">
+                  {exShort}
+                </span>
               </div>
             </div>
-
-            {/* Featured Post Toggle */}
-            <div className="pt-2 border-t border-stone-100">
-              <label className="flex items-center justify-between cursor-pointer">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-medium text-stone-800">
-                    Bài viết tiêu điểm (Hero)
-                  </span>
-                  <p className="text-[10px] text-stone-400">
-                    Hiển thị ở vị trí lớn nhất đầu trang chủ
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={featured}
-                  onChange={(e) => setFeatured(e.target.checked)}
-                  className="w-4 h-4 rounded text-stone-900 focus:ring-stone-800 border-stone-300 cursor-pointer"
-                />
-              </label>
-            </div>
           </div>
-        </div>
+        </aside>
       </div>
-    </form>
+    </div>
   );
 }

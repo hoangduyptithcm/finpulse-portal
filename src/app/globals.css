@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F7F5F0;
+  --foreground: #16181D;
+  --color-paper: #F7F5F0;
+  --color-card: #FCFBF8;
+  --color-muted-card: #EEEAE2;
+  --color-border-dark: #16181D;
+  --color-border-light: #E3E1DC;
+  --color-border-input: #C9C5BC;
+  --color-ink: #16181D;
+  --color-body: #2B2F36;
+  --color-subtle: #5E636B;
+  --color-navy: #133A63;
+  --color-navy-hover: #0C2A4A;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-sans), 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-serif: var(--font-serif), 'Source Serif 4', Georgia, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: #F7F5F0;
+  color: #16181D;
+  font-family: var(--font-sans), 'Be Vietnam Pro', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Use :where() so that default link styles have zero specificity and won't override Tailwind classes like text-white */
+:where(a) {
+  color: #133A63;
+  text-decoration: none;
+}
+
+:where(a:hover) {
+  color: #0C2A4A;
+  text-decoration: underline;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input, textarea, select, button {
+  font-family: inherit;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #C9C5BC;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }

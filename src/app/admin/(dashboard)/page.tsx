@@ -1,219 +1,108 @@
-import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  FileText,
-  Eye,
-  CheckCircle2,
-  Clock,
-  Plus,
-  ArrowUpRight,
-} from "lucide-react";
+import { ADMIN_OVERVIEW_DATA } from "@/data/portalData";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Tổng quan Quản trị | FinPulse",
+  description: "Trang tổng quan hệ thống và số liệu đọc tuần của FinPulse",
+};
 
-export default async function AdminDashboardPage() {
-  const [totalPosts, publishedPosts, draftPosts, totalViewsResult, recentPosts] =
-    await Promise.all([
-      prisma.post.count(),
-      prisma.post.count({ where: { status: "PUBLISHED" } }),
-      prisma.post.count({ where: { status: "DRAFT" } }),
-      prisma.post.aggregate({ _sum: { views: true } }),
-      prisma.post.findMany({
-        take: 8,
-        orderBy: { createdAt: "desc" },
-        include: { category: true, author: true },
-      }),
-    ]);
-
-  const totalViews = totalViewsResult._sum.views || 0;
+export default function AdminDashboardPage() {
+  const { stats, drafts, topWeek } = ADMIN_OVERVIEW_DATA;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200">
-        <div>
-          <h2 className="font-serif text-2xl font-bold tracking-tight text-stone-900">
-            Tổng quan Hệ thống
-          </h2>
-          <p className="text-xs text-stone-500 mt-1">
-            Số liệu bài viết, lượt xem và các hoạt động xuất bản tin tức trên FinPulse
-          </p>
-        </div>
-
-        <Link
-          href="/admin/posts/new"
-          className="inline-flex items-center gap-1.5 rounded-sm bg-stone-900 hover:bg-stone-800 px-4 py-2 text-xs font-medium text-white transition-colors self-start sm:self-auto cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Soạn bài mới</span>
-        </Link>
+    <div
+      data-screen-label="05 Tổng quan"
+      className="max-w-[1080px] flex flex-col gap-8"
+    >
+      {/* Welcome Header */}
+      <div className="flex flex-col gap-1">
+        <h1 className="m-0 text-[26px] font-bold text-[#16181D]">
+          Chào buổi sáng, Minh Anh
+        </h1>
+        <p className="m-0 text-[15px] text-[#5E636B]">
+          Thứ Năm, 24/09/2026 · 2 bản nháp đang chờ bạn hoàn thiện.
+        </p>
       </div>
 
-      {/* Metric Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1 */}
-        <div className="border border-stone-200 bg-white p-5 rounded-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-stone-500 font-medium">
-            <span>Tổng bài viết</span>
-            <FileText className="w-4 h-4 text-stone-400" />
-          </div>
-          <div>
-            <div className="font-serif text-2xl font-bold text-stone-900">{totalPosts}</div>
-            <p className="text-[11px] text-stone-400 mt-0.5">
-              {publishedPosts} bài đã xuất bản
-            </p>
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="border border-stone-200 bg-white p-5 rounded-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-stone-500 font-medium">
-            <span>Đã xuất bản</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div>
-            <div className="font-serif text-2xl font-bold text-emerald-700">{publishedPosts}</div>
-            <p className="text-[11px] text-stone-400 mt-0.5">
-              Đang hiển thị cho độc giả
-            </p>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="border border-stone-200 bg-white p-5 rounded-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-stone-500 font-medium">
-            <span>Bản nháp (Draft)</span>
-            <Clock className="w-4 h-4 text-amber-600" />
-          </div>
-          <div>
-            <div className="font-serif text-2xl font-bold text-amber-700">{draftPosts}</div>
-            <p className="text-[11px] text-stone-400 mt-0.5">
-              Đang biên tập
-            </p>
-          </div>
-        </div>
-
-        {/* Card 4 */}
-        <div className="border border-stone-200 bg-white p-5 rounded-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-stone-500 font-medium">
-            <span>Tổng lượt xem</span>
-            <Eye className="w-4 h-4 text-stone-400" />
-          </div>
-          <div>
-            <div className="font-serif text-2xl font-bold text-stone-900">{totalViews.toLocaleString("vi-VN")}</div>
-            <p className="text-[11px] text-stone-400 mt-0.5">
-              Lượt truy cập bài viết
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Posts Table */}
-      <div className="border border-stone-200 bg-white rounded-sm overflow-hidden">
-        <div className="p-4 border-b border-stone-200 flex items-center justify-between">
-          <h3 className="font-serif font-bold text-sm text-stone-900">
-            Bài viết gần đây
-          </h3>
-
-          <Link
-            href="/admin/posts"
-            className="text-xs font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1 transition-colors"
+      {/* 4 Stat Cards Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 bg-[#FCFBF8] border border-[#E3E1DC]">
+        {stats.map((s, idx) => (
+          <div
+            key={s.label}
+            className={`p-4.5 sm:p-5 flex flex-col gap-1 ${
+              idx < stats.length - 1 ? "border-r border-[#E3E1DC]" : ""
+            }`}
           >
-            <span>Xem tất cả bài</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
+            <span className="text-[13px] text-[#5E636B]">{s.label}</span>
+            <span className="text-[28px] font-bold tabular-nums text-[#16181D] leading-tight">
+              {s.value}
+            </span>
+            <span
+              className="text-[13px] font-medium"
+              style={{ color: s.noteColor }}
+            >
+              {s.note}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* 2-Column Grid: Drafts & Top Views */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left: Bản nháp của bạn */}
+        <div className="bg-[#FCFBF8] border border-[#E3E1DC] rounded-[2px]">
+          <div className="flex justify-between items-center px-5 py-3.5 border-b border-[#E3E1DC]">
+            <strong className="text-[15px] text-[#16181D]">
+              Bản nháp của bạn
+            </strong>
+            <Link
+              href="/admin/posts"
+              className="text-[14px] text-[#133A63] hover:underline"
+            >
+              Tất cả
+            </Link>
+          </div>
+          <div className="flex flex-col">
+            {drafts.map((d) => (
+              <Link
+                key={d.title}
+                href="/admin/posts/new"
+                className="flex flex-col gap-1 px-5 py-3.5 border-b border-[#EFEDE8] last:border-none text-[#16181D] hover:bg-[#F1EEE8] transition-colors no-underline group"
+              >
+                <span className="text-[15px] font-semibold group-hover:text-[#133A63]">
+                  {d.title}
+                </span>
+                <span className="text-[13px] text-[#5E636B]">
+                  {d.cat} · Sửa lần cuối {d.time}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-stone-200 bg-stone-50/70 text-stone-500 font-medium text-[11px]">
-              <tr>
-                <th className="py-3 px-4">Bài viết</th>
-                <th className="py-3 px-4">Chuyên mục</th>
-                <th className="py-3 px-4">Trạng thái</th>
-                <th className="py-3 px-4 text-center">Lượt đọc</th>
-                <th className="py-3 px-4">Ngày tạo</th>
-                <th className="py-3 px-4 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {recentPosts.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-stone-400">
-                    Chưa có bài viết nào.
-                  </td>
-                </tr>
-              ) : (
-                recentPosts.map((post) => (
-                  <tr key={post.id} className="hover:bg-stone-50/60 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        {post.coverImage ? (
-                          <div className="relative w-12 h-8 rounded-sm overflow-hidden shrink-0 bg-stone-100">
-                            <Image
-                              src={post.coverImage}
-                              alt={post.title}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ) : null}
-                        <div className="max-w-md">
-                          <p className="font-medium text-stone-900 truncate">
-                            {post.title}
-                          </p>
-                          <p className="text-[10px] text-stone-400 font-mono truncate">
-                            /posts/{post.slug}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-stone-600 text-xs">
-                        {post.category?.name || "Chưa phân loại"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {post.status === "PUBLISHED" ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-medium">
-                          Đã xuất bản
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-sm bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-medium">
-                          Bản nháp
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-center font-mono text-stone-700">
-                      {post.views}
-                    </td>
-                    <td className="py-3 px-4 text-stone-500">
-                      {new Date(post.createdAt).toLocaleDateString("vi-VN")}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/admin/posts/edit/${post.id}`}
-                          className="px-2 py-1 rounded-sm bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs transition-colors"
-                        >
-                          Sửa
-                        </Link>
-                        <Link
-                          href={`/posts/${post.slug}`}
-                          target="_blank"
-                          className="p-1 rounded-sm hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors"
-                          title="Xem bài"
-                        >
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        {/* Right: Đọc nhiều 7 ngày qua */}
+        <div className="bg-[#FCFBF8] border border-[#E3E1DC] rounded-[2px]">
+          <div className="flex justify-between items-center px-5 py-3.5 border-b border-[#E3E1DC]">
+            <strong className="text-[15px] text-[#16181D]">
+              Đọc nhiều 7 ngày qua
+            </strong>
+            <span className="text-[13px] text-[#5E636B]">Lượt xem</span>
+          </div>
+          <div className="flex flex-col">
+            {topWeek.map((t) => (
+              <div
+                key={t.title}
+                className="flex justify-between items-center gap-4 px-5 py-3 border-b border-[#EFEDE8] last:border-none text-[14px]"
+              >
+                <span className="font-medium text-[#16181D] leading-[1.4]">
+                  {t.title}
+                </span>
+                <span className="tabular-nums font-semibold text-[#16181D]">
+                  {t.views}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

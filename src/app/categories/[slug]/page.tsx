@@ -1,107 +1,114 @@
-import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import type { Metadata } from "next";
 import TopBar from "@/components/public/TopBar";
 import Navbar from "@/components/public/Navbar";
-import MarketTicker from "@/components/public/MarketTicker";
 import Footer from "@/components/public/Footer";
-import AdminBottomBar from "@/components/public/AdminBottomBar";
-
-export const dynamic = "force-dynamic";
+import Top10Widget from "@/components/public/Top10Widget";
+import { CATEGORIES, CATEGORY_RIVER } from "@/data/portalData";
+import { notFound } from "next/navigation";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CategoryPageProps) {
   const { slug } = await params;
-  const category = await prisma.category.findUnique({
-    where: { slug },
-  });
-
-  if (!category) {
-    return { title: "Chuyên mục không tồn tại | FinPulse" };
-  }
-
+  const cat = CATEGORIES.find((c) => c.slug === slug);
+  if (!cat) return { title: "Chuyên mục | FinPulse" };
   return {
-    title: `${category.name} | FinPulse`,
-    description: category.description || `Bản tin tài chính chuyên mục ${category.name}`,
+    title: `${cat.name} | FinPulse`,
+    description: cat.desc,
   };
 }
 
-export default async function CategoryDetailPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
+  const currentCategory = CATEGORIES.find((c) => c.slug === slug);
 
-  const [category, allCategories, posts] = await Promise.all([
-    prisma.category.findUnique({
-      where: { slug },
-    }),
-    prisma.category.findMany({ orderBy: { order: "asc" } }),
-    prisma.post.findMany({
-      where: {
-        category: { slug },
-        status: "PUBLISHED",
-      },
-      orderBy: { createdAt: "desc" },
-      include: { author: true, category: true },
-    }),
-  ]);
-
-  if (!category) {
+  if (!currentCategory) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen bg-white text-stone-900 font-sans selection:bg-stone-200">
+    <div className="min-h-screen flex flex-col bg-[#F7F5F0] text-[#16181D]">
+      {/* 1. Top Bar */}
       <TopBar />
-      <Navbar categories={allCategories} />
-      <MarketTicker />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* 2. Navbar */}
+      <Navbar />
+
+      {/* 3. Main Category View (Screen 02) */}
+      <main className="max-w-[1240px] mx-auto px-6 py-9 pb-16 w-full flex flex-col gap-7">
         {/* Category Header */}
-        <div className="border-b border-stone-200 pb-4 space-y-1">
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900">
-            {category.name}
+        <div className="flex flex-col gap-2 pb-5 border-b border-[#E3E1DC]">
+          <h1 className="m-0 font-serif font-bold text-[36px] sm:text-[40px] tracking-[-0.015em] text-[#16181D]">
+            {currentCategory.name}
           </h1>
-          {category.description && (
-            <p className="text-xs text-stone-600 max-w-2xl">{category.description}</p>
-          )}
-          <p className="text-[11px] text-stone-400 font-sans">{posts.length} bài viết</p>
+          <p className="m-0 text-[16px] text-[#2B2F36] max-w-[640px] leading-[1.55]">
+            {currentCategory.desc}
+          </p>
+          <div className="flex gap-5 mt-2 text-[14px] font-semibold">
+            <span className="text-[#16181D] border-b-2 border-[#16181D] pb-1.5 cursor-pointer">
+              Mới nhất
+            </span>
+            <span className="text-[#5E636B] hover:text-[#16181D] cursor-pointer transition-colors">
+              Được đọc nhiều
+            </span>
+            <span className="text-[#5E636B] hover:text-[#16181D] cursor-pointer transition-colors">
+              Chuỗi bài
+            </span>
+          </div>
         </div>
 
-        {/* List of articles */}
-        {posts.length === 0 ? (
-          <div className="py-12 text-center text-stone-500 text-xs">
-            Chưa có bài viết nào trong chuyên mục này.
-          </div>
-        ) : (
-          <div className="divide-y divide-stone-200 max-w-4xl">
-            {posts.map((post) => (
-              <article key={post.id} className="py-4 space-y-1.5">
-                <Link href={`/posts/${post.slug}`} className="group block space-y-1">
-                  <h2 className="font-serif text-lg font-bold text-stone-900 group-hover:text-blue-700 transition-colors">
-                    {post.title}
-                  </h2>
-                  {post.excerpt && (
-                    <p className="text-xs text-stone-600 leading-relaxed line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                  )}
-                  <p className="text-[11px] text-stone-400 font-sans">
-                    {post.author?.name || "Minh Anh"} · {new Date(post.createdAt).toLocaleDateString("vi-VN")} · {post.views} lượt đọc
-                  </p>
-                </Link>
-              </article>
+        {/* Content Layout: River list & Sidebar */}
+        <div className="flex flex-wrap gap-12 items-start">
+          {/* Article River list */}
+          <div className="flex-[2_1_520px] flex flex-col min-w-0">
+            {CATEGORY_RIVER.map((p) => (
+              <Link
+                key={p.slug}
+                href={`/posts/${p.slug}`}
+                className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_150px] gap-4 sm:gap-6 py-5.5 border-b border-[#E3E1DC] text-[#16181D] hover:no-underline group"
+              >
+                <span className="flex flex-col gap-1.5">
+                  <span className="text-[13px] text-[#5E636B]">
+                    {p.date} · {p.read}
+                  </span>
+                  <span className="font-serif font-bold text-[20px] sm:text-[22px] leading-[1.25] group-hover:text-[#133A63] transition-colors">
+                    {p.title}
+                  </span>
+                  <span className="text-[15px] leading-[1.55] text-[#2B2F36]">
+                    {p.dek}
+                  </span>
+                </span>
+
+                <span className="flex flex-col justify-center gap-1 p-3.5 sm:px-4 bg-[#EEEAE2] self-start rounded-[2px]">
+                  <span className="text-[22px] font-bold tabular-nums leading-[1.1] text-[#16181D]">
+                    {p.stat}
+                  </span>
+                  <span className="text-[12px] text-[#2B2F36] leading-[1.4]">
+                    {p.statLabel}
+                  </span>
+                </span>
+              </Link>
             ))}
+
+            <button
+              type="button"
+              className="mt-6 self-center border border-[#16181D] bg-[#FCFBF8] hover:bg-[#F0EEE9] px-7 py-2.5 text-[15px] font-semibold cursor-pointer rounded-[2px] transition-colors text-[#16181D]"
+            >
+              Xem thêm bài
+            </button>
           </div>
-        )}
+
+          {/* Sidebar */}
+          <aside className="flex-1 basis-[280px] min-w-0 flex flex-col gap-8">
+            <Top10Widget />
+          </aside>
+        </div>
       </main>
 
+      {/* 4. Footer */}
       <Footer />
-      <AdminBottomBar />
     </div>
   );
 }

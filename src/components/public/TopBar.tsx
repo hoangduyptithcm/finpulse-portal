@@ -1,49 +1,26 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 export default function TopBar() {
-  const [currentDate, setCurrentDate] = useState("Thứ Năm, 24/09/2026");
-
-  useEffect(() => {
-    try {
-      const now = new Date();
-      const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
-      const dayName = days[now.getDay()];
-      const day = String(now.getDate()).padStart(2, "0");
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const year = now.getFullYear();
-      setCurrentDate(`${dayName}, ${day}/${month}/${year}`);
-    } catch {
-      // Fallback
-    }
-  }, []);
-
   return (
-    <div className="border-b border-stone-200 bg-white text-stone-600 text-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between">
-        <span className="font-serif text-[11px] text-stone-500">
-          {currentDate}
+    <div className="bg-[#EEEAE2] text-[13px] text-[#2B2F36] border-b border-[#E3E1DC]">
+      <div className="max-w-[1240px] mx-auto px-6 min-h-[34px] py-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <span className="font-semibold">
+          Quan điểm cá nhân – không phải cơ quan báo chí
         </span>
-
-        <div className="flex items-center space-x-4 text-[11px]">
+        <span className="flex items-center gap-5">
+          <Link
+            href="/about"
+            className="text-[#2B2F36] hover:text-[#133A63] transition-colors"
+          >
+            Giới thiệu và miễn trừ
+          </Link>
           <a
             href="#newsletter"
-            className="hover:text-stone-900 transition-colors"
+            className="text-[#2B2F36] hover:text-[#133A63] transition-colors"
           >
-            Bản tin email
+            Nhận bài qua email
           </a>
-          <span className="text-stone-300">•</span>
-          <a
-            href="https://facebook.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-blue-600 transition-colors font-medium"
-          >
-            Fanpage
-          </a>
-        </div>
+        </span>
       </div>
     </div>
   );

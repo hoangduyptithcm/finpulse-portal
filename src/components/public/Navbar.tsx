@@ -1,123 +1,106 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Search, Menu, X } from "lucide-react";
+import { CATEGORIES } from "@/data/portalData";
+import { Search, X } from "lucide-react";
 
-interface CategoryNav {
-  id: string;
-  name: string;
-  slug: string;
-}
-
-export default function Navbar({ categories }: { categories: CategoryNav[] }) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Navbar() {
+  const pathname = usePathname();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <header className="border-b border-stone-200 bg-white sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14">
-          {/* Brand Logo */}
-          <div className="flex items-center gap-8">
-            <Link href="/" className="font-serif text-2xl font-bold tracking-tight text-stone-900 hover:opacity-90">
-              FinPulse
-            </Link>
+    <header className="border-b border-[#16181D] bg-[#F7F5F0] sticky top-0 z-20">
+      <div className="max-w-[1240px] mx-auto px-6 flex items-center justify-between gap-6 sm:gap-8 h-[66px]">
+        {/* Brand */}
+        <Link
+          href="/"
+          className="flex flex-col text-[#16181D] no-underline flex-shrink-0 group"
+        >
+          <span className="font-serif font-bold text-[26px] tracking-[-0.02em] leading-none group-hover:text-[#133A63] transition-colors">
+            FinPulse
+          </span>
+          <span className="text-[12px] text-[#5E636B] mt-[3px]">
+            Sổ phân tích của Minh Anh
+          </span>
+        </Link>
 
-            {/* Desktop Categories Menu */}
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-stone-700">
-              <Link href="/categories/crypto" className="hover:text-stone-950 transition-colors">
-                Crypto
+        {/* Navigation Categories */}
+        <nav className="hidden md:flex items-center gap-[22px] flex-1 overflow-x-auto scrollbar-none whitespace-nowrap">
+          {CATEGORIES.map((cat) => {
+            const href = `/categories/${cat.slug}`;
+            const isActive = pathname === href;
+            return (
+              <Link
+                key={cat.slug}
+                href={href}
+                className={`text-[15px] font-semibold text-[#16181D] py-[21px] transition-colors border-b-[3px] hover:text-[#133A63] hover:no-underline ${
+                  isActive ? "border-[#133A63]" : "border-transparent"
+                }`}
+              >
+                {cat.name}
               </Link>
-              <Link href="/categories/chung-khoan" className="hover:text-stone-950 transition-colors">
-                Chứng khoán
-              </Link>
-              <Link href="/categories/vi-mo" className="hover:text-stone-950 transition-colors">
-                Vĩ mô
-              </Link>
-              <Link href="/categories/kien-thuc-dau-tu" className="hover:text-stone-950 transition-colors">
-                Kiến thức đầu tư
-              </Link>
-            </nav>
-          </div>
+            );
+          })}
+        </nav>
 
-          {/* Right: Search */}
-          <div className="flex items-center gap-3">
-            {showSearch ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm tin tức, cổ phiếu, crypto..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="rounded-lg border border-stone-300 px-3 py-1 text-xs text-stone-900 outline-none focus:border-stone-800 w-48 sm:w-64"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSearch(false)}
-                  className="text-stone-400 hover:text-stone-700"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
+        {/* Search & Actions */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {showSearch ? (
+            <div className="flex items-center bg-[#FCFBF8] border border-[#16181D] rounded-[2px] px-2 py-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm mã cổ phiếu, bài viết..."
+                autoFocus
+                className="text-[14px] bg-transparent outline-none w-48 sm:w-60 text-[#16181D] placeholder:text-[#5E636B]"
+              />
               <button
                 type="button"
-                onClick={() => setShowSearch(true)}
-                className="flex items-center gap-1.5 text-xs text-stone-600 hover:text-stone-950 cursor-pointer font-medium"
+                onClick={() => {
+                  setShowSearch(false);
+                  setSearchQuery("");
+                }}
+                className="text-[#5E636B] hover:text-[#16181D] p-1"
+                aria-label="Đóng tìm kiếm"
               >
-                <Search className="w-3.5 h-3.5" />
-                <span>Tìm kiếm</span>
+                <X className="w-4 h-4" />
               </button>
-            )}
-
-            {/* Mobile menu trigger */}
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-1.5 text-stone-600 hover:text-stone-950"
+              onClick={() => setShowSearch(true)}
+              className="border-0 bg-transparent cursor-pointer text-[14px] font-semibold text-[#16181D] hover:text-[#133A63] py-2 flex items-center gap-1.5 transition-colors"
             >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <Search className="w-4 h-4" />
+              <span>Tìm kiếm</span>
             </button>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
-      {isOpen && (
-        <div className="md:hidden border-t border-stone-200 bg-white px-4 py-3 space-y-2 text-sm font-medium text-stone-800">
-          <Link
-            href="/categories/crypto"
-            onClick={() => setIsOpen(false)}
-            className="block py-1.5 hover:text-stone-950"
-          >
-            Crypto
-          </Link>
-          <Link
-            href="/categories/chung-khoan"
-            onClick={() => setIsOpen(false)}
-            className="block py-1.5 hover:text-stone-950"
-          >
-            Chứng khoán
-          </Link>
-          <Link
-            href="/categories/vi-mo"
-            onClick={() => setIsOpen(false)}
-            className="block py-1.5 hover:text-stone-950"
-          >
-            Vĩ mô
-          </Link>
-          <Link
-            href="/categories/kien-thuc-dau-tu"
-            onClick={() => setIsOpen(false)}
-            className="block py-1.5 hover:text-stone-950"
-          >
-            Kiến thức đầu tư
-          </Link>
-        </div>
-      )}
+      {/* Mobile nav row */}
+      <div className="md:hidden flex items-center gap-4 overflow-x-auto px-6 py-2 border-t border-[#E3E1DC] scrollbar-none whitespace-nowrap bg-[#F7F5F0]">
+        {CATEGORIES.map((cat) => {
+          const href = `/categories/${cat.slug}`;
+          const isActive = pathname === href;
+          return (
+            <Link
+              key={cat.slug}
+              href={href}
+              className={`text-[13px] font-semibold text-[#16181D] py-1 border-b-2 ${
+                isActive ? "border-[#133A63] text-[#133A63]" : "border-transparent"
+              }`}
+            >
+              {cat.name}
+            </Link>
+          );
+        })}
+      </div>
     </header>
   );
 }

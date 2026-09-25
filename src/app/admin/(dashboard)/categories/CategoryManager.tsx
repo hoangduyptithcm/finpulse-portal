@@ -1,191 +1,171 @@
 "use client";
 
 import { useState } from "react";
-import { createCategory, deleteCategory } from "@/app/admin/actions";
-import { Plus, Trash2, Loader2, FolderTree } from "lucide-react";
+import { CATEGORIES } from "@/data/portalData";
 
-interface CategoryItem {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  order: number;
-  _count: { posts: number };
-}
-
-export default function CategoryManager({
-  initialCategories,
-}: {
-  initialCategories: CategoryItem[];
-}) {
+export default function CategoryManager() {
+  const [categories, setCategories] = useState(
+    CATEGORIES.map((c, i) => ({
+      order: i + 1,
+      name: c.name,
+      slug: c.slug,
+      count: c.count,
+    }))
+  );
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [order, setOrder] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [desc, setDesc] = useState("");
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    try {
-      setIsSubmitting(true);
-      setError(null);
-      await createCategory({ name, description, order: Number(order) });
-      setName("");
-      setDescription("");
-      setOrder(0);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    const slug = name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    setCategories((prev) => [
+      ...prev,
+      {
+        order: prev.length + 1,
+        name: name.trim(),
+        slug,
+        count: 0,
+      },
+    ]);
+    setName("");
+    setDesc("");
   };
 
-  const handleDelete = async (id: string, catName: string, postCount: number) => {
-    if (postCount > 0) {
-      alert(`Không thể xóa chuyên mục "${catName}" vì đang có ${postCount} bài viết trực thuộc.`);
-      return;
-    }
-    if (!confirm(`Bạn có chắc chắn muốn xóa chuyên mục "${catName}"?`)) return;
-
-    try {
-      setDeletingId(id);
-      await deleteCategory(id);
-    } catch (err) {
-      alert((err as Error).message);
-    } finally {
-      setDeletingId(null);
+  const handleDelete = (slug: string, catName: string) => {
+    if (confirm(`Bạn có chắc muốn xóa chuyên mục: "${catName}"?`)) {
+      setCategories((prev) => prev.filter((c) => c.slug !== slug));
     }
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      {/* Create form (5 cols) */}
-      <div className="lg:col-span-5">
+    <div
+      data-screen-label="08 Chuyên mục"
+      className="flex flex-col gap-5 max-w-[1080px]"
+    >
+      <h1 className="m-0 text-[26px] font-bold text-[#16181D]">
+        Chuyên mục
+      </h1>
+
+      <div className="flex flex-wrap gap-7 items-start">
+        {/* Table of categories */}
+        <div className="flex-[1_1_560px] min-w-0 bg-[#FCFBF8] border border-[#E3E1DC] overflow-x-auto rounded-[2px]">
+          <table className="w-full border-collapse text-[14px] min-w-[520px]">
+            <thead>
+              <tr className="text-left text-[#5E636B] text-[13px] bg-[#F1EEE8]">
+                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E3E1DC] w-14">
+                  Thứ tự
+                </th>
+                <th className="py-2.5 px-4 font-semibold border-b border-[#E3E1DC]">
+                  Tên
+                </th>
+                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E3E1DC]">
+                  Đường dẫn
+                </th>
+                <th className="py-2.5 px-4 font-semibold whitespace-nowrap border-b border-[#E3E1DC] text-right">
+                  Số bài
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map((c) => (
+                <tr key={c.slug} className="hover:bg-[#F1EEE8] transition-colors">
+                  <td className="py-3.5 px-4 border-b border-[#EFEDE8] text-[#5E636B]">
+                    {c.order}
+                  </td>
+                  <td className="py-3.5 px-4 border-b border-[#EFEDE8]">
+                    <span className="flex flex-col gap-1">
+                      <strong className="text-[#16181D] font-semibold">
+                        {c.name}
+                      </strong>
+                      <span className="flex gap-3 text-[13px]">
+                        <a
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const newName = prompt("Đổi tên chuyên mục:", c.name);
+                            if (newName) {
+                              setCategories((prev) =>
+                                prev.map((item) =>
+                                  item.slug === c.slug
+                                    ? { ...item, name: newName }
+                                    : item
+                                )
+                              );
+                            }
+                          }}
+                          className="text-[#133A63] hover:underline"
+                        >
+                          Sửa
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(c.slug, c.name)}
+                          className="border-0 bg-transparent p-0 text-[#C0271D] hover:underline cursor-pointer"
+                        >
+                          Xóa
+                        </button>
+                      </span>
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 border-b border-[#EFEDE8] text-[#5E636B]">
+                    /{c.slug}
+                  </td>
+                  <td className="py-3.5 px-4 border-b border-[#EFEDE8] text-right tabular-nums text-[#16181D] font-medium">
+                    {c.count}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Add Category Form */}
         <form
-          onSubmit={handleCreate}
-          className="border border-stone-200 bg-white p-5 rounded-sm space-y-4"
+          onSubmit={handleAdd}
+          className="flex-[1_1_260px] bg-[#FCFBF8] border border-[#E3E1DC] p-5 flex flex-col gap-3.5 rounded-[2px]"
         >
-          <div className="flex items-center gap-2 text-stone-900 font-serif font-bold text-sm pb-2 border-b border-stone-100">
-            <Plus className="w-4 h-4 text-stone-700" />
-            <span>Thêm Chuyên mục mới</span>
-          </div>
+          <strong className="text-[15px] text-[#16181D]">
+            Thêm chuyên mục
+          </strong>
 
-          {error && (
-            <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-sm border border-red-200">
-              {error}
-            </p>
-          )}
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-stone-800">
-              Tên chuyên mục *
-            </label>
+          <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#16181D]">
+            Tên
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="VD: Phân tích Kỹ thuật"
+              placeholder="VD: Vàng và hàng hóa"
               required
-              className="w-full rounded-sm border border-stone-300 bg-white px-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 outline-none focus:border-stone-800"
+              className="border border-[#C9C5BC] bg-white px-2.5 py-2 text-[14px] font-normal rounded-[3px] outline-none text-[#16181D] focus:border-[#16181D]"
             />
-          </div>
+          </label>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-stone-800">
-              Mô tả ngắn
-            </label>
+          <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#16181D]">
+            Mô tả
             <textarea
-              rows={2}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Mô tả về chủ đề..."
-              className="w-full rounded-sm border border-stone-300 bg-white p-2.5 text-xs text-stone-900 placeholder-stone-400 outline-none focus:border-stone-800 resize-none"
+              rows={3}
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              className="border border-[#C9C5BC] bg-white px-2.5 py-2 text-[14px] font-normal rounded-[3px] resize-y outline-none text-[#16181D] focus:border-[#16181D]"
             />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-stone-800">
-              Thứ tự hiển thị
-            </label>
-            <input
-              type="number"
-              value={order}
-              onChange={(e) => setOrder(Number(e.target.value))}
-              className="w-full rounded-sm border border-stone-300 bg-white px-3 py-1.5 text-xs text-stone-900 outline-none focus:border-stone-800"
-            />
-          </div>
+          </label>
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-1.5 rounded-sm bg-stone-900 hover:bg-stone-800 py-2 px-4 text-xs font-medium text-white transition-colors disabled:opacity-50 cursor-pointer"
+            className="border-0 bg-[#133A63] hover:bg-[#0C2A4A] !text-white hover:!text-white py-2.5 px-4 text-[14px] font-semibold cursor-pointer rounded-[3px] transition-colors"
           >
-            {isSubmitting ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <span>Lưu Chuyên mục</span>
-            )}
+            Thêm
           </button>
         </form>
-      </div>
-
-      {/* Categories List (7 cols) */}
-      <div className="lg:col-span-7">
-        <div className="border border-stone-200 bg-white rounded-sm overflow-hidden">
-          <div className="p-3.5 border-b border-stone-200 flex items-center gap-2 font-serif font-bold text-xs text-stone-900">
-            <FolderTree className="w-4 h-4 text-stone-500" />
-            <span>Danh sách Chuyên mục hiện có</span>
-          </div>
-
-          <div className="divide-y divide-stone-100">
-            {initialCategories.map((cat) => (
-              <div
-                key={cat.id}
-                className="p-3.5 flex items-center justify-between hover:bg-stone-50/60 transition-colors"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-stone-900">
-                      {cat.name}
-                    </span>
-                    <span className="text-[10px] font-mono text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded-sm border border-stone-200">
-                      /{cat.slug}
-                    </span>
-                  </div>
-                  {cat.description && (
-                    <p className="text-xs text-stone-500 line-clamp-1">
-                      {cat.description}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-3 text-[11px] text-stone-400">
-                    <span>Thứ tự: {cat.order}</span>
-                    <span>•</span>
-                    <span>{cat._count.posts} bài viết</span>
-                  </div>
-                </div>
-
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(cat.id, cat.name, cat._count.posts)}
-                    disabled={deletingId === cat.id}
-                    className="p-1.5 rounded-sm text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
-                    title="Xóa chuyên mục"
-                  >
-                    {deletingId === cat.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-red-600" />
-                    ) : (
-                      <Trash2 className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
