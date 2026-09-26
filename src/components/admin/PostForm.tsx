@@ -248,7 +248,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
       showToast(
         "success",
         isPub
-          ? "Xuất bản bài viết lên Supabase thành công!"
+          ? "Xuất bản bài viết thành công!"
           : "Đã lưu bản nháp thành công!"
       );
     } catch (err: unknown) {
@@ -654,8 +654,8 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
 
             <p className="text-[14px] text-[#6B7280] leading-[1.5] mb-6">
               {publishModal.isPub
-                ? `Bài viết "${publishModal.title}" đã được lưu an toàn vào Supabase Database và sẵn sàng cho độc giả đón đọc.`
-                : `Bài viết "${publishModal.title}" đã được lưu vào cơ sở dữ liệu ở trạng thái bản nháp.`}
+                ? `Bài viết "${publishModal.title}" đã được xuất bản và hiển thị trực tiếp cho độc giả đón đọc.`
+                : `Bài viết "${publishModal.title}" đã được lưu vào bản nháp thành công.`}
             </p>
 
             <div className="flex flex-col gap-2.5 w-full">
@@ -663,10 +663,13 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
                 <Link
                   href={`/posts/${publishModal.slug}`}
                   target="_blank"
-                  className="w-full bg-[#1E40AF] hover:bg-[#1E3A8A] text-white py-2.5 px-4 rounded-[4px] font-semibold text-[14px] flex items-center justify-center gap-2 no-underline transition-colors"
+                  style={{ color: "#FFFFFF" }}
+                  className="w-full bg-[#1E40AF] hover:bg-[#1E3A8A] !text-white hover:!text-white py-2.5 px-4 rounded-[4px] font-semibold text-[14px] flex items-center justify-center gap-2 no-underline transition-colors shadow-xs"
                 >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Xem bài viết trên web</span>
+                  <ExternalLink className="w-4 h-4 text-white !text-white" style={{ color: "#FFFFFF" }} />
+                  <span className="text-white !text-white font-semibold" style={{ color: "#FFFFFF" }}>
+                    Xem bài viết trên web
+                  </span>
                 </Link>
               )}
 

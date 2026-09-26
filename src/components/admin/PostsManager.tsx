@@ -106,7 +106,7 @@ export default function PostsManager({
         <div>
           <h1 className="m-0 text-[26px] font-bold text-[#16181D]">Bài viết</h1>
           <p className="m-0 mt-1 text-[14px] text-[#5E636B]">
-            Dữ liệu kết nối trực tiếp với Supabase Database
+            Quản lý và theo dõi toàn bộ bài viết trên hệ thống
           </p>
         </div>
         <Link
@@ -330,7 +330,7 @@ export default function PostsManager({
               <strong className="text-[#111827]">
                 &quot;{deleteTarget.title}&quot;
               </strong>
-              ? Dữ liệu sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu Supabase và không thể khôi phục.
+              ? Bài viết này sẽ bị xóa hoàn toàn khỏi hệ thống và không thể khôi phục.
             </p>
             <div className="flex gap-2.5 justify-end">
               <button
