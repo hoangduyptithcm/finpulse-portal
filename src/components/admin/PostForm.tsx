@@ -7,7 +7,16 @@ import { slugify } from "@/lib/slugify";
 import TipTapEditor from "./TipTapEditor";
 import { createPost, updatePost } from "@/app/admin/actions";
 import { PostStatus } from "@prisma/client";
-import { Loader2, Upload, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  Check,
+  ExternalLink,
+  X,
+} from "lucide-react";
 
 interface PostFormProps {
   initialData?: {
@@ -60,6 +69,27 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Modern Toast notification state
+  const [toast, setToast] = useState<{
+    type: "success" | "error" | "warning";
+    message: string;
+  } | null>(null);
+
+  // Success Modal state
+  const [publishModal, setPublishModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    slug: string;
+    isPub: boolean;
+  } | null>(null);
+
+  const showToast = (type: "success" | "error" | "warning", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => {
+      setToast((cur) => (cur?.message === message ? null : cur));
+    }, 4500);
+  };
+
   // Pre-publish checklist
   const [checks, setChecks] = useState([true, true, true, true]);
   const checkLabels = [
@@ -108,6 +138,38 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
     setChecks([true, true, true, true]);
   };
 
+  // Dedicated Preview Handler - Never 404s!
+  const handlePreview = () => {
+    const activeCat = categories.find((c) => c.id === categoryId) || {
+      id: "cat-default",
+      name: "Đọc BCTC",
+    };
+    const currentSlug = slug.trim() ? slugify(slug) : slugify(title) || "bai-viet-xem-truoc";
+    const previewData = {
+      id: initialData?.id || "preview-temp",
+      title: title.trim() || "Tiêu đề bài viết xem trước",
+      slug: currentSlug,
+      excerpt: excerpt.trim(),
+      content: content || "<p>Chưa có nội dung bài viết.</p>",
+      coverImage: coverImage.trim() || null,
+      category: {
+        name: activeCat.name,
+        slug: slugify(activeCat.name),
+      },
+      author: { name: "Minh Anh" },
+      createdAt: new Date().toISOString(),
+      sources,
+    };
+
+    try {
+      sessionStorage.setItem("finpulse_preview_post", JSON.stringify(previewData));
+    } catch (e) {
+      console.error("Lỗi khi lưu preview session:", e);
+    }
+
+    window.open("/posts/preview", "_blank");
+  };
+
   // Upload image handler
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,9 +191,10 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
       }
 
       setCoverImage(data.url);
+      showToast("success", "Đã tải ảnh bìa lên thành công!");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Lỗi khi tải ảnh";
-      alert(msg);
+      showToast("error", msg);
     } finally {
       setIsUploading(false);
     }
@@ -139,12 +202,15 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
 
   const handlePublish = async () => {
     if (!title.trim()) {
-      alert("Vui lòng nhập tiêu đề bài viết.");
+      showToast("warning", "Vui lòng nhập tiêu đề bài viết.");
       return;
     }
 
     if (isBlocked) {
-      alert("Vui lòng hoàn thành 4 mục trong danh sách kiểm tra trước khi xuất bản.");
+      showToast(
+        "warning",
+        "Vui lòng hoàn thành 4 mục trong danh sách kiểm tra trước khi xuất bản."
+      );
       return;
     }
 
@@ -152,9 +218,11 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
       setIsSaving(true);
       setErrorMessage("");
 
+      const finalSlug = slug.trim() ? slugify(slug) : slugify(title);
+
       const postPayload = {
         title: title.trim(),
-        slug: slug.trim() ? slugify(slug) : slugify(title),
+        slug: finalSlug,
         excerpt: excerpt.trim(),
         content,
         coverImage: coverImage.trim() || undefined,
@@ -165,19 +233,30 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
 
       if (initialData?.id) {
         await updatePost(initialData.id, postPayload);
-        alert("Đã cập nhật bài viết thành công!");
       } else {
         await createPost(postPayload);
-        alert(isPub ? "Xuất bản bài viết lên Supabase thành công!" : "Đã lưu bản nháp thành công!");
       }
 
-      router.push("/admin/posts");
-      router.refresh();
+      // Show high quality modal confirmation without jarring browser alert()
+      setPublishModal({
+        isOpen: true,
+        title: title.trim(),
+        slug: finalSlug,
+        isPub,
+      });
+
+      showToast(
+        "success",
+        isPub
+          ? "Xuất bản bài viết lên Supabase thành công!"
+          : "Đã lưu bản nháp thành công!"
+      );
     } catch (err: unknown) {
       console.error(err);
-      const msg = err instanceof Error ? err.message : "Đã xảy ra lỗi khi lưu bài viết";
+      const msg =
+        err instanceof Error ? err.message : "Đã xảy ra lỗi khi lưu bài viết";
       setErrorMessage(msg);
-      alert("Lỗi: " + msg);
+      showToast("error", "Lỗi: " + msg);
     } finally {
       setIsSaving(false);
     }
@@ -189,8 +268,31 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
   return (
     <div
       data-screen-label="07 Soạn bài"
-      className="min-h-screen bg-white flex flex-col -m-7 sm:-m-9 -mb-20 text-[#111827]"
+      className="min-h-screen bg-white flex flex-col -m-7 sm:-m-9 -mb-20 text-[#111827] relative"
     >
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[14px] font-medium transition-all animate-in fade-in slide-in-from-top-4 duration-200 bg-white border-[#E5E7EB] text-[#111827]">
+          {toast.type === "success" && (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          )}
+          {toast.type === "warning" && (
+            <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
+          )}
+          {toast.type === "error" && (
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          )}
+          <span>{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="ml-2 text-[#9CA3AF] hover:text-[#111827] border-0 bg-transparent cursor-pointer p-0.5"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Top Header */}
       <header className="h-14 border-b border-[#E5E7EB] flex items-center justify-between px-5 gap-4 sticky top-0 bg-white z-10">
         <span className="flex gap-4 items-center text-[14px]">
@@ -206,15 +308,16 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
         </span>
 
         <span className="flex gap-2 items-center">
-          {slug && (
-            <Link
-              href={`/posts/${slug}`}
-              target="_blank"
-              className="border border-[#E5E7EB] bg-white hover:bg-[#F9FAFB] px-3.5 py-2 text-[14px] font-semibold cursor-pointer rounded-[4px] text-[#111827] no-underline transition-colors"
-            >
-              Xem trước
-            </Link>
-          )}
+          <button
+            type="button"
+            onClick={handlePreview}
+            className="border border-[#E5E7EB] bg-white hover:bg-[#F9FAFB] px-3.5 py-2 text-[14px] font-semibold cursor-pointer rounded-[4px] text-[#111827] transition-colors flex items-center gap-1.5 shadow-xs"
+            title="Xem trước bài viết thực tế không cần xuất bản"
+          >
+            <Eye className="w-4 h-4 text-[#4B5563]" />
+            <span>Xem trước</span>
+          </button>
+
           <button
             type="button"
             onClick={handlePublish}
@@ -534,6 +637,61 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
           </div>
         </aside>
       </div>
+
+      {/* Publish / Save Success Modal */}
+      {publishModal?.isOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-lg p-6 max-w-[440px] w-full shadow-2xl border border-[#E5E7EB] flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+            <div className="w-13 h-13 rounded-full bg-emerald-100 flex items-center justify-center mb-4 text-emerald-600">
+              <CheckCircle2 className="w-7 h-7" />
+            </div>
+
+            <h3 className="text-[20px] font-bold text-[#111827] mb-1.5 font-sans">
+              {publishModal.isPub
+                ? "Xuất bản bài viết thành công!"
+                : "Đã lưu bản nháp thành công!"}
+            </h3>
+
+            <p className="text-[14px] text-[#6B7280] leading-[1.5] mb-6">
+              {publishModal.isPub
+                ? `Bài viết "${publishModal.title}" đã được lưu an toàn vào Supabase Database và sẵn sàng cho độc giả đón đọc.`
+                : `Bài viết "${publishModal.title}" đã được lưu vào cơ sở dữ liệu ở trạng thái bản nháp.`}
+            </p>
+
+            <div className="flex flex-col gap-2.5 w-full">
+              {publishModal.isPub && (
+                <Link
+                  href={`/posts/${publishModal.slug}`}
+                  target="_blank"
+                  className="w-full bg-[#1E40AF] hover:bg-[#1E3A8A] text-white py-2.5 px-4 rounded-[4px] font-semibold text-[14px] flex items-center justify-center gap-2 no-underline transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Xem bài viết trên web</span>
+                </Link>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  router.push("/admin/posts");
+                  router.refresh();
+                }}
+                className="w-full bg-[#F3F4F6] hover:bg-[#E5E7EB] text-[#111827] py-2.5 px-4 rounded-[4px] font-semibold text-[14px] border-0 cursor-pointer transition-colors"
+              >
+                Về danh sách bài viết
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPublishModal(null)}
+                className="text-[13px] text-[#6B7280] hover:text-[#111827] hover:underline bg-transparent border-0 cursor-pointer pt-1"
+              >
+                Tiếp tục chỉnh sửa bài này
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

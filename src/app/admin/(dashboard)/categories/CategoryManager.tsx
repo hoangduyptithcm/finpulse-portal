@@ -14,6 +14,7 @@ export default function CategoryManager() {
   );
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ slug: string; name: string } | null>(null);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,10 +41,10 @@ export default function CategoryManager() {
     setDesc("");
   };
 
-  const handleDelete = (slug: string, catName: string) => {
-    if (confirm(`Bạn có chắc muốn xóa chuyên mục: "${catName}"?`)) {
-      setCategories((prev) => prev.filter((c) => c.slug !== slug));
-    }
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    setCategories((prev) => prev.filter((c) => c.slug !== deleteTarget.slug));
+    setDeleteTarget(null);
   };
 
   return (
@@ -87,28 +88,9 @@ export default function CategoryManager() {
                         {c.name}
                       </strong>
                       <span className="flex gap-3 text-[13px]">
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            const newName = prompt("Đổi tên chuyên mục:", c.name);
-                            if (newName) {
-                              setCategories((prev) =>
-                                prev.map((item) =>
-                                  item.slug === c.slug
-                                    ? { ...item, name: newName }
-                                    : item
-                                )
-                              );
-                            }
-                          }}
-                          className="text-[#1E40AF] hover:underline"
-                        >
-                          Sửa
-                        </a>
                         <button
                           type="button"
-                          onClick={() => handleDelete(c.slug, c.name)}
+                          onClick={() => setDeleteTarget({ slug: c.slug, name: c.name })}
                           className="border-0 bg-transparent p-0 text-[#DC2626] hover:underline cursor-pointer"
                         >
                           Xóa
@@ -167,6 +149,36 @@ export default function CategoryManager() {
           </button>
         </form>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-5 max-w-[380px] w-full shadow-xl border border-[#E5E7EB]">
+            <h4 className="text-[16px] font-bold text-[#111827] mb-2 font-sans">
+              Xóa chuyên mục
+            </h4>
+            <p className="text-[13px] text-[#4B5563] mb-4 leading-relaxed">
+              Bạn có chắc muốn xóa chuyên mục: <strong>&quot;{deleteTarget.name}&quot;</strong>?
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="px-3 py-1.5 text-[13px] font-medium text-[#374151] bg-[#F3F4F6] hover:bg-[#E5E7EB] rounded border-0 cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="px-3 py-1.5 text-[13px] font-medium text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded border-0 cursor-pointer"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

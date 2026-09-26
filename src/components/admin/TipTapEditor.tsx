@@ -98,7 +98,7 @@ export default function TipTapEditor({
         editor.chain().focus().setImage({ src: data.url }).run();
       }
     } catch (err) {
-      alert("Lỗi khi tải ảnh lên bài viết: " + (err as Error).message);
+      console.error("Lỗi khi tải ảnh lên bài viết:", err);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

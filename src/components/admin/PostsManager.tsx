@@ -4,7 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { deletePost } from "@/app/admin/actions";
-import { Loader2, Plus, Trash2, Edit3, ExternalLink } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Trash2,
+  Edit3,
+  ExternalLink,
+  CheckCircle2,
+  AlertCircle,
+  X,
+} from "lucide-react";
 
 export interface PostItem {
   id: string;
@@ -33,6 +42,18 @@ export default function PostsManager({
   const [selectedCat, setSelectedCat] = useState("all");
   const [postsList, setPostsList] = useState<PostItem[]>(initialPosts);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => {
+      setToast((cur) => (cur?.message === message ? null : cur));
+    }, 4000);
+  };
 
   const nPub = postsList.filter((r) => r.status === "PUBLISHED").length;
   const nDraft = postsList.filter((r) => r.status === "DRAFT").length;
@@ -46,19 +67,19 @@ export default function PostsManager({
     return true;
   });
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Bạn có chắc chắn muốn xóa bài viết: "${title}"?`)) return;
-
+  const confirmDelete = async (id: string) => {
     try {
       setDeletingId(id);
       await deletePost(id);
       setPostsList((prev) => prev.filter((p) => p.id !== id));
+      showToast("success", "Đã xóa bài viết thành công!");
       router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Lỗi khi xóa bài viết";
-      alert(msg);
+      showToast("error", msg);
     } finally {
       setDeletingId(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -260,7 +281,7 @@ export default function PostsManager({
                     <button
                       type="button"
                       disabled={deletingId === r.id}
-                      onClick={() => handleDelete(r.id, r.title)}
+                      onClick={() => setDeleteTarget({ id: r.id, title: r.title })}
                       className="border-0 bg-transparent p-1 text-[#C0271D] hover:bg-red-50 rounded cursor-pointer transition-colors disabled:opacity-50"
                       title="Xóa bài viết"
                     >
@@ -277,6 +298,63 @@ export default function PostsManager({
           </table>
         )}
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[14px] font-medium bg-white border-[#E5E7EB] text-[#111827] animate-in fade-in slide-in-from-top-4 duration-200">
+          {toast.type === "success" ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          )}
+          <span>{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="ml-2 text-[#9CA3AF] hover:text-[#111827] border-0 bg-transparent cursor-pointer p-0.5"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-lg p-6 max-w-[420px] w-full shadow-2xl border border-[#E5E7EB] animate-in zoom-in-95 duration-200">
+            <h3 className="text-[18px] font-bold text-[#111827] mb-2 font-sans">
+              Xác nhận xóa bài viết
+            </h3>
+            <p className="text-[14px] text-[#4B5563] mb-6 leading-[1.5]">
+              Bạn có chắc chắn muốn xóa bài viết:{" "}
+              <strong className="text-[#111827]">
+                &quot;{deleteTarget.title}&quot;
+              </strong>
+              ? Dữ liệu sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu Supabase và không thể khôi phục.
+            </p>
+            <div className="flex gap-2.5 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 text-[14px] font-medium text-[#374151] bg-[#F3F4F6] hover:bg-[#E5E7EB] rounded-[4px] border-0 cursor-pointer transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={deletingId === deleteTarget.id}
+                onClick={() => confirmDelete(deleteTarget.id)}
+                className="px-4 py-2 text-[14px] font-medium text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-[4px] border-0 cursor-pointer flex items-center gap-1.5 transition-colors disabled:opacity-50"
+              >
+                {deletingId === deleteTarget.id && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                <span>Xác nhận xóa</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

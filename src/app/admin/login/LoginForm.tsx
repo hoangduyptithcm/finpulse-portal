@@ -54,16 +54,9 @@ export default function LoginForm() {
       <label className="flex flex-col gap-1.5 text-[14px] font-semibold text-[#111827]">
         <span className="flex justify-between items-center">
           <span>Mật khẩu</span>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              alert("Mật khẩu mặc định trong .env: AdminPassword@2026");
-            }}
-            className="text-[13px] font-medium text-[#1E40AF] hover:underline"
-          >
-            Quên mật khẩu?
-          </a>
+          <span className="text-[12px] text-[#6B7280] font-normal">
+            Mặc định: <code className="bg-gray-100 px-1 py-0.5 rounded text-[#1E40AF]">AdminPassword@2026</code>
+          </span>
         </span>
         <input
           id="password"

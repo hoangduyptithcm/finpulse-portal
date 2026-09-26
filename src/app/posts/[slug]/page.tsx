@@ -50,13 +50,28 @@ export async function generateMetadata({
 export default async function PostDetailPage({ params }: PostPageProps) {
   const { slug } = await params;
 
-  const post = await prisma.post.findUnique({
+  let post = await prisma.post.findUnique({
     where: { slug },
     include: {
       category: true,
       author: { select: { name: true } },
     },
   });
+
+  if (!post) {
+    post = await prisma.post.findFirst({
+      where: {
+        slug: {
+          equals: slug,
+          mode: "insensitive",
+        },
+      },
+      include: {
+        category: true,
+        author: { select: { name: true } },
+      },
+    });
+  }
 
   // If not found in DB and not the default mock VCB slug, return 404
   if (!post && slug !== "vcb-co-dat-sau-bao-cao-quy-2") {
@@ -65,6 +80,11 @@ export default async function PostDetailPage({ params }: PostPageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#111827]">
+      {post?.status === "DRAFT" && (
+        <aside aria-label="Thông báo bản nháp" className="bg-[#D97706] text-white text-[13px] font-medium px-4 py-2 text-center flex items-center justify-center gap-2">
+          <span>⚡ BẢN NHÁP: Bài viết này đang ở trạng thái bản nháp và chưa xuất bản chính thức.</span>
+        </aside>
+      )}
       <TopBar />
       <Navbar />
       <MarketTickerBar />
