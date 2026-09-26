@@ -1,0 +1,51 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Chạy mỗi 2 ngày lúc 03:00 UTC (10:00 sáng giờ Việt Nam)
+    # Cron format: min hour day-of-month month day-of-week
+    - cron: '0 3 */2 * *'
+  # Cho phép bấm "Run workflow" thủ công trên giao diện GitHub Actions để test ngay
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    name: Ping Supabase to Prevent Inactivity Pause
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          echo "Bắt đầu ping để duy trì hoạt động cho Supabase..."
+
+          # 1. Ping trực tiếp vào Supabase REST API (nếu có cấu hình secret)
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+            echo "Đang gửi request trực tiếp đến Supabase API: $SUPABASE_URL"
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              "$SUPABASE_URL/rest/v1/")
+            echo "Supabase API HTTP Response Code: $HTTP_STATUS"
+          else
+            echo "Chưa cấu hình NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY trong GitHub Secrets"
+          fi
+
+          # 2. Ping thông qua Next.js API Keep-Alive route (nếu có cấu hình APP_URL)
+          if [ -n "$APP_URL" ]; then
+            echo "Đang gửi request đến Website API: $APP_URL/api/cron/keep-alive"
+            AUTH_HEADER=""
+            if [ -n "$CRON_SECRET" ]; then
+              AUTH_HEADER="Authorization: Bearer $CRON_SECRET"
+            fi
+            
+            HTTP_STATUS_APP=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "$AUTH_HEADER" \
+              "$APP_URL/api/cron/keep-alive")
+            echo "Website API HTTP Response Code: $HTTP_STATUS_APP"
+          fi
+
+          echo "Hoàn thành chu kỳ ping!"
