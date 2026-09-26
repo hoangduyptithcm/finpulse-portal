@@ -78,6 +78,18 @@ export default async function PostDetailPage({ params }: PostPageProps) {
     notFound();
   }
 
+  const relatedPosts = await prisma.post
+    .findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(post?.id ? { NOT: { id: post.id } } : {}),
+      },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    })
+    .catch(() => []);
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#111827]">
       {post?.status === "DRAFT" && (
@@ -88,7 +100,7 @@ export default async function PostDetailPage({ params }: PostPageProps) {
       <TopBar />
       <Navbar />
       <MarketTickerBar />
-      <ArticleView post={post || undefined} />
+      <ArticleView post={post || undefined} relatedPosts={relatedPosts} />
       <Footer />
     </div>
   );

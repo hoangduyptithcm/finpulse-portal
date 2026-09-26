@@ -1,11 +1,19 @@
 import Link from "next/link";
 import SignOutButton from "./SignOutButton";
+import { prisma } from "@/lib/prisma";
 
-export default function AdminDashboardLayout({
+export const dynamic = "force-dynamic";
+
+export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [postCount, categoryCount] = await Promise.all([
+    prisma.post.count().catch(() => 0),
+    prisma.category.count().catch(() => 0),
+  ]);
+
   return (
     <div className="min-h-screen flex bg-[#F9FAFB] text-[#111827] font-sans selection:bg-[#E0E7FF]">
       {/* Sidebar matching FinPulse design */}
@@ -42,14 +50,18 @@ export default function AdminDashboardLayout({
             className="flex justify-between items-center py-2 px-2.5 rounded-[4px] text-[14px] text-[#111827] font-medium hover:bg-[#F3F4F6] transition-colors no-underline"
           >
             <span>Bài viết</span>
-            <span className="text-[#6B7280] font-normal text-[13px]">7</span>
+            <span className="text-[#6B7280] font-normal text-[13px] tabular-nums">
+              {postCount}
+            </span>
           </Link>
           <Link
             href="/admin/categories"
             className="flex justify-between items-center py-2 px-2.5 rounded-[4px] text-[14px] text-[#111827] font-medium hover:bg-[#F3F4F6] transition-colors no-underline"
           >
             <span>Chuyên mục</span>
-            <span className="text-[#6B7280] font-normal text-[13px]">4</span>
+            <span className="text-[#6B7280] font-normal text-[13px] tabular-nums">
+              {categoryCount}
+            </span>
           </Link>
         </nav>
 

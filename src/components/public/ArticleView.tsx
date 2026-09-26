@@ -27,9 +27,16 @@ export interface DynamicPostData {
 
 interface ArticleViewProps {
   post?: DynamicPostData;
+  relatedPosts?: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    createdAt: Date | string;
+    category?: { name: string; slug: string } | null;
+  }>;
 }
 
-export default function ArticleView({ post }: ArticleViewProps = {}) {
+export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProps = {}) {
   const data = {
     ...VCB_ARTICLE_DATA,
     ...(post
@@ -44,7 +51,8 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
             month: "2-digit",
             year: "numeric",
           }),
-          shortAnswer: post.excerpt || VCB_ARTICLE_DATA.shortAnswer,
+          shortAnswer: post.excerpt || "",
+          shortAnswerBullets: [],
           tags: [post.category?.name || "Phân tích"],
         }
       : {}),
@@ -522,16 +530,16 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
               </span>
             </div>
 
-            {/* Next Series Card */}
+            {/* Next Category Card */}
             <Link
-              href="/posts/bien-loi-nhuan-gop-nhom-thep-qua-8-quy"
+              href={`/categories/${data.categorySlug}`}
               className="flex flex-col gap-1 p-4.5 sm:px-5 border border-[#111827] bg-white text-[#111827] no-underline hover:no-underline transition-all hover:shadow-[4px_4px_0_#111827] group"
             >
               <span className="text-[13px] font-bold text-[#1E40AF]">
-                Phần tiếp trong chuỗi · Đọc BCTC ngân hàng
+                Khám phá chuyên mục · {data.category}
               </span>
               <span className="font-serif font-bold text-[20px] leading-[1.3] group-hover:text-[#1E40AF] transition-colors">
-                Chi phí dự phòng ăn vào lợi nhuận thế nào
+                Xem toàn bộ các bài viết cùng chủ đề →
               </span>
             </Link>
           </article>
@@ -540,60 +548,70 @@ export default function ArticleView({ post }: ArticleViewProps = {}) {
           <aside className="flex-[0_1_290px] min-w-[250px] flex flex-col gap-8">
             <Top10Widget />
 
-            {/* Sticky Table of Contents (TOC) */}
-            <nav className="sticky top-[84px] flex flex-col bg-white p-4 border border-[#E5E7EB] rounded-[2px]">
-              <h2 className="m-0 mb-1.5 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
-                Trong bài này
-              </h2>
-              <div className="flex flex-col">
-                {TOC.map((t) => {
-                  const isActive = activeSec === t.id;
-                  return (
-                    <a
-                      key={t.id}
-                      href={`#${t.id}`}
-                      onClick={scrollTo(t.id)}
-                      className={`py-2 pl-3 text-[14px] leading-[1.4] border-l-2 transition-colors hover:no-underline hover:text-[#111827] ${
-                        isActive
-                          ? "border-[#1E40AF] text-[#111827] font-semibold"
-                          : "border-[#E5E7EB] text-[#6B7280] font-normal"
-                      }`}
-                    >
-                      {t.label}
-                    </a>
-                  );
-                })}
-              </div>
-              <span className="mt-3 text-[13px] text-[#6B7280]">
-                {readLeft}
-              </span>
-            </nav>
+            {/* Sticky Table of Contents (TOC) - Only for default demo article */}
+            {!post && (
+              <nav className="sticky top-[84px] flex flex-col bg-white p-4 border border-[#E5E7EB] rounded-[2px]">
+                <h2 className="m-0 mb-1.5 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
+                  Trong bài này
+                </h2>
+                <div className="flex flex-col">
+                  {TOC.map((t) => {
+                    const isActive = activeSec === t.id;
+                    return (
+                      <a
+                        key={t.id}
+                        href={`#${t.id}`}
+                        onClick={scrollTo(t.id)}
+                        className={`py-2 pl-3 text-[14px] leading-[1.4] border-l-2 transition-colors hover:no-underline hover:text-[#111827] ${
+                          isActive
+                            ? "border-[#1E40AF] text-[#111827] font-semibold"
+                            : "border-[#E5E7EB] text-[#6B7280] font-normal"
+                        }`}
+                      >
+                        {t.label}
+                      </a>
+                    );
+                  })}
+                </div>
+                <span className="mt-3 text-[13px] text-[#6B7280]">
+                  {readLeft}
+                </span>
+              </nav>
+            )}
           </aside>
         </div>
 
-        {/* Related Articles Section */}
-        <section className="max-w-[1000px] w-full mx-auto flex flex-col gap-4 pt-6">
-          <h2 className="m-0 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
-            Bài liên quan
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-7">
-            {data.related.map((p) => (
-              <Link
-                key={p.slug}
-                href={`/posts/${p.slug}`}
-                className="flex flex-col gap-2 pt-3.5 border-t border-[#E5E7EB] text-[#111827] hover:text-[#1E40AF] hover:no-underline transition-colors group"
-              >
-                <span className="text-[13px] font-bold text-[#1E40AF]">
-                  {p.cat}
-                </span>
-                <span className="font-serif font-bold text-[19px] leading-[1.3] group-hover:text-[#1E40AF]">
-                  {p.title}
-                </span>
-                <span className="text-[13px] text-[#6B7280]">{p.date}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {/* Related Articles Section - Only rendered when real related posts exist */}
+        {relatedPosts && relatedPosts.length > 0 && (
+          <section className="max-w-[1000px] w-full mx-auto flex flex-col gap-4 pt-6">
+            <h2 className="m-0 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
+              Bài liên quan
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-7">
+              {relatedPosts.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/posts/${p.slug}`}
+                  className="flex flex-col gap-2 pt-3.5 border-t border-[#E5E7EB] text-[#111827] hover:text-[#1E40AF] hover:no-underline transition-colors group"
+                >
+                  <span className="text-[13px] font-bold text-[#1E40AF]">
+                    {p.category?.name || "Bài viết"}
+                  </span>
+                  <span className="font-serif font-bold text-[19px] leading-[1.3] group-hover:text-[#1E40AF] line-clamp-2">
+                    {p.title}
+                  </span>
+                  <span className="text-[13px] text-[#6B7280]">
+                    {new Date(p.createdAt).toLocaleDateString("vi-VN", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </>
   );

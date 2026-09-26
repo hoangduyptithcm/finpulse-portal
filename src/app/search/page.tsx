@@ -5,128 +5,118 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import Top10Widget from "@/components/public/Top10Widget";
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import { BookOpen, Calendar, Eye, ArrowLeft } from "lucide-react";
+import { Search as SearchIcon, ArrowLeft, BookOpen } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-interface CategoryPageProps {
-  params: Promise<{ slug: string }>;
+interface SearchPageProps {
+  searchParams: Promise<{ q?: string }>;
 }
 
 export async function generateMetadata({
-  params,
-}: CategoryPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  let category = await prisma.category.findUnique({
-    where: { slug },
-  });
-
-  if (!category) {
-    category = await prisma.category.findFirst({
-      where: { slug: { equals: slug, mode: "insensitive" } },
-    });
-  }
-
-  if (!category) {
-    return { title: "Chuyên mục | FinPulse" };
-  }
-
+  searchParams,
+}: SearchPageProps): Promise<Metadata> {
+  const { q } = await searchParams;
   return {
-    title: `${category.name} | FinPulse`,
-    description: category.description || `Các bài viết thuộc chuyên mục ${category.name}`,
+    title: q ? `Tìm kiếm: "${q}" | FinPulse` : "Tìm kiếm | FinPulse",
   };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { slug } = await params;
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const { q } = await searchParams;
+  const query = q?.trim() || "";
 
-  let category = await prisma.category.findUnique({
-    where: { slug },
-    include: {
-      posts: {
-        where: { status: "PUBLISHED" },
-        include: {
-          category: true,
-          author: { select: { name: true } },
-        },
-        orderBy: { createdAt: "desc" },
+  let posts: any[] = [];
+  if (query) {
+    posts = await prisma.post.findMany({
+      where: {
+        status: "PUBLISHED",
+        OR: [
+          { title: { contains: query, mode: "insensitive" } },
+          { excerpt: { contains: query, mode: "insensitive" } },
+          { content: { contains: query, mode: "insensitive" } },
+          { category: { name: { contains: query, mode: "insensitive" } } },
+        ],
       },
-    },
-  });
-
-  if (!category) {
-    category = await prisma.category.findFirst({
-      where: { slug: { equals: slug, mode: "insensitive" } },
       include: {
-        posts: {
-          where: { status: "PUBLISHED" },
-          include: {
-            category: true,
-            author: { select: { name: true } },
-          },
-          orderBy: { createdAt: "desc" },
-        },
+        category: true,
+        author: { select: { name: true } },
       },
-    });
+      orderBy: { createdAt: "desc" },
+    }).catch(() => []);
   }
-
-  if (!category) {
-    notFound();
-  }
-
-  const posts = category.posts;
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#111827]">
-      {/* 1. Top Bar */}
       <TopBar />
-
-      {/* 2. Navbar */}
       <Navbar />
 
-      {/* 3. Main Category View */}
-      <main className="max-w-[1240px] mx-auto px-6 py-9 pb-16 w-full flex flex-col gap-7">
-        {/* Category Header */}
-        <div className="flex flex-col gap-2 pb-5 border-b border-[#E5E7EB]">
+      <main className="max-w-[1240px] mx-auto px-6 py-9 pb-16 w-full flex flex-col gap-8">
+        {/* Breadcrumb & Header */}
+        <div className="flex flex-col gap-3 pb-5 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-2 text-[13px] text-[#6B7280]">
             <Link href="/" className="hover:text-[#1E40AF] transition-colors flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Trang chủ</span>
             </Link>
             <span>/</span>
-            <span className="text-[#111827] font-medium">Chuyên mục</span>
+            <span className="text-[#111827] font-medium">Tìm kiếm</span>
           </div>
 
-          <h1 className="m-0 font-serif font-bold text-[34px] sm:text-[40px] tracking-[-0.015em] text-[#111827]">
-            {category.name}
+          <h1 className="m-0 font-serif font-bold text-[32px] sm:text-[38px] text-[#111827]">
+            {query ? (
+              <>
+                Kết quả tìm kiếm cho <span className="text-[#1E40AF]">&ldquo;{query}&rdquo;</span>
+              </>
+            ) : (
+              "Tìm kiếm bài viết"
+            )}
           </h1>
 
-          {category.description && (
-            <p className="m-0 text-[16px] text-[#4B5563] max-w-[640px] leading-[1.55]">
-              {category.description}
-            </p>
-          )}
-
-          <div className="flex items-center gap-4 mt-2 text-[14px]">
-            <span className="text-[#111827] font-semibold border-b-2 border-[#111827] pb-1">
-              Tất cả bài viết ({posts.length})
-            </span>
-          </div>
+          <p className="m-0 text-[15px] text-[#6B7280]">
+            {query
+              ? `Tìm thấy ${posts.length} bài viết phù hợp với từ khóa của bạn.`
+              : "Nhập từ khóa hoặc mã cổ phiếu (VD: VCB, FPT, BCTC, biên lợi nhuận...) để tìm kiếm."}
+          </p>
         </div>
 
-        {/* Content Layout: River list & Sidebar */}
-        <div className="flex flex-wrap gap-12 items-start">
-          {/* Article River list */}
+        {/* Search Input Bar on Page */}
+        <form action="/search" method="GET" className="flex gap-2 max-w-[600px]">
+          <div className="flex-1 flex items-center bg-white border border-[#D1D5DB] rounded-[4px] px-3.5 py-2.5 focus-within:border-[#1E40AF] transition-colors">
+            <SearchIcon className="w-4 h-4 text-[#9CA3AF] mr-2.5 shrink-0" />
+            <input
+              type="text"
+              name="q"
+              defaultValue={query}
+              placeholder="Nhập tên bài, mã chứng khoán hoặc chủ đề..."
+              className="w-full bg-transparent outline-none text-[15px] text-[#111827] placeholder:text-[#9CA3AF]"
+              autoFocus={!query}
+            />
+          </div>
+          <button
+            type="submit"
+            className="border-0 bg-[#1E40AF] hover:bg-[#1E3A8A] !text-white hover:!text-white px-6 py-2.5 text-[15px] font-semibold rounded-[4px] cursor-pointer transition-colors"
+          >
+            Tìm kiếm
+          </button>
+        </form>
+
+        {/* Results Layout */}
+        <div className="flex flex-wrap gap-12 items-start mt-2">
+          {/* Main Results Column */}
           <div className="flex-[2_1_520px] flex flex-col min-w-0">
-            {posts.length === 0 ? (
-              <div className="py-16 px-6 text-center border border-dashed border-[#E5E7EB] rounded-[4px] flex flex-col items-center justify-center gap-3">
+            {!query ? (
+              <div className="py-12 px-6 text-center border border-dashed border-[#E5E7EB] rounded-[4px] text-[#6B7280]">
+                Hãy nhập từ khóa tìm kiếm để bắt đầu tra cứu.
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="py-14 px-6 text-center border border-dashed border-[#E5E7EB] rounded-[4px] flex flex-col items-center justify-center gap-3">
                 <BookOpen className="w-10 h-10 text-[#9CA3AF] stroke-[1.5]" />
                 <h3 className="m-0 font-serif text-[20px] font-bold text-[#111827]">
-                  Chưa có bài viết nào trong chuyên mục này
+                  Không tìm thấy bài viết nào phù hợp
                 </h3>
                 <p className="m-0 text-[14px] text-[#6B7280] max-w-[420px]">
-                  Các bài phân tích mới nhất sẽ được xuất bản tại đây. Bạn có thể xem các chuyên mục khác hoặc quay lại trang chủ.
+                  Không có bài viết nào khớp với từ khóa &ldquo;{query}&rdquo;. Thử tìm kiếm với từ khóa ngắn gọn hơn hoặc xem danh mục bài viết.
                 </p>
                 <Link
                   href="/"
@@ -153,7 +143,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                     <span className="flex flex-col gap-2">
                       <span className="text-[13px] text-[#6B7280] flex items-center gap-2">
                         <span className="font-semibold text-[#1E40AF]">
-                          {category.name}
+                          {p.category?.name || "Bài viết"}
                         </span>
                         <span>·</span>
                         <span>{dateStr}</span>
@@ -191,7 +181,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
       </main>
 
-      {/* 4. Footer */}
       <Footer />
     </div>
   );

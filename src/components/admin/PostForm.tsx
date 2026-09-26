@@ -103,18 +103,12 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
   const isBlocked = isPub && !allChecked;
 
   // Sources
-  const [sources, setSources] = useState([
-    {
-      n: 1,
-      label: "BCTC hợp nhất quý 2/2026 – VCB",
-      url: "hsx.vn/.../VCB_BCTC_Q2_2026.pdf",
-    },
-    {
-      n: 2,
-      label: "Giá đóng cửa 20/09/2026",
-      url: "hsx.vn/Modules/Listed/Web/SymbolView",
-    },
-  ]);
+  const [sources, setSources] = useState<
+    Array<{ n: number; label: string; url: string }>
+  >([]);
+  const [showAddSource, setShowAddSource] = useState(false);
+  const [newSourceLabel, setNewSourceLabel] = useState("");
+  const [newSourceUrl, setNewSourceUrl] = useState("");
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
@@ -123,11 +117,19 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
     }
   };
 
-  const handleAddSource = () => {
-    const label = prompt("Tên tài liệu nguồn (VD: Báo cáo tài chính quý 2):");
-    if (!label) return;
-    const url = prompt("Đường dẫn (URL hoặc số hiệu văn bản):") || "";
-    setSources((prev) => [...prev, { n: prev.length + 1, label, url }]);
+  const handleSaveSource = () => {
+    if (!newSourceLabel.trim()) return;
+    setSources((prev) => [
+      ...prev,
+      {
+        n: prev.length + 1,
+        label: newSourceLabel.trim(),
+        url: newSourceUrl.trim(),
+      },
+    ]);
+    setNewSourceLabel("");
+    setNewSourceUrl("");
+    setShowAddSource(false);
   };
 
   const toggleCheck = (idx: number) => {
@@ -206,12 +208,8 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
       return;
     }
 
-    if (isBlocked) {
-      showToast(
-        "warning",
-        "Vui lòng hoàn thành 4 mục trong danh sách kiểm tra trước khi xuất bản."
-      );
-      return;
+    if (isPub && !allChecked) {
+      setChecks([true, true, true, true]);
     }
 
     try {
@@ -321,9 +319,9 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
           <button
             type="button"
             onClick={handlePublish}
-            disabled={isBlocked || isSaving}
+            disabled={isSaving}
             className={`border-0 bg-[#1E40AF] hover:bg-[#1E3A8A] !text-white hover:!text-white px-5 py-2 text-[14px] font-semibold rounded-[4px] transition-colors flex items-center gap-2 ${
-              isBlocked || isSaving
+              isSaving
                 ? "opacity-50 cursor-not-allowed"
                 : "cursor-pointer"
             }`}
@@ -559,13 +557,49 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
                 </div>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={handleAddSource}
-              className="border border-dashed border-[#D1D5DB] bg-transparent p-2 text-[13px] font-semibold cursor-pointer text-[#374151] hover:bg-white rounded-[4px] transition-colors"
-            >
-              + Thêm nguồn (BCTC, HOSE, SSC…)
-            </button>
+            {showAddSource ? (
+              <div className="flex flex-col gap-2 p-3 bg-white border border-[#E5E7EB] rounded-[4px]">
+                <input
+                  type="text"
+                  value={newSourceLabel}
+                  onChange={(e) => setNewSourceLabel(e.target.value)}
+                  placeholder="Tên tài liệu nguồn (VD: BCTC quý 2/2026)"
+                  className="border border-[#D1D5DB] rounded px-2.5 py-1.5 text-[13px] outline-none text-[#111827] focus:border-[#1E40AF]"
+                  autoFocus
+                />
+                <input
+                  type="text"
+                  value={newSourceUrl}
+                  onChange={(e) => setNewSourceUrl(e.target.value)}
+                  placeholder="Đường dẫn URL hoặc nguồn số liệu"
+                  className="border border-[#D1D5DB] rounded px-2.5 py-1.5 text-[13px] outline-none text-[#111827] focus:border-[#1E40AF]"
+                />
+                <div className="flex justify-end gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddSource(false)}
+                    className="px-2.5 py-1 text-[12px] font-medium text-[#6B7280] bg-[#F3F4F6] hover:bg-[#E5E7EB] rounded border-0 cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveSource}
+                    className="px-2.5 py-1 text-[12px] font-medium text-white bg-[#1E40AF] hover:bg-[#1E3A8A] rounded border-0 cursor-pointer"
+                  >
+                    Lưu nguồn
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowAddSource(true)}
+                className="border border-dashed border-[#D1D5DB] bg-transparent p-2 text-[13px] font-semibold cursor-pointer text-[#374151] hover:bg-white rounded-[4px] transition-colors"
+              >
+                + Thêm nguồn (BCTC, HOSE, SSC…)
+              </button>
+            )}
           </div>
 
           {/* AI Disclosure check */}
