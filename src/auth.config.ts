@@ -6,7 +6,8 @@ export const authConfig: NextAuthConfig = {
     signIn: "/admin/login",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request }) {
+      const { nextUrl } = request;
       const isLoggedIn = !!auth?.user;
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");
       const isOnLogin = nextUrl.pathname === "/admin/login";
@@ -14,7 +15,14 @@ export const authConfig: NextAuthConfig = {
       if (isOnAdmin) {
         if (isOnLogin) {
           if (isLoggedIn) {
-            return Response.redirect(new URL("/admin", nextUrl));
+            const host =
+              request.headers.get("x-forwarded-host") ||
+              request.headers.get("host") ||
+              nextUrl.host;
+            const proto =
+              request.headers.get("x-forwarded-proto") ||
+              (nextUrl.protocol ? nextUrl.protocol.replace(":", "") : "https");
+            return Response.redirect(new URL("/admin", `${proto}://${host}`));
           }
           return true;
         }
