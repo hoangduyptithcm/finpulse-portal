@@ -57,7 +57,7 @@ export default function ArticleView({
             month: "2-digit",
             year: "numeric",
           }),
-          shortAnswer: post.excerpt || "",
+          shortAnswer: "",
           shortAnswerBullets: [],
           tags: [post.category?.name || "Phân tích"],
         }
@@ -235,20 +235,24 @@ export default function ArticleView({
               </span>
             </div>
 
-            {/* "Trả lời ngắn" Callout Box */}
-            <div className="bg-[#16181D] text-[#F7F5F0] p-6 sm:p-6.5 flex flex-col gap-3 rounded-[2px]">
-              <span className="text-[13px] font-bold text-[#C9D6E6]">
-                Trả lời ngắn
-              </span>
-              <span className="font-serif text-[20px] sm:text-[21px] leading-[1.45] text-white font-medium">
-                {data.shortAnswer}
-              </span>
-              <ul className="m-0 mt-1 pl-5 flex flex-col gap-1.5 text-[15px] leading-[1.55] text-[#E5E7EB]">
-                {data.shortAnswerBullets.map((bullet, i) => (
-                  <li key={i}>{bullet}</li>
-                ))}
-              </ul>
-            </div>
+            {/* "Trả lời ngắn" Callout Box (chỉ hiển thị khi có phần tóm tắt riêng biệt cho bài mẫu) */}
+            {!post && data.shortAnswer && (
+              <div className="bg-[#16181D] text-[#F7F5F0] p-6 sm:p-6.5 flex flex-col gap-3 rounded-[2px]">
+                <span className="text-[13px] font-bold text-[#C9D6E6]">
+                  Trả lời ngắn
+                </span>
+                <span className="font-serif text-[20px] sm:text-[21px] leading-[1.45] text-white font-medium">
+                  {data.shortAnswer}
+                </span>
+                {data.shortAnswerBullets && data.shortAnswerBullets.length > 0 && (
+                  <ul className="m-0 mt-1 pl-5 flex flex-col gap-1.5 text-[15px] leading-[1.55] text-[#E5E7EB]">
+                    {data.shortAnswerBullets.map((bullet, i) => (
+                      <li key={i}>{bullet}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
 
             {/* Article Body */}
             {post ? (
@@ -543,25 +547,11 @@ export default function ArticleView({
               mua/bán. Số liệu lấy từ nguồn công bố; nhà đầu tư tự kiểm chứng.
             </p>
 
-            {/* Author Card */}
-            <div className="flex gap-4 items-center">
-              <span className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center font-serif font-bold text-[24px] text-[#1E40AF] flex-shrink-0">
-                M
-              </span>
-              <span className="flex flex-col gap-1 text-[15px] leading-[1.5]">
-                <strong className="text-[#111827]">Minh Anh</strong>
-                <span className="text-[#374151]">
-                  Nhà đầu tư cá nhân, ghi chép việc đọc báo cáo tài chính từ
-                  2019.
-                </span>
-                <Link
-                  href="/about"
-                  className="font-semibold text-[14px] text-[#1E40AF] hover:underline"
-                >
-                  Tôi là ai và viết như thế nào
-                </Link>
-              </span>
-            </div>
+            {/* Comments Section */}
+            <CommentsSection
+              postSlug={post?.slug || "vcb-co-dat-sau-bao-cao-quy-2"}
+              initialComments={initialComments}
+            />
 
             {/* Next Category Card */}
             <Link
@@ -575,12 +565,6 @@ export default function ArticleView({
                 Xem toàn bộ các bài viết cùng chủ đề →
               </span>
             </Link>
-
-            {/* Comments Section */}
-            <CommentsSection
-              postSlug={post?.slug || "vcb-co-dat-sau-bao-cao-quy-2"}
-              initialComments={initialComments}
-            />
           </article>
 
           {/* Sticky Right Sidebar (TOC & Top 10) */}
