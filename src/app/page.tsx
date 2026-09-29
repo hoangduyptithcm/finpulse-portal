@@ -15,7 +15,7 @@ import { ArrowRight, BookOpen, Clock, FileText } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "FinPulse | Sổ phân tích của Minh Anh",
+  title: "Nhịp đập tài chính | Sổ phân tích của Minh Anh",
   description:
     "Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, trả lời bằng số liệu công bố. Sổ ghi chép cá nhân, không phải tin tức hay lời khuyên đầu tư.",
 };
@@ -56,7 +56,7 @@ export default async function HomePage() {
       <Navbar />
 
       {/* 3. Main Page Content */}
-      <main className="max-w-[1240px] mx-auto px-6 py-11 pb-20 w-full flex flex-col gap-14">
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-11 pb-20 flex flex-col gap-14">
         {/* Section 1: Hero Lead & Featured Article Card */}
         <section className="flex flex-wrap gap-12 items-center">
           {/* Left Column: Mission statement & Newsletter */}
@@ -86,7 +86,7 @@ export default async function HomePage() {
                   month: "2-digit",
                   year: "numeric",
                 })}{" "}
-                · {featuredPost.views} lượt xem
+                · {featuredPost.views.toLocaleString("vi-VN")} lượt xem
               </span>
               <span className="font-serif font-bold text-[26px] sm:text-[30px] lg:text-[34px] leading-[1.15] tracking-[-0.015em] group-hover:text-[#1E40AF] transition-colors">
                 {featuredPost.title}
@@ -103,10 +103,10 @@ export default async function HomePage() {
           ) : (
             <div className="flex-1 basis-[440px] min-w-0 flex flex-col gap-4 p-7 bg-[#F9FAFB] border border-[#E5E7EB] text-[#111827] rounded-[4px]">
               <span className="text-[13px] font-bold text-[#1E40AF] tracking-wide uppercase">
-                FinPulse · Sổ ghi chép phân tích
+                Nhịp đập tài chính · Sổ ghi chép phân tích
               </span>
               <h2 className="m-0 font-serif font-bold text-[26px] sm:text-[28px] leading-[1.2] text-[#111827]">
-                Chào mừng bạn đến với FinPulse
+                Chào mừng bạn đến với Nhịp đập tài chính
               </h2>
               <p className="m-0 text-[15px] leading-[1.6] text-[#4B5563]">
                 Hệ thống đang chuẩn bị phát hành các bài phân tích chuyên sâu mới nhất.
@@ -161,7 +161,7 @@ export default async function HomePage() {
                           day: "2-digit",
                           month: "2-digit",
                         })}{" "}
-                        · {it.views} lượt xem
+                        · {it.views.toLocaleString("vi-VN")} lượt xem
                       </span>
                     </Link>
                   ))

@@ -10,7 +10,7 @@ export default function TopBar() {
 
   return (
     <div className="bg-white text-[13px] text-[#4B5563] border-b border-[#E5E7EB]">
-      <div className="max-w-[1240px] mx-auto px-6 min-h-[36px] py-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 min-h-[36px] py-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
         <span className="font-medium text-[#4B5563]">
           {formattedDate}
         </span>

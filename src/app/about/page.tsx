@@ -4,9 +4,9 @@ import Footer from "@/components/public/Footer";
 import { ABOUT_PAGE_DATA } from "@/data/portalData";
 
 export const metadata = {
-  title: "Giới thiệu & Miễn trừ | FinPulse",
+  title: "Giới thiệu & Miễn trừ | Nhịp đập tài chính",
   description:
-    "Về FinPulse và phương pháp phân tích của Minh Anh. Nguyên tắc nguồn số liệu, cách sử dụng AI và tuyên bố miễn trừ trách nhiệm.",
+    "Về Nhịp đập tài chính và phương pháp phân tích của Minh Anh. Nguyên tắc nguồn số liệu, cách sử dụng AI và tuyên bố miễn trừ trách nhiệm.",
 };
 
 export default function AboutPage() {
@@ -21,13 +21,13 @@ export default function AboutPage() {
       <Navbar />
 
       {/* 3. Screen 09: Giới thiệu */}
-      <main className="max-w-[760px] mx-auto px-6 py-11 pb-20 w-full flex flex-col gap-9">
+      <main className="max-w-[800px] mx-auto px-6 py-11 pb-20 w-full flex flex-col gap-9">
         <div className="flex flex-col gap-3.5">
           <h1 className="m-0 font-serif font-bold text-[38px] sm:text-[44px] tracking-[-0.02em] text-[#16181D]">
-            Về FinPulse
+            Về Nhịp đập tài chính
           </h1>
           <p className="m-0 font-serif text-[19px] sm:text-[20px] leading-[1.55] text-[#2B2F36]">
-            FinPulse là sổ phân tích cá nhân của Minh Anh. Tôi viết quan điểm
+            Nhịp đập tài chính là sổ phân tích cá nhân của Minh Anh. Tôi viết quan điểm
             của mình dựa trên số liệu công khai, không đăng lại hay tổng hợp tin
             từ báo chí.
           </p>

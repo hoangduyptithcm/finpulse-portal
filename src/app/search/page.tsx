@@ -18,7 +18,7 @@ export async function generateMetadata({
 }: SearchPageProps): Promise<Metadata> {
   const { q } = await searchParams;
   return {
-    title: q ? `Tìm kiếm: "${q}" | FinPulse` : "Tìm kiếm | FinPulse",
+    title: q ? `Tìm kiếm: "${q}" | Nhịp đập tài chính` : "Tìm kiếm | Nhịp đập tài chính",
   };
 }
 
@@ -51,7 +51,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <TopBar />
       <Navbar />
 
-      <main className="max-w-[1240px] mx-auto px-6 py-9 pb-16 w-full flex flex-col gap-8">
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-9 pb-16 flex flex-col gap-8">
         {/* Breadcrumb & Header */}
         <div className="flex flex-col gap-3 pb-5 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-2 text-[13px] text-[#6B7280]">
@@ -102,9 +102,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </form>
 
         {/* Results Layout */}
-        <div className="flex flex-wrap gap-12 items-start mt-2">
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-12 items-start w-full mt-2">
           {/* Main Results Column */}
-          <div className="flex-[2_1_520px] flex flex-col min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col">
             {!query ? (
               <div className="py-12 px-6 text-center border border-dashed border-[#E5E7EB] rounded-[4px] text-[#6B7280]">
                 Hãy nhập từ khóa tìm kiếm để bắt đầu tra cứu.
@@ -175,7 +175,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
 
           {/* Sidebar */}
-          <aside className="flex-1 basis-[280px] min-w-0 flex flex-col gap-8">
+          <aside className="w-full lg:w-[340px] xl:w-[380px] shrink-0 flex flex-col gap-8">
             <Top10Widget />
           </aside>
         </div>

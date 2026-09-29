@@ -29,11 +29,11 @@ export async function generateMetadata({
   }
 
   if (!category) {
-    return { title: "Chuyên mục | FinPulse" };
+    return { title: "Chuyên mục | Nhịp đập tài chính" };
   }
 
   return {
-    title: `${category.name} | FinPulse`,
+    title: `${category.name} | Nhịp đập tài chính`,
     description: category.description || `Các bài viết thuộc chuyên mục ${category.name}`,
   };
 }
@@ -86,7 +86,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <Navbar />
 
       {/* 3. Main Category View */}
-      <main className="max-w-[1240px] mx-auto px-6 py-9 pb-16 w-full flex flex-col gap-7">
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-9 pb-16 flex flex-col gap-7">
         {/* Category Header */}
         <div className="flex flex-col gap-2 pb-5 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-2 text-[13px] text-[#6B7280]">
@@ -116,9 +116,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
 
         {/* Content Layout: River list & Sidebar */}
-        <div className="flex flex-wrap gap-12 items-start">
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-12 items-start w-full">
           {/* Article River list */}
-          <div className="flex-[2_1_520px] flex flex-col min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col">
             {posts.length === 0 ? (
               <div className="py-16 px-6 text-center border border-dashed border-[#E5E7EB] rounded-[4px] flex flex-col items-center justify-center gap-3">
                 <BookOpen className="w-10 h-10 text-[#9CA3AF] stroke-[1.5]" />
@@ -185,7 +185,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           </div>
 
           {/* Sidebar */}
-          <aside className="flex-1 basis-[280px] min-w-0 flex flex-col gap-8">
+          <aside className="w-full lg:w-[340px] xl:w-[380px] shrink-0 flex flex-col gap-8">
             <Top10Widget />
           </aside>
         </div>

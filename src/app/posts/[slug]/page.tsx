@@ -23,9 +23,9 @@ export async function generateMetadata({
 
   if (post) {
     const postUrl = `https://finpulse.aas.ai.vn/posts/${slug}`;
-    const desc = post.excerpt || `Bài viết phân tích chuyên sâu về ${post.title} trên FinPulse.`;
+    const desc = post.excerpt || `Bài viết phân tích chuyên sâu về ${post.title} trên Nhịp đập tài chính.`;
     return {
-      title: post.title,
+      title: `${post.title} | Nhịp đập tài chính`,
       description: desc,
       alternates: {
         canonical: postUrl,
@@ -40,7 +40,7 @@ export async function generateMetadata({
         authors: ["Minh Anh"],
         images: post.coverImage
           ? [{ url: post.coverImage, alt: post.title }]
-          : [{ url: "/icon-512.png", alt: "FinPulse" }],
+          : [{ url: "/icon-512.png", alt: "Nhịp đập tài chính" }],
       },
       twitter: {
         card: "summary_large_image",
@@ -53,8 +53,8 @@ export async function generateMetadata({
 
   const isVcb = slug === "vcb-co-dat-sau-bao-cao-quy-2";
   const title = isVcb
-    ? "VCB có đắt sau báo cáo quý 2? | FinPulse"
-    : "Chi tiết bài viết | FinPulse";
+    ? "VCB có đắt sau báo cáo quý 2? | Nhịp đập tài chính"
+    : "Chi tiết bài viết | Nhịp đập tài chính";
   const description =
     "Tôi so P/B, ROE và nợ xấu của Vietcombank với chính nó trong 5 năm để xem mức giá hiện tại đang phản ánh điều gì.";
 
@@ -125,7 +125,7 @@ export default async function PostDetailPage({ params }: PostPageProps) {
         },
         publisher: {
           "@type": "Organization",
-          name: "FinPulse",
+          name: "Nhịp đập tài chính",
           logo: {
             "@type": "ImageObject",
             url: "https://finpulse.aas.ai.vn/icon-512.png",

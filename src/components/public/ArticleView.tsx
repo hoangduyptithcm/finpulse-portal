@@ -62,6 +62,33 @@ export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProp
   const [activeSec, setActiveSec] = useState("muc-1");
   const [feedback, setFeedback] = useState<null | "yes" | "no">(null);
   const [copied, setCopied] = useState(false);
+  const [views, setViews] = useState<number>(post?.views ?? 0);
+
+  useEffect(() => {
+    if (!post?.slug) return;
+
+    const storageKey = `finpulse_viewed_${post.slug}`;
+    const alreadyViewed =
+      typeof window !== "undefined" ? sessionStorage.getItem(storageKey) : null;
+
+    if (!alreadyViewed) {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(storageKey, "1");
+      }
+      fetch("/api/posts/view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: post.slug }),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success && typeof result.views === "number") {
+            setViews(result.views);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [post?.slug]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -117,12 +144,12 @@ export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProp
         style={{ width: `${(progress * 100).toFixed(1)}%` }}
       />
 
-      <main className="max-w-[1240px] mx-auto px-6 py-7 pb-16 w-full flex flex-col gap-14">
-        <div className="flex flex-wrap gap-10 justify-center">
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-7 pb-16 flex flex-col gap-14">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 justify-between items-start w-full">
           {/* Main Article Content */}
           <article
             id="fp-article"
-            className="flex-1 basis-[460px] max-w-[720px] min-w-0 flex flex-col gap-5.5"
+            className="flex-1 min-w-0 max-w-[1020px] w-full flex flex-col gap-6"
           >
             {/* Breadcrumbs */}
             <nav className="flex gap-2 text-[14px] text-[#5E636B]">
@@ -160,7 +187,7 @@ export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProp
                     {data.author}
                   </Link>
                   <span className="text-[#6B7280]">
-                    {data.date} · {data.readTime} · {data.metaNote}
+                    {data.date} · {views > 0 ? `${views.toLocaleString("vi-VN")} lượt xem · ` : ""}{data.readTime} · {data.metaNote}
                   </span>
                 </span>
               </div>
@@ -545,7 +572,7 @@ export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProp
           </article>
 
           {/* Sticky Right Sidebar (TOC & Top 10) */}
-          <aside className="flex-[0_1_290px] min-w-[250px] flex flex-col gap-8">
+          <aside className="w-full lg:w-[340px] xl:w-[380px] shrink-0 flex flex-col gap-8">
             <Top10Widget />
 
             {/* Sticky Table of Contents (TOC) - Only for default demo article */}
@@ -583,7 +610,7 @@ export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProp
 
         {/* Related Articles Section - Only rendered when real related posts exist */}
         {relatedPosts && relatedPosts.length > 0 && (
-          <section className="max-w-[1000px] w-full mx-auto flex flex-col gap-4 pt-6">
+          <section className="w-full flex flex-col gap-4 pt-6">
             <h2 className="m-0 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
               Bài liên quan
             </h2>

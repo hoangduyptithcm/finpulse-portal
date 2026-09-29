@@ -39,14 +39,14 @@ export default function Navbar() {
 
   return (
     <header className="border-b border-[#E5E7EB] bg-white sticky top-0 z-20">
-      <div className="max-w-[1240px] mx-auto px-6 flex items-center justify-between gap-6 sm:gap-8 h-[66px]">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between gap-6 sm:gap-8 h-[66px]">
         {/* Brand */}
         <Link
           href="/"
           className="flex flex-col text-[#111827] no-underline flex-shrink-0 group"
         >
-          <span className="font-serif font-bold text-[26px] tracking-[-0.02em] leading-none group-hover:text-[#1E40AF] transition-colors">
-            FinPulse
+          <span className="font-serif font-bold text-[24px] sm:text-[26px] tracking-[-0.02em] leading-none group-hover:text-[#1E40AF] transition-colors">
+            Nhịp đập tài chính
           </span>
           <span className="text-[12px] text-[#6B7280] mt-[3px]">
             Sổ phân tích của Minh Anh
@@ -121,7 +121,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile nav row */}
-      <div className="md:hidden flex items-center gap-4 overflow-x-auto px-6 py-2.5 border-t border-[#E5E7EB] scrollbar-none whitespace-nowrap bg-white">
+      <div className="md:hidden flex items-center gap-4 overflow-x-auto px-4 sm:px-8 py-2.5 border-t border-[#E5E7EB] scrollbar-none whitespace-nowrap bg-white">
         {categories.map((cat) => {
           const href = `/categories/${cat.slug}`;
           const isActive = pathname === href;

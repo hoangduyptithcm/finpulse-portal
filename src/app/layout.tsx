@@ -20,12 +20,14 @@ const sourceSerif4 = Source_Serif_4({
 export const metadata: Metadata = {
   metadataBase: new URL("https://finpulse.aas.ai.vn"),
   title: {
-    default: "FinPulse | Sổ phân tích của Minh Anh - Dữ liệu & Cổ phiếu niêm yết",
-    template: "%s | FinPulse",
+    default: "Nhịp đập tài chính | Sổ phân tích của Minh Anh - Dữ liệu & Cổ phiếu niêm yết",
+    template: "%s | Nhịp đập tài chính",
   },
   description:
-    "FinPulse - Sổ phân tích độc lập của Minh Anh. Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, phân tích chuyên sâu báo cáo tài chính, dòng tiền và định giá cổ phiếu bằng số liệu thực tế.",
+    "Nhịp đập tài chính - Sổ phân tích độc lập của Minh Anh. Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, phân tích chuyên sâu báo cáo tài chính, dòng tiền và định giá cổ phiếu bằng số liệu thực tế.",
   keywords: [
+    "nhịp đập tài chính",
+    "nhip dap tai chinh",
     "finpulse",
     "finpulse portal",
     "finpulse vn",
@@ -39,17 +41,17 @@ export const metadata: Metadata = {
     "vn-index",
   ],
   authors: [{ name: "Minh Anh", url: "https://finpulse.aas.ai.vn/about" }],
-  creator: "FinPulse",
-  publisher: "FinPulse",
+  creator: "Nhịp đập tài chính",
+  publisher: "Nhịp đập tài chính",
   alternates: {
     canonical: "https://finpulse.aas.ai.vn",
   },
   openGraph: {
-    title: "FinPulse | Sổ phân tích của Minh Anh - Dữ liệu & Cổ phiếu niêm yết",
+    title: "Nhịp đập tài chính | Sổ phân tích của Minh Anh - Dữ liệu & Cổ phiếu niêm yết",
     description:
-      "FinPulse - Sổ phân tích độc lập của Minh Anh. Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, phân tích chuyên sâu báo cáo tài chính bằng số liệu công bố.",
+      "Nhịp đập tài chính - Sổ phân tích độc lập của Minh Anh. Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, phân tích chuyên sâu báo cáo tài chính bằng số liệu công bố.",
     url: "https://finpulse.aas.ai.vn",
-    siteName: "FinPulse",
+    siteName: "Nhịp đập tài chính",
     locale: "vi_VN",
     type: "website",
     images: [
@@ -57,13 +59,13 @@ export const metadata: Metadata = {
         url: "/icon-512.png",
         width: 512,
         height: 512,
-        alt: "FinPulse Logo",
+        alt: "Nhịp đập tài chính Logo",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FinPulse | Sổ phân tích của Minh Anh",
+    title: "Nhịp đập tài chính | Sổ phân tích của Minh Anh",
     description:
       "Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, phân tích chuyên sâu báo cáo tài chính bằng số liệu công bố.",
     images: ["/icon-512.png"],
@@ -98,8 +100,8 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": "https://finpulse.aas.ai.vn/#website",
       url: "https://finpulse.aas.ai.vn",
-      name: "FinPulse",
-      alternateName: ["FinPulse Portal", "FinPulse VN", "Sổ phân tích của Minh Anh"],
+      name: "Nhịp đập tài chính",
+      alternateName: ["FinPulse", "FinPulse Portal", "FinPulse VN", "Sổ phân tích của Minh Anh"],
       description:
         "Sổ phân tích độc lập về doanh nghiệp niêm yết, báo cáo tài chính và thị trường chứng khoán của Minh Anh",
       inLanguage: "vi",
@@ -112,7 +114,7 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": "https://finpulse.aas.ai.vn/#organization",
-      name: "FinPulse",
+      name: "Nhịp đập tài chính",
       url: "https://finpulse.aas.ai.vn",
       logo: "https://finpulse.aas.ai.vn/icon-512.png",
       sameAs: [],

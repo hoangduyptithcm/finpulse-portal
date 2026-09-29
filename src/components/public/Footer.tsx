@@ -4,11 +4,11 @@ import { CATEGORIES } from "@/data/portalData";
 export default function Footer() {
   return (
     <footer className="border-t border-[#E5E7EB] mt-auto bg-white">
-      <div className="max-w-[1240px] mx-auto px-6 py-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-[14px]">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-[14px]">
         {/* Brand Column */}
         <div className="flex flex-col gap-2">
           <span className="font-serif font-bold text-[22px] tracking-[-0.01em] text-[#16181D]">
-            FinPulse
+            Nhịp đập tài chính
           </span>
           <span className="text-[#5E636B] leading-[1.5]">
             Sổ phân tích cá nhân. Không phải cơ quan báo chí.
@@ -59,8 +59,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-[1240px] mx-auto px-6 py-4 border-t border-[#E5E7EB] text-[13px] leading-[1.6] text-[#6B7280]">
-        © 2026 FinPulse. Nội dung do tác giả biên soạn với hỗ trợ công cụ AI, mang tính trao đổi kiến thức. Không phải thông tin báo chí, không phải khuyến nghị mua/bán. Số liệu lấy từ nguồn công bố; nhà đầu tư tự kiểm chứng.
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-4 border-t border-[#E5E7EB] text-[13px] leading-[1.6] text-[#6B7280]">
+        © 2026 Nhịp đập tài chính. Nội dung do tác giả biên soạn với hỗ trợ công cụ AI, mang tính trao đổi kiến thức. Không phải thông tin báo chí, không phải khuyến nghị mua/bán. Số liệu lấy từ nguồn công bố; nhà đầu tư tự kiểm chứng.
       </div>
     </footer>
   );

@@ -18,7 +18,7 @@ const MARKET_DATA: MarketItem[] = [
 export default function MarketTickerBar() {
   return (
     <div className="bg-white border-b border-[#E5E7EB] text-[13px] overflow-x-auto scrollbar-none">
-      <div className="max-w-[1240px] mx-auto px-6 py-2.5 flex items-center gap-7 whitespace-nowrap">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-2.5 flex items-center gap-7 whitespace-nowrap">
         {MARKET_DATA.map((item) => (
           <div key={item.name} className="flex items-center gap-1.5 font-medium">
             <span className="font-semibold text-[#111827]">{item.name}</span>
