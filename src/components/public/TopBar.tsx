@@ -4,6 +4,7 @@ export default function TopBar() {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "Asia/Ho_Chi_Minh",
   }).format(new Date());
 
   const formattedDate = today.charAt(0).toUpperCase() + today.slice(1);

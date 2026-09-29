@@ -4,11 +4,12 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import NewsletterForm from "@/components/public/NewsletterForm";
 import Top10Widget from "@/components/public/Top10Widget";
+import MarketTickerBar from "@/components/public/MarketTickerBar";
+import MarketWatchlist from "@/components/public/MarketWatchlist";
 import { prisma } from "@/lib/prisma";
 import {
   KEY_STATS,
   SERIES_LIST,
-  WATCH_LIST,
 } from "@/data/portalData";
 import { ArrowRight, BookOpen, Clock, FileText } from "lucide-react";
 
@@ -54,6 +55,9 @@ export default async function HomePage() {
 
       {/* 2. Brand Sticky Navbar */}
       <Navbar />
+
+      {/* 2.1 Live Market Ticker */}
+      <MarketTickerBar />
 
       {/* 3. Main Page Content */}
       <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-11 pb-20 flex flex-col gap-14">
@@ -290,35 +294,8 @@ export default async function HomePage() {
             {/* Top 10 articles */}
             <Top10Widget />
 
-            {/* Số liệu tôi đang theo dõi (Market Watchlist) */}
-            <div className="flex flex-col">
-              <h2 className="m-0 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
-                Số liệu tôi đang theo dõi
-              </h2>
-              <table className="w-full border-collapse text-[14px] tabular-nums">
-                <tbody>
-                  {WATCH_LIST.map((t) => (
-                    <tr key={t.name}>
-                      <td className="py-[9px] border-b border-[#E5E7EB] font-semibold text-[#111827]">
-                        {t.name}
-                      </td>
-                      <td className="py-[9px] border-b border-[#E5E7EB] text-right font-medium text-[#374151]">
-                        {t.value}
-                      </td>
-                      <td
-                        className="py-[9px] pl-2.5 border-b border-[#E5E7EB] text-right w-[64px] font-semibold"
-                        style={{ color: t.color }}
-                      >
-                        {t.change}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <span className="mt-2 text-[12px] text-[#6B7280] leading-[1.5]">
-                Dữ liệu thị trường tổng hợp. Nguồn: HOSE, NHNN.
-              </span>
-            </div>
+            {/* Số liệu tôi đang theo dõi (Realtime Market Watchlist) */}
+            <MarketWatchlist />
           </aside>
         </section>
       </main>

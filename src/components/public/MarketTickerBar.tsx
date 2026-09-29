@@ -1,37 +1,62 @@
 "use client";
 
-interface MarketItem {
-  name: string;
-  value: string;
-  change: string;
-  isUp: boolean;
-}
-
-const MARKET_DATA: MarketItem[] = [
-  { name: "VN-Index", value: "1.292,40", change: "+0,67%", isUp: true },
-  { name: "VN30", value: "1.335,20", change: "+0,84%", isUp: true },
-  { name: "HNX", value: "238,15", change: "-0,19%", isUp: false },
-  { name: "Bitcoin", value: "97.420", change: "+3,85%", isUp: true },
-  { name: "Ethereum", value: "2.890", change: "+2,40%", isUp: true },
-];
+import { useMarketRealtime } from "@/hooks/useMarketRealtime";
 
 export default function MarketTickerBar() {
+  const { tickerItems, isSocketConnected, updatedAt } = useMarketRealtime();
+
   return (
     <div className="bg-white border-b border-[#E5E7EB] text-[13px] overflow-x-auto scrollbar-none">
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-2.5 flex items-center gap-7 whitespace-nowrap">
-        {MARKET_DATA.map((item) => (
-          <div key={item.name} className="flex items-center gap-1.5 font-medium">
-            <span className="font-semibold text-[#111827]">{item.name}</span>
-            <span className="text-[#374151] tabular-nums">{item.value}</span>
-            <span
-              className={`font-semibold tabular-nums text-[12px] ${
-                item.isUp ? "text-[#16A34A]" : "text-[#DC2626]"
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-2 flex items-center justify-between gap-6 whitespace-nowrap">
+        <div className="flex items-center gap-7">
+          {tickerItems.map((item) => (
+            <div
+              key={item.name}
+              className={`flex items-center gap-1.5 font-medium px-1.5 py-0.5 rounded transition-all duration-300 ${
+                item.flash === "up"
+                  ? "bg-emerald-50 ring-1 ring-emerald-300"
+                  : item.flash === "down"
+                  ? "bg-rose-50 ring-1 ring-rose-300"
+                  : ""
               }`}
             >
-              {item.change}
+              <span className="font-semibold text-[#111827]">{item.name}</span>
+              <span
+                className={`tabular-nums transition-colors duration-300 ${
+                  item.flash === "up"
+                    ? "text-[#16A34A] font-bold"
+                    : item.flash === "down"
+                    ? "text-[#DC2626] font-bold"
+                    : "text-[#374151]"
+                }`}
+              >
+                {item.value}
+              </span>
+              <span
+                className={`font-semibold tabular-nums text-[12px] ${
+                  item.isUp ? "text-[#16A34A]" : "text-[#DC2626]"
+                }`}
+              >
+                {item.change}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
+            <span>Realtime</span>
           </div>
-        ))}
+          {updatedAt && (
+            <span className="text-[11px] text-[#9CA3AF] tabular-nums">
+              {updatedAt}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

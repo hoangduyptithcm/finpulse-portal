@@ -131,6 +131,7 @@ export default function RootLayout({
     <html
       lang="vi"
       className={`${beVietnamPro.variable} ${sourceSerif4.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <script
