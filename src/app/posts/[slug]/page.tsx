@@ -98,17 +98,36 @@ export default async function PostDetailPage({ params }: PostPageProps) {
     notFound();
   }
 
-  const relatedPosts = await prisma.post
-    .findMany({
-      where: {
-        status: "PUBLISHED",
-        ...(post?.id ? { NOT: { id: post.id } } : {}),
-      },
-      include: { category: true },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-    })
-    .catch(() => []);
+  const [relatedPosts, comments] = await Promise.all([
+    prisma.post
+      .findMany({
+        where: {
+          status: "PUBLISHED",
+          ...(post?.id ? { NOT: { id: post.id } } : {}),
+        },
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+      })
+      .catch(() => []),
+    post?.id
+      ? prisma.comment
+          .findMany({
+            where: {
+              postId: post.id,
+              status: "APPROVED",
+            },
+            orderBy: { createdAt: "asc" },
+            select: {
+              id: true,
+              name: true,
+              content: true,
+              createdAt: true,
+            },
+          })
+          .catch(() => [])
+      : Promise.resolve([]),
+  ]);
 
   const articleJsonLd = post
     ? {
@@ -159,7 +178,11 @@ export default async function PostDetailPage({ params }: PostPageProps) {
       <TopBar />
       <Navbar />
       <MarketTickerBar />
-      <ArticleView post={post || undefined} relatedPosts={relatedPosts} />
+      <ArticleView
+        post={post || undefined}
+        initialComments={comments}
+        relatedPosts={relatedPosts}
+      />
       <Footer />
     </div>
   );

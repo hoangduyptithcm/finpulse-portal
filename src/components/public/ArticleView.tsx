@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Top10Widget from "@/components/public/Top10Widget";
+import CommentsSection, { CommentItem } from "@/components/public/CommentsSection";
 import { VCB_ARTICLE_DATA, KEY_STATS } from "@/data/portalData";
 
 const TOC = [
@@ -27,6 +28,7 @@ export interface DynamicPostData {
 
 interface ArticleViewProps {
   post?: DynamicPostData;
+  initialComments?: CommentItem[];
   relatedPosts?: Array<{
     id: string;
     title: string;
@@ -36,7 +38,11 @@ interface ArticleViewProps {
   }>;
 }
 
-export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProps = {}) {
+export default function ArticleView({
+  post,
+  initialComments = [],
+  relatedPosts = [],
+}: ArticleViewProps = {}) {
   const data = {
     ...VCB_ARTICLE_DATA,
     ...(post
@@ -569,6 +575,12 @@ export default function ArticleView({ post, relatedPosts = [] }: ArticleViewProp
                 Xem toàn bộ các bài viết cùng chủ đề →
               </span>
             </Link>
+
+            {/* Comments Section */}
+            <CommentsSection
+              postSlug={post?.slug || "vcb-co-dat-sau-bao-cao-quy-2"}
+              initialComments={initialComments}
+            />
           </article>
 
           {/* Sticky Right Sidebar (TOC & Top 10) */}
