@@ -63,7 +63,6 @@ export default function ArticleView({
         }
       : {}),
   };
-  const [bigFont, setBigFont] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activeSec, setActiveSec] = useState("muc-1");
   const [feedback, setFeedback] = useState<null | "yes" | "no">(null);
@@ -198,41 +197,13 @@ export default function ArticleView({
                 </span>
               </div>
 
-              <span className="flex gap-4 items-center text-[14px] font-semibold">
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="border-0 bg-transparent cursor-pointer text-[#1E40AF] hover:underline p-0"
-                >
-                  {copied ? "Đã chép link!" : "Sao chép link"}
-                </button>
-                <span className="flex border border-[#E5E7EB] rounded-[3px] overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setBigFont(false)}
-                    title="Cỡ chữ thường"
-                    className={`border-0 px-2.5 py-1 text-[13px] font-bold cursor-pointer transition-colors ${
-                      !bigFont
-                        ? "bg-[#111827] text-white"
-                        : "bg-white text-[#374151]"
-                    }`}
-                  >
-                    A
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBigFont(true)}
-                    title="Cỡ chữ lớn"
-                    className={`border-0 border-l border-[#E5E7EB] px-2.5 py-1 text-[16px] font-bold cursor-pointer transition-colors ${
-                      bigFont
-                        ? "bg-[#111827] text-white"
-                        : "bg-white text-[#374151]"
-                    }`}
-                  >
-                    A
-                  </button>
-                </span>
-              </span>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="border-0 bg-transparent cursor-pointer text-[#1E40AF] hover:underline p-0 text-[14px] font-semibold"
+              >
+                {copied ? "Đã chép link!" : "Sao chép link"}
+              </button>
             </div>
 
             {/* "Trả lời ngắn" Callout Box (chỉ hiển thị khi có phần tóm tắt riêng biệt cho bài mẫu) */}
@@ -257,16 +228,12 @@ export default function ArticleView({
             {/* Article Body */}
             {post ? (
               <div
-                className={`font-serif leading-[1.72] text-[#16181D] flex flex-col gap-5.5 transition-all prose prose-lg max-w-none py-2 ${
-                  bigFont ? "text-[21px]" : "text-[19px]"
-                }`}
+                className="font-serif leading-[1.75] text-[#16181D] flex flex-col gap-5.5 transition-all prose prose-lg max-w-none py-2 text-[18px] sm:text-[19px]"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
             ) : (
             <div
-              className={`font-serif leading-[1.72] text-[#16181D] flex flex-col gap-5.5 transition-all ${
-                bigFont ? "text-[21px]" : "text-[19px]"
-              }`}
+              className="font-serif leading-[1.75] text-[#16181D] flex flex-col gap-5.5 transition-all text-[18px] sm:text-[19px]"
             >
               {/* Section 1 */}
               <h2
