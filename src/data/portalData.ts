@@ -307,22 +307,23 @@ export const VCB_ARTICLE_DATA = {
 
 export const ABOUT_PAGE_DATA = {
   useSrc: [
-    "Số liệu công bố trên HOSE, HNX, Ủy ban Chứng khoán",
-    "Báo cáo tài chính, nghị quyết ĐHĐCĐ, công bố thông tin doanh nghiệp",
-    "Văn bản pháp luật, thông cáo của cơ quan nhà nước",
-    "Kinh nghiệm, checklist và mô hình của riêng tôi",
+    "Báo cáo tài chính kiểm toán, nghị quyết ĐHĐCĐ, công bố thông tin chính thức của doanh nghiệp",
+    "Dữ liệu giao dịch khớp lệnh thực tế từ Sở Giao dịch Chứng khoán (HOSE, HNX)",
+    "Số liệu thống kê vĩ mô chính thức từ Tổng cục Thống kê, NHNN, Bộ Tài chính",
+    "Sự kiện thị trường được chắt lọc từ các báo kinh tế chính thống uy tín (luôn ghi rõ nguồn)",
+    "Kinh nghiệm, mô hình định lượng và checklist độc lập của riêng tôi",
   ],
   noSrc: [
-    "Bài viết của báo chí, kể cả khi diễn đạt lại",
-    "Phỏng vấn, điều tra hay phân tích độc quyền của báo",
-    "Ảnh, infographic, video, biểu đồ của báo",
+    "Tin đồn vô căn cứ từ các hội nhóm kín, diễn đàn phím hàng",
+    "Sao chép nguyên văn (copy-paste) bài viết báo chí mà không có trích dẫn và phân tích định lượng",
+    "Lời khuyên phím mã, cam kết lợi nhuận hay khuyến nghị mua/bán dưới mọi hình thức",
   ],
   process: [
-    { n: 1, text: "Tôi chọn một câu hỏi cụ thể cho mỗi bài." },
-    { n: 2, text: "Tôi lấy số từ nguồn gốc (BCTC, HOSE, SSC) và lưu link." },
-    { n: 3, text: "AI soạn nháp chỉ từ số liệu tôi đưa vào." },
-    { n: 4, text: "Tôi sửa luận điểm, rủi ro và tự viết kết luận." },
-    { n: 5, text: "Cuối bài luôn có nguồn số liệu và miễn trừ trách nhiệm." },
+    { n: 1, text: "Tôi chọn một câu hỏi cụ thể hoặc sự kiện quan trọng cho mỗi bài." },
+    { n: 2, text: "Tôi đối chiếu số liệu từ nguồn gốc (BCTC, HOSE, SSC) hoặc báo chí chính thống và lưu liên kết." },
+    { n: 3, text: "AI hỗ trợ rà soát cấu trúc số liệu thô và đối chiếu tính toán." },
+    { n: 4, text: "Tôi tự tay viết luận điểm, bóc tách rủi ro và đưa ra góc nhìn khách quan." },
+    { n: 5, text: "Cuối bài luôn gắn nhãn phân loại, trích nguồn minh bạch và có nút báo lỗi số liệu." },
   ],
 };
 

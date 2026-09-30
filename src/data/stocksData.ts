@@ -1,0 +1,312 @@
+export interface StockInfo {
+  ticker: string;
+  name: string;
+  exchange: "HOSE" | "HNX" | "UPCOM";
+  industry: string;
+  price: string;
+  change: string;
+  changePercent: string;
+  isPositive: boolean;
+  marketCap: string;
+  pe: string;
+  pb: string;
+  roe: string;
+  grossMargin: string;
+  netMargin: string;
+  dividend: string;
+  high52w: string;
+  low52w: string;
+  volume: string;
+  sparkline: number[];
+  overview: string;
+}
+
+export const STOCKS_DATA: Record<string, StockInfo> = {
+  HPG: {
+    ticker: "HPG",
+    name: "CTCP Tập đoàn Hòa Phát",
+    exchange: "HOSE",
+    industry: "Thép & Vật liệu xây dựng",
+    price: "28.450 đ",
+    change: "+350 đ",
+    changePercent: "+1.25%",
+    isPositive: true,
+    marketCap: "182.500 tỷ đ",
+    pe: "12.8x",
+    pb: "1.65x",
+    roe: "14.2%",
+    grossMargin: "13.8%",
+    netMargin: "8.6%",
+    dividend: "5 - 10% tiền mặt",
+    high52w: "31.200 đ",
+    low52w: "23.400 đ",
+    volume: "24.5M",
+    sparkline: [26.8, 27.1, 26.9, 27.5, 27.3, 27.8, 28.1, 28.0, 28.3, 28.45],
+    overview:
+      "Tập đoàn sản xuất thép số 1 Đông Nam Á với chuỗi giá trị khép kín từ thượng nguồn lò cao (Dung Quất 1 & 2) đến hạ nguồn ống thép, tôn mạ và nông nghiệp.",
+  },
+  VCB: {
+    ticker: "VCB",
+    name: "Ngân hàng TMCP Ngoại thương Việt Nam",
+    exchange: "HOSE",
+    industry: "Ngân hàng",
+    price: "91.200 đ",
+    change: "+600 đ",
+    changePercent: "+0.66%",
+    isPositive: true,
+    marketCap: "512.400 tỷ đ",
+    pe: "14.6x",
+    pb: "2.75x",
+    roe: "21.5%",
+    grossMargin: "3.2% (NIM)",
+    netMargin: "38.5%",
+    dividend: "Cổ tức tiền & cổ phiếu",
+    high52w: "96.500 đ",
+    low52w: "82.000 đ",
+    volume: "1.8M",
+    sparkline: [88.5, 89.0, 88.2, 89.6, 90.1, 90.0, 90.8, 91.0, 90.5, 91.2],
+    overview:
+      "Ngân hàng thương mại vốn hóa lớn nhất Việt Nam, dẫn đầu về chất lượng tài sản, tỷ lệ bao phủ nợ xấu cao nhất toàn ngành và chi phí vốn COF tối ưu nhờ CASA vững chắc.",
+  },
+  FPT: {
+    ticker: "FPT",
+    name: "CTCP FPT",
+    exchange: "HOSE",
+    industry: "Công nghệ thông tin & Viễn thông",
+    price: "134.500 đ",
+    change: "+1.200 đ",
+    changePercent: "+0.90%",
+    isPositive: true,
+    marketCap: "196.800 tỷ đ",
+    pe: "23.4x",
+    pb: "5.10x",
+    roe: "27.8%",
+    grossMargin: "38.2%",
+    netMargin: "14.8%",
+    dividend: "20% tiền mặt / năm",
+    high52w: "142.000 đ",
+    low52w: "92.500 đ",
+    volume: "3.2M",
+    sparkline: [122, 125, 128, 127, 130, 132, 131, 133, 133.5, 134.5],
+    overview:
+      "Tập đoàn công nghệ hàng đầu Việt Nam với tăng trưởng xuất khẩu phần mềm 2 chữ số tại các thị trường Nhật Bản, Mỹ, EU, đồng thời tiên phong mở rộng mảng bán dẫn và AI.",
+  },
+  VNM: {
+    ticker: "VNM",
+    name: "CTCP Sữa Việt Nam (Vinamilk)",
+    exchange: "HOSE",
+    industry: "Thực phẩm & Đồ uống",
+    price: "67.800 đ",
+    change: "-200 đ",
+    changePercent: "-0.29%",
+    isPositive: false,
+    marketCap: "141.700 tỷ đ",
+    pe: "15.2x",
+    pb: "4.15x",
+    roe: "26.4%",
+    grossMargin: "41.6%",
+    netMargin: "14.9%",
+    dividend: "38.5% tiền mặt",
+    high52w: "74.500 đ",
+    low52w: "63.200 đ",
+    volume: "2.5M",
+    sparkline: [69.2, 68.8, 68.5, 68.0, 67.5, 67.2, 67.9, 68.1, 67.6, 67.8],
+    overview:
+      "Doanh nghiệp sữa dẫn đầu thị phần trong nước với hệ thống trang trại chuẩn quốc tế, dòng tiền dồi dào và chính sách cổ tức tiền mặt đều đặn qua nhiều năm.",
+  },
+  MWG: {
+    ticker: "MWG",
+    name: "CTCP Đầu tư Thế Giới Di Động",
+    exchange: "HOSE",
+    industry: "Bán lẻ",
+    price: "64.200 đ",
+    change: "+800 đ",
+    changePercent: "+1.26%",
+    isPositive: true,
+    marketCap: "93.900 tỷ đ",
+    pe: "18.5x",
+    pb: "3.20x",
+    roe: "18.9%",
+    grossMargin: "21.4%",
+    netMargin: "3.8%",
+    dividend: "5% tiền mặt",
+    high52w: "68.500 đ",
+    low52w: "42.000 đ",
+    volume: "6.8M",
+    sparkline: [58.0, 59.5, 61.0, 60.2, 62.5, 63.0, 62.8, 63.5, 63.8, 64.2],
+    overview:
+      "Nhà bán lẻ công nghệ và thực phẩm hàng đầu; chuỗi Bách Hóa Xanh đã đạt điểm hòa vốn cấp cửa hàng và bắt đầu đóng góp lợi nhuận ròng vào tập đoàn.",
+  },
+  TCB: {
+    ticker: "TCB",
+    name: "Ngân hàng TMCP Kỹ thương Việt Nam",
+    exchange: "HOSE",
+    industry: "Ngân hàng",
+    price: "24.650 đ",
+    change: "+150 đ",
+    changePercent: "+0.61%",
+    isPositive: true,
+    marketCap: "173.800 tỷ đ",
+    pe: "7.9x",
+    pb: "1.15x",
+    roe: "16.8%",
+    grossMargin: "4.1% (NIM)",
+    netMargin: "36.2%",
+    dividend: "15% tiền mặt",
+    high52w: "26.800 đ",
+    low52w: "18.500 đ",
+    volume: "12.4M",
+    sparkline: [22.5, 23.0, 22.8, 23.6, 24.1, 23.9, 24.2, 24.5, 24.4, 24.65],
+    overview:
+      "Ngân hàng tư nhân dẫn đầu về tỷ lệ CASA, thế mạnh vượt trội ở mảng tư vấn tài chính, dịch vụ ngân hàng đầu tư và phân khúc khách hàng thu nhập cao.",
+  },
+  MBB: {
+    ticker: "MBB",
+    name: "Ngân hàng TMCP Quân đội",
+    exchange: "HOSE",
+    industry: "Ngân hàng",
+    price: "25.100 đ",
+    change: "+200 đ",
+    changePercent: "+0.80%",
+    isPositive: true,
+    marketCap: "132.500 tỷ đ",
+    pe: "6.8x",
+    pb: "1.20x",
+    roe: "22.1%",
+    grossMargin: "4.6% (NIM)",
+    netMargin: "35.8%",
+    dividend: "Cổ tức tiền & cổ phiếu",
+    high52w: "26.500 đ",
+    low52w: "19.200 đ",
+    volume: "14.2M",
+    sparkline: [23.1, 23.5, 23.8, 24.0, 24.5, 24.2, 24.6, 24.8, 24.9, 25.1],
+    overview:
+      "Ngân hàng có tốc độ tăng trưởng khách hàng số nhanh nhất toàn ngành, biên lãi thuần NIM cao và sở hữu hệ sinh thái tài chính hoàn chỉnh (bảo hiểm, chứng khoán, tiêu dùng).",
+  },
+  SSI: {
+    ticker: "SSI",
+    name: "CTCP Chứng khoán SSI",
+    exchange: "HOSE",
+    industry: "Dịch vụ tài chính / Chứng khoán",
+    price: "34.800 đ",
+    change: "+400 đ",
+    changePercent: "+1.16%",
+    isPositive: true,
+    marketCap: "52.300 tỷ đ",
+    pe: "17.2x",
+    pb: "1.85x",
+    roe: "12.6%",
+    grossMargin: "42.0%",
+    netMargin: "34.5%",
+    dividend: "10% tiền mặt",
+    high52w: "38.200 đ",
+    low52w: "28.500 đ",
+    volume: "18.5M",
+    sparkline: [31.5, 32.2, 32.0, 33.1, 33.8, 33.5, 34.0, 34.2, 34.4, 34.8],
+    overview:
+      "Định chế chứng khoán lâu đời và vốn chủ sở hữu top đầu thị trường, hưởng lợi trực tiếp từ thanh khoản thị trường và câu chuyện nâng hạng TTCK Việt Nam.",
+  },
+  VHM: {
+    ticker: "VHM",
+    name: "CTCP Vinhomes",
+    exchange: "HOSE",
+    industry: "Bất động sản",
+    price: "43.500 đ",
+    change: "-150 đ",
+    changePercent: "-0.34%",
+    isPositive: false,
+    marketCap: "189.400 tỷ đ",
+    pe: "6.5x",
+    pb: "0.95x",
+    roe: "18.2%",
+    grossMargin: "28.5%",
+    netMargin: "22.4%",
+    dividend: "Tùy chính sách hàng năm",
+    high52w: "48.000 đ",
+    low52w: "36.200 đ",
+    volume: "8.9M",
+    sparkline: [44.2, 43.8, 43.0, 42.5, 43.1, 42.9, 43.4, 43.7, 43.6, 43.5],
+    overview:
+      "Nhà phát triển bất động sản quy mô lớn nhất Việt Nam với quỹ đất sạch khổng lồ, năng lực triển khai các đại đô thị tích hợp (Ocean Park, Smart City, Grand Park).",
+  },
+  PNJ: {
+    ticker: "PNJ",
+    name: "CTCP Vàng bạc Đá quý Phú Nhuận",
+    exchange: "HOSE",
+    industry: "Bán lẻ xa xỉ & Trang sức",
+    price: "96.400 đ",
+    change: "+500 đ",
+    changePercent: "+0.52%",
+    isPositive: true,
+    marketCap: "32.600 tỷ đ",
+    pe: "15.8x",
+    pb: "3.10x",
+    roe: "22.5%",
+    grossMargin: "17.5%",
+    netMargin: "5.8%",
+    dividend: "20% tiền mặt",
+    high52w: "105.000 đ",
+    low52w: "81.000 đ",
+    volume: "1.2M",
+    sparkline: [92.0, 93.5, 93.0, 94.2, 95.0, 94.8, 95.5, 96.0, 95.8, 96.4],
+    overview:
+      "Thương hiệu bán lẻ trang sức số 1 Việt Nam với mạng lưới hơn 400 cửa hàng, năng lực chế tác độc quyền và tỷ lệ tăng trưởng doanh số cửa hàng hiện hữu (SSSG) vượt trội.",
+  },
+  DGC: {
+    ticker: "DGC",
+    name: "CTCP Tập đoàn Hóa chất Đức Giang",
+    exchange: "HOSE",
+    industry: "Hóa chất cơ bản",
+    price: "112.500 đ",
+    change: "+1.500 đ",
+    changePercent: "+1.35%",
+    isPositive: true,
+    marketCap: "42.700 tỷ đ",
+    pe: "13.2x",
+    pb: "3.40x",
+    roe: "28.5%",
+    grossMargin: "34.8%",
+    netMargin: "26.1%",
+    dividend: "30% tiền mặt",
+    high52w: "128.000 đ",
+    low52w: "88.000 đ",
+    volume: "2.1M",
+    sparkline: [105, 107, 106, 108.5, 110, 109, 111, 111.5, 111, 112.5],
+    overview:
+      "Nhà sản xuất phốt pho vàng (P4) hàng đầu phục vụ chuỗi cung ứng chất bán dẫn và vi mạch toàn cầu; dự án Nghi Sơn mở ra động lực tăng trưởng dài hạn.",
+  },
+};
+
+export const KNOWN_TICKERS = Object.keys(STOCKS_DATA);
+
+// Fallback generator for unlisted tickers
+export function getStockByTicker(tickerParam: string): StockInfo {
+  const ticker = tickerParam.toUpperCase().trim();
+  if (STOCKS_DATA[ticker]) {
+    return STOCKS_DATA[ticker];
+  }
+
+  // Graceful fallback for any valid ticker code
+  return {
+    ticker,
+    name: `Công ty niêm yết mã ${ticker}`,
+    exchange: "HOSE",
+    industry: "Doanh nghiệp niêm yết",
+    price: "--",
+    change: "--",
+    changePercent: "--",
+    isPositive: true,
+    marketCap: "Đang cập nhật",
+    pe: "--",
+    pb: "--",
+    roe: "--",
+    grossMargin: "--",
+    netMargin: "--",
+    dividend: "Theo NQ ĐHĐCĐ",
+    high52w: "--",
+    low52w: "--",
+    volume: "--",
+    sparkline: [10, 10.5, 10.2, 10.8, 11.0, 10.9, 11.2, 11.4, 11.3, 11.5],
+    overview: `Trang tổng hợp số liệu công bố, chỉ số tài chính và các bài viết phân tích chuyên sâu về mã cổ phiếu ${ticker} trên sàn chứng khoán Việt Nam.`,
+  };
+}

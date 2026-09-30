@@ -38,8 +38,13 @@ export default function Navbar({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    const q = searchQuery.trim();
+    if (!q) return;
+    if (/^[a-zA-Z0-9]{3}$/.test(q)) {
+      router.push(`/ma/${q.toUpperCase()}`);
+    } else {
+      router.push(`/search?q=${encodeURIComponent(q)}`);
+    }
     setShowSearch(false);
   };
 
@@ -76,6 +81,16 @@ export default function Navbar({
               </Link>
             );
           })}
+          <Link
+            href="/thuat-ngu"
+            className={`text-[15px] font-semibold py-[21px] transition-colors border-b-[3px] hover:text-[#1E40AF] hover:no-underline flex items-center gap-1 ${
+              pathname === "/thuat-ngu"
+                ? "border-[#1E40AF] text-[#1E40AF]"
+                : "border-transparent text-[#4B5563]"
+            }`}
+          >
+            Từ điển BCTC
+          </Link>
         </nav>
 
         {/* Search & Actions */}

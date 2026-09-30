@@ -42,6 +42,14 @@ body {
   text-decoration: underline;
 }
 
+a.text-white,
+a.\!text-white,
+a[class*="text-white"],
+button.text-white,
+button[class*="text-white"] {
+  color: #FFFFFF !important;
+}
+
 * {
   box-sizing: border-box;
 }

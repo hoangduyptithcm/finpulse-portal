@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Top10Widget from "@/components/public/Top10Widget";
 import CommentsSection, { CommentItem } from "@/components/public/CommentsSection";
+import ArticleSourceBadge from "@/components/public/ArticleSourceBadge";
+import InteractiveFinancialCharts from "@/components/public/InteractiveFinancialCharts";
+import { enrichArticleContent } from "@/lib/autoLinker";
+import { KNOWN_TICKERS } from "@/data/stocksData";
 import { VCB_ARTICLE_DATA, KEY_STATS } from "@/data/portalData";
+import { BookOpen } from "lucide-react";
 
 const TOC = [
   { id: "muc-1", label: "1. Tôi nhìn vào số nào" },
@@ -206,6 +211,18 @@ export default function ArticleView({
               </button>
             </div>
 
+            {/* Article Type Badge & Report Error Button */}
+            <ArticleSourceBadge
+              type={
+                post?.category?.name?.includes("Quan sát")
+                  ? "OBSERVATION"
+                  : post?.category?.name?.includes("Điểm tin")
+                  ? "MARKET_DIGEST"
+                  : "ORIGINAL_ANALYSIS"
+              }
+              sourceName={post ? undefined : "BCTC VCB 2021-2026, HOSE"}
+            />
+
             {/* "Trả lời ngắn" Callout Box (chỉ hiển thị khi có phần tóm tắt riêng biệt cho bài mẫu) */}
             {!post && data.shortAnswer && (
               <div className="bg-[#16181D] text-[#F7F5F0] p-6 sm:p-6.5 flex flex-col gap-3 rounded-[2px]">
@@ -230,7 +247,7 @@ export default function ArticleView({
               <div className="flex flex-col gap-6">
                 <div
                   className="font-serif leading-[1.75] text-[#16181D] flex flex-col gap-5.5 transition-all prose prose-lg max-w-none py-2 text-[18px] sm:text-[19px]"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
+                  dangerouslySetInnerHTML={{ __html: enrichArticleContent(post.content) }}
                 />
 
                 {/* Section Nguồn số liệu & Thời điểm ghi nhận */}
@@ -299,49 +316,12 @@ export default function ArticleView({
                 ))}
               </div>
 
-              {/* Bar Chart figure */}
-              <figure className="m-0 flex flex-col gap-3 font-sans bg-[#F9FAFB] p-5 border border-[#E5E7EB] rounded-[2px]">
-                <figcaption className="flex flex-col gap-0.5">
-                  <strong className="text-[16px] text-[#16181D]">
-                    Lợi nhuận trước thuế theo quý
-                  </strong>
-                  <span className="text-[13px] text-[#5E636B]">
-                    Nghìn tỷ đồng, hợp nhất
-                  </span>
-                </figcaption>
-
-                <div className="flex items-end gap-3 h-[190px] border-b border-[#16181D] pt-5">
-                  {data.qBars.map((b) => (
-                    <div
-                      key={b.m}
-                      className="flex-1 flex flex-col justify-end items-center gap-1.5 h-full"
-                    >
-                      <span className="text-[13px] font-semibold tabular-nums text-[#16181D]">
-                        {b.label}
-                      </span>
-                      <div
-                        className="w-full max-w-[56px] transition-all duration-300"
-                        style={{ height: b.h, backgroundColor: b.color }}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  {data.qBars.map((b) => (
-                    <span
-                      key={b.m}
-                      className="flex-1 text-center text-[13px] text-[#5E636B]"
-                    >
-                      {b.m}
-                    </span>
-                  ))}
-                </div>
-
-                <span className="text-[12px] text-[#5E636B]">
-                  Biểu đồ tự vẽ từ BCTC hợp nhất đã công bố [1]. Số liệu minh họa.
-                </span>
-              </figure>
+              {/* Interactive Financial Charts */}
+              <InteractiveFinancialCharts
+                title="Tăng trưởng Doanh thu & Lợi nhuận trước thuế VCB (2021 - 2026)"
+                subtitle="Nghìn tỷ đồng, BCTC hợp nhất kiểm toán (Rê chuột xem chi tiết số liệu)"
+                unit="nghìn tỷ đ"
+              />
 
               {/* Section 2 */}
               <h2
@@ -503,6 +483,57 @@ export default function ArticleView({
                 </span>
               ))}
             </div>
+
+            {/* Stock Profile & Glossary Navigation Cards */}
+            {(() => {
+              const fullText = `${data.title} ${data.excerpt} ${post?.content || ""}`;
+              const detectedTicker =
+                KNOWN_TICKERS.find((t) => new RegExp(`\\b${t}\\b`, "i").test(fullText)) ||
+                (post?.slug?.includes("vcb") || !post ? "VCB" : null);
+
+              return (
+                <div className="flex flex-col gap-3">
+                  {detectedTicker && (
+                    <div className="p-5 bg-[#EFF6FF] border border-[#BFDBFE] rounded-[4px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-extrabold text-[16px] bg-[#1E40AF] text-white px-2 py-0.5 rounded">
+                            {detectedTicker}
+                          </span>
+                          <span className="text-[14px] font-bold text-[#111827]">
+                            Xem hồ sơ tài chính & các chỉ số của mã {detectedTicker}
+                          </span>
+                        </div>
+                        <span className="text-[13px] text-[#4B5563]">
+                          Tra cứu nhanh P/E, P/B, ROE, biên lợi nhuận và toàn bộ bài viết phân tích về {detectedTicker}.
+                        </span>
+                      </div>
+                      <Link
+                        href={`/ma/${detectedTicker}`}
+                        style={{ color: "#ffffff", backgroundColor: "#1E40AF" }}
+                        className="px-4 py-2.5 bg-[#1E40AF] hover:bg-[#1E3A8A] !text-white text-[13px] font-bold rounded-[3px] transition-colors no-underline whitespace-nowrap shrink-0 shadow-xs flex items-center gap-1"
+                      >
+                        <span>Hồ sơ {detectedTicker}</span>
+                        <span aria-hidden="true">→</span>
+                      </Link>
+                    </div>
+                  )}
+
+                  <div className="p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-[4px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[14px]">
+                    <div className="flex items-center gap-2 text-[#374151]">
+                      <BookOpen className="w-4 h-4 text-[#1E40AF] shrink-0" />
+                      <span>Chưa nắm rõ các thuật ngữ như <strong>NIM, CASA, NPL, P/B, ROE</strong>?</span>
+                    </div>
+                    <Link
+                      href="/thuat-ngu"
+                      className="text-[#1E40AF] font-bold hover:underline shrink-0 text-[13px]"
+                    >
+                      Tra cứu Từ điển BCTC →
+                    </Link>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Reader Feedback Widget */}
             <div className="flex flex-wrap items-center justify-between gap-3 p-4.5 sm:px-5 bg-[#F3F4F6] border border-[#E5E7EB] rounded-[2px]">

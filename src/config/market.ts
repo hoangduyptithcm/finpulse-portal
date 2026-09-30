@@ -52,11 +52,18 @@ export const MARKET_CONFIG = {
     cryptoIndicesUrl:
       process.env.CRYPTO_INDICES_API_URL ||
       'https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT"]',
+    tickerQuoteEndpoint:
+      process.env.DOMESTIC_SECURITIES_QUOTE_URL ||
+      process.env.STOCK_QUOTE_API_URL ||
+      "",
     get stockEndpoint() {
       return this.stockIndicesUrl;
     },
     get cryptoEndpoint() {
       return this.cryptoIndicesUrl;
+    },
+    get tickerEndpoint() {
+      return this.tickerQuoteEndpoint;
     },
   },
 };

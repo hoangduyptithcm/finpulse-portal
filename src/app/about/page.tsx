@@ -26,11 +26,19 @@ export default function AboutPage() {
           <h1 className="m-0 font-serif font-bold text-[38px] sm:text-[44px] tracking-[-0.02em] text-[#16181D]">
             Về Nhịp đập tài chính
           </h1>
-          <p className="m-0 font-serif text-[19px] sm:text-[20px] leading-[1.55] text-[#2B2F36]">
-            Nhịp đập tài chính là sổ phân tích cá nhân của Minh Anh. Tôi viết quan điểm
-            của mình dựa trên số liệu công khai, không đăng lại hay tổng hợp tin
-            từ báo chí.
+          <p className="m-0 font-serif text-[18px] sm:text-[19px] leading-[1.6] text-[#2B2F36]">
+            Nhịp đập tài chính là sổ phân tích cá nhân của Minh Anh. Chúng tôi theo đuổi nguyên tắc <strong>minh bạch nguồn gốc dữ liệu tuyệt đối</strong>:
           </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[14px] leading-[1.55] text-[#374151]">
+            <div className="p-3.5 bg-[#EFF6FF] border border-[#BFDBFE] rounded-[3px]">
+              <strong className="text-[#1E40AF] block mb-1">🟢 Phân tích chuyên sâu & BCTC:</strong>
+              Tự tay bóc tách từ Báo cáo tài chính kiểm toán, nghị quyết công bố thông tin trên HOSE/HNX và Ủy ban Chứng khoán Nhà nước.
+            </div>
+            <div className="p-3.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-[3px]">
+              <strong className="text-[#111827] block mb-1">🔵 Điểm tin & Sự kiện thị trường:</strong>
+              Chắt lọc từ nguồn báo chí kinh tế chính thống (CafeF, VnEconomy...), luôn ghi rõ link nguồn trích dẫn, nói không với tin đồn vô căn cứ.
+            </div>
+          </div>
         </div>
 
         {/* Nguồn số liệu so sánh: Tôi dùng vs Tôi không dùng */}
