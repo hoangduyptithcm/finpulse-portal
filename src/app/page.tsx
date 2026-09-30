@@ -14,7 +14,10 @@ import {
 } from "@/data/portalData";
 import { ArrowRight, BookOpen, Clock, FileText } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+import { cache } from "react";
+import { withMemoryCache } from "@/lib/cache";
+
+export const revalidate = 60;
 
 export const metadata = {
   title: "Nhịp đập tài chính | Sổ phân tích thị trường & Doanh nghiệp",
@@ -22,39 +25,72 @@ export const metadata = {
     "Nhịp đập thị trường mỗi ngày & phân tích chuyên sâu doanh nghiệp niêm yết qua góc nhìn số liệu công bố thực tế.",
 };
 
-export default async function HomePage() {
-  const [publishedPosts, categoriesWithPosts] = await Promise.all([
-    prisma.post
-      .findMany({
-        where: { status: "PUBLISHED" },
-        include: { category: true },
-        orderBy: { createdAt: "desc" },
-        take: 12,
-      })
-      .catch(() => []),
-    prisma.category
-      .findMany({
-        orderBy: { order: "asc" },
-        include: {
-          posts: {
-            where: { status: "PUBLISHED" },
-            orderBy: { createdAt: "desc" },
-            take: 4,
+const getHomeData = cache(async () => {
+  return withMemoryCache("home-data", 60, async () => {
+    const [publishedPosts, categoriesWithPosts] = await Promise.all([
+      prisma.post
+        .findMany({
+          where: { status: "PUBLISHED" },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            excerpt: true,
+            coverImage: true,
+            featured: true,
+            views: true,
+            createdAt: true,
+            category: {
+              select: { name: true, slug: true },
+            },
           },
-        },
-      })
-      .catch(() => []),
-  ]);
+          orderBy: { createdAt: "desc" },
+          take: 12,
+        })
+        .catch(() => []),
+      prisma.category
+        .findMany({
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            posts: {
+              where: { status: "PUBLISHED" },
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                excerpt: true,
+                views: true,
+                createdAt: true,
+                coverImage: true,
+              },
+              orderBy: { createdAt: "desc" },
+              take: 4,
+            },
+          },
+        })
+        .catch(() => []),
+    ]);
+
+    return { publishedPosts, categoriesWithPosts };
+  });
+});
+
+export default async function HomePage() {
+  const { publishedPosts, categoriesWithPosts } = await getHomeData();
 
   const featuredPost =
     publishedPosts.find((p) => p.featured) || publishedPosts[0];
 
-  const featuredWords = (featuredPost?.content || featuredPost?.excerpt || "")
+  const featuredWords = (featuredPost?.excerpt || featuredPost?.title || "")
     .replace(/<[^>]*>/g, " ")
     .trim()
     .split(/\s+/)
     .filter(Boolean).length;
-  const featuredReadTime = Math.max(3, Math.min(12, Math.round(featuredWords / 160) || 4));
+  const featuredReadTime = Math.max(3, Math.min(12, Math.round(featuredWords / 15) || 4));
 
   const initialNavbarCategories = categoriesWithPosts.map((c) => ({
     id: c.id,
@@ -181,8 +217,8 @@ export default async function HomePage() {
               )}
               <div className="flex flex-col">
                 {c.posts.map((it, idx) => {
-                  const words = (it.content || it.excerpt || "").replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
-                  const readTime = Math.max(3, Math.min(12, Math.round(words / 160) || 4));
+                  const words = (it.excerpt || it.title || "").replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+                  const readTime = Math.max(3, Math.min(10, Math.round(words / 15) || 4));
                   const showSparkline = (c.slug === "vi-mo" || c.slug === "chung-khoan" || c.slug === "crypto") && idx === 0;
                   const isUp = it.title.toLowerCase().includes("tăng") || it.title.toLowerCase().includes("bứt phá") || it.title.toLowerCase().includes("kỷ lục") || !it.title.toLowerCase().includes("giảm");
 
@@ -304,8 +340,8 @@ export default async function HomePage() {
                     const d = new Date(n.createdAt);
                     const dayStr = d.getDate().toString().padStart(2, "0");
                     const monthStr = `T${d.getMonth() + 1}`;
-                    const words = (n.content || n.excerpt || "").replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
-                    const readTime = Math.max(3, Math.min(12, Math.round(words / 160) || 4));
+                    const words = (n.excerpt || n.title || "").replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+                    const readTime = Math.max(3, Math.min(10, Math.round(words / 15) || 4));
 
                     return (
                       <Link

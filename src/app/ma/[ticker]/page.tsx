@@ -21,21 +21,83 @@ import {
   Activity,
 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+import { cache } from "react";
+import { withMemoryCache } from "@/lib/cache";
+
+export const revalidate = 30;
 
 interface StockPageProps {
   params: Promise<{ ticker: string }>;
 }
+
+const getStockPageData = cache(async (upperTicker: string) => {
+  return withMemoryCache(`stock-quote-${upperTicker}`, 30, async () => {
+    const [liveQuote, staticStock] = await Promise.all([
+      fetchStockQuoteData(upperTicker),
+      Promise.resolve(getStockByTicker(upperTicker)),
+    ]);
+    return { liveQuote, staticStock };
+  });
+});
+
+const getStockPosts = cache(async (upperTicker: string) => {
+  return withMemoryCache(`stock-posts-${upperTicker}`, 60, async () => {
+    return prisma.post
+      .findMany({
+        where: {
+          status: "PUBLISHED",
+          OR: [
+            { title: { contains: upperTicker, mode: "insensitive" } },
+            { excerpt: { contains: upperTicker, mode: "insensitive" } },
+            {
+              tags: {
+                some: {
+                  tag: {
+                    name: { contains: upperTicker, mode: "insensitive" },
+                  },
+                },
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          views: true,
+          createdAt: true,
+          category: {
+            select: { name: true, slug: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      })
+      .catch(() => []);
+  });
+});
+
+const getGlobalCategories = cache(async () => {
+  return withMemoryCache("global-categories", 300, async () => {
+    return prisma.category
+      .findMany({
+        orderBy: { order: "asc" },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      })
+      .catch(() => []);
+  });
+});
 
 export async function generateMetadata({
   params,
 }: StockPageProps): Promise<Metadata> {
   const { ticker } = await params;
   const upperTicker = ticker.toUpperCase().trim();
-  const [liveQuote, staticStock] = await Promise.all([
-    fetchStockQuoteData(upperTicker),
-    Promise.resolve(getStockByTicker(upperTicker)),
-  ]);
+  const { liveQuote, staticStock } = await getStockPageData(upperTicker);
 
   const companyName = liveQuote?.companyNameVi || staticStock.name;
   const title = `Mã cổ phiếu ${upperTicker}: Chỉ số tài chính & Bài phân tích | ${companyName}`;
@@ -65,10 +127,11 @@ export default async function StockDetailPage({ params }: StockPageProps) {
     notFound();
   }
 
-  // Fetch real-time market quote & static fundamental profile in parallel
-  const [liveQuote, staticStock] = await Promise.all([
-    fetchStockQuoteData(upperTicker),
-    Promise.resolve(getStockByTicker(upperTicker)),
+  // Fetch real-time market quote, stock fundamental, posts, and navbar categories in parallel
+  const [{ liveQuote, staticStock }, posts, categories] = await Promise.all([
+    getStockPageData(upperTicker),
+    getStockPosts(upperTicker),
+    getGlobalCategories(),
   ]);
 
   // Determine effective display values
@@ -79,49 +142,6 @@ export default async function StockDetailPage({ params }: StockPageProps) {
   const changePercent = liveQuote?.changePercentFormatted || staticStock.changePercent;
   const isPositive = liveQuote ? liveQuote.isPositive : staticStock.isPositive;
   const volume = liveQuote?.volumeFormatted || staticStock.volume;
-
-  interface StockPost {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt?: string | null;
-    content?: string;
-    views: number;
-    createdAt: Date;
-    category?: { name: string; slug: string } | null;
-  }
-
-  // Fetch all articles referencing this stock
-  let posts: StockPost[] = [];
-  try {
-    posts = await prisma.post.findMany({
-      where: {
-        status: "PUBLISHED",
-        OR: [
-          { title: { contains: upperTicker, mode: "insensitive" } },
-          { excerpt: { contains: upperTicker, mode: "insensitive" } },
-          { content: { contains: upperTicker, mode: "insensitive" } },
-          {
-            tags: {
-              some: {
-                tag: {
-                  name: { contains: upperTicker, mode: "insensitive" },
-                },
-              },
-            },
-          },
-        ],
-      },
-      include: {
-        category: true,
-        author: { select: { name: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-  } catch (error) {
-    console.error("Error fetching stock posts:", error);
-    posts = [];
-  }
 
   // Calculate SVG sparkline coordinates
   const minVal = Math.min(...staticStock.sparkline);
@@ -141,7 +161,7 @@ export default async function StockDetailPage({ params }: StockPageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#111827]">
       <TopBar />
-      <Navbar />
+      <Navbar initialCategories={categories} />
       <MarketTickerBar />
 
       <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8 pb-20 flex flex-col gap-10">
@@ -337,12 +357,12 @@ export default async function StockDetailPage({ params }: StockPageProps) {
             {posts.length > 0 ? (
               <div className="flex flex-col gap-5">
                 {posts.map((p) => {
-                  const words = (p.content || p.excerpt || "")
+                  const words = (p.excerpt || p.title || "")
                     .replace(/<[^>]*>/g, " ")
                     .trim()
                     .split(/\s+/)
                     .filter(Boolean).length;
-                  const mins = Math.max(3, Math.min(12, Math.round(words / 160) || 4));
+                  const mins = Math.max(3, Math.min(10, Math.round(words / 15) || 4));
 
                   return (
                     <article

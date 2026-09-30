@@ -8,25 +8,79 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { BookOpen, Calendar, Eye, ArrowLeft } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+import { cache } from "react";
+import { withMemoryCache } from "@/lib/cache";
+
+export const revalidate = 60;
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
+const getCategoryWithPosts = cache(async (slug: string) => {
+  return withMemoryCache(`cat-posts-${slug}`, 60, async () => {
+    let category = await prisma.category.findUnique({
+      where: { slug },
+      include: {
+        posts: {
+          where: { status: "PUBLISHED" },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            excerpt: true,
+            views: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!category) {
+      category = await prisma.category.findFirst({
+        where: { slug: { equals: slug, mode: "insensitive" } },
+        include: {
+          posts: {
+            where: { status: "PUBLISHED" },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              excerpt: true,
+              views: true,
+              createdAt: true,
+            },
+            orderBy: { createdAt: "desc" },
+          },
+        },
+      });
+    }
+
+    return category;
+  });
+});
+
+const getGlobalCategories = cache(async () => {
+  return withMemoryCache("global-categories", 300, async () => {
+    return prisma.category
+      .findMany({
+        orderBy: { order: "asc" },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      })
+      .catch(() => []);
+  });
+});
+
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  let category = await prisma.category.findUnique({
-    where: { slug },
-  });
-
-  if (!category) {
-    category = await prisma.category.findFirst({
-      where: { slug: { equals: slug, mode: "insensitive" } },
-    });
-  }
+  const category = await getCategoryWithPosts(slug);
 
   if (!category) {
     return { title: "Chuyên mục | Nhịp đập tài chính" };
@@ -41,35 +95,10 @@ export async function generateMetadata({
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
 
-  let category = await prisma.category.findUnique({
-    where: { slug },
-    include: {
-      posts: {
-        where: { status: "PUBLISHED" },
-        include: {
-          category: true,
-          author: { select: { name: true } },
-        },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
-
-  if (!category) {
-    category = await prisma.category.findFirst({
-      where: { slug: { equals: slug, mode: "insensitive" } },
-      include: {
-        posts: {
-          where: { status: "PUBLISHED" },
-          include: {
-            category: true,
-            author: { select: { name: true } },
-          },
-          orderBy: { createdAt: "desc" },
-        },
-      },
-    });
-  }
+  const [category, allCategories] = await Promise.all([
+    getCategoryWithPosts(slug),
+    getGlobalCategories(),
+  ]);
 
   if (!category) {
     if (slug === "giai-thich-khai-niem" || slug === "checklist") {
@@ -86,7 +115,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <TopBar />
 
       {/* 2. Navbar */}
-      <Navbar />
+      <Navbar initialCategories={allCategories} />
 
       {/* 3. Main Category View */}
       <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-9 pb-16 flex flex-col gap-7">

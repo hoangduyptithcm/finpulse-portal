@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { slugify } from "@/lib/slugify";
 import { PostStatus } from "@prisma/client";
+import { invalidateMemoryCache } from "@/lib/cache";
 
 // --- QUẢN LÝ BÀI VIẾT ---
 
@@ -71,6 +72,7 @@ export async function createPost(formData: {
     },
   });
 
+  invalidateMemoryCache();
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/posts");
@@ -132,6 +134,7 @@ export async function updatePost(
     },
   });
 
+  invalidateMemoryCache();
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/posts");
@@ -149,6 +152,7 @@ export async function deletePost(id: string) {
 
   const post = await prisma.post.delete({ where: { id } });
 
+  invalidateMemoryCache();
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/posts");
@@ -185,6 +189,7 @@ export async function createCategory(data: {
     },
   });
 
+  invalidateMemoryCache();
   revalidatePath("/");
   revalidatePath("/admin/categories");
   revalidatePath("/admin/posts/new");
@@ -200,6 +205,7 @@ export async function deleteCategory(id: string) {
 
   await prisma.category.delete({ where: { id } });
 
+  invalidateMemoryCache();
   revalidatePath("/");
   revalidatePath("/admin/categories");
   revalidatePath("/admin/posts/new");

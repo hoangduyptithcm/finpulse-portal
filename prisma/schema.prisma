@@ -63,6 +63,9 @@ model Post {
   tags        PostTag[]
   comments    Comment[]
 
+  @@index([status, createdAt(sort: Desc)])
+  @@index([status, views(sort: Desc)])
+  @@index([categoryId, status, createdAt(sort: Desc)])
   @@map("posts")
 }
 

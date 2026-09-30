@@ -1,6 +1,6 @@
 import StockDetailPage, { generateMetadata } from "@/app/ma/[ticker]/page";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export { generateMetadata };
 export default StockDetailPage;

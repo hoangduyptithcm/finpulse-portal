@@ -7,19 +7,91 @@ import MarketTickerBar from "@/components/public/MarketTickerBar";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+import { cache } from "react";
+import { withMemoryCache } from "@/lib/cache";
+
+export const revalidate = 60;
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
+const getPostBySlug = cache(async (slug: string) => {
+  return withMemoryCache(`post-${slug}`, 60, async () => {
+    let post = await prisma.post.findUnique({
+      where: { slug },
+      include: {
+        category: true,
+        author: { select: { name: true } },
+      },
+    });
+
+    if (!post) {
+      post = await prisma.post.findFirst({
+        where: {
+          slug: {
+            equals: slug,
+            mode: "insensitive",
+          },
+        },
+        include: {
+          category: true,
+          author: { select: { name: true } },
+        },
+      });
+    }
+
+    return post;
+  });
+});
+
+const getRelatedPosts = cache(async (postId?: string) => {
+  return withMemoryCache(`related-posts-${postId || "default"}`, 60, async () => {
+    return prisma.post
+      .findMany({
+        where: {
+          status: "PUBLISHED",
+          ...(postId ? { NOT: { id: postId } } : {}),
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          createdAt: true,
+          category: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+      })
+      .catch(() => []);
+  });
+});
+
+const getGlobalCategories = cache(async () => {
+  return withMemoryCache("global-categories", 300, async () => {
+    return prisma.category
+      .findMany({
+        orderBy: { order: "asc" },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      })
+      .catch(() => []);
+  });
+});
+
 export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await prisma.post.findUnique({
-    where: { slug },
-  });
+  const post = await getPostBySlug(slug);
 
   if (post) {
     const postUrl = `https://finpulse.aas.ai.vn/posts/${slug}`;
@@ -35,8 +107,8 @@ export async function generateMetadata({
         description: desc,
         url: postUrl,
         type: "article",
-        publishedTime: post.createdAt.toISOString(),
-        modifiedTime: post.updatedAt.toISOString(),
+        publishedTime: new Date(post.createdAt).toISOString(),
+        modifiedTime: new Date(post.updatedAt).toISOString(),
         authors: ["Minh Anh"],
         images: post.coverImage
           ? [{ url: post.coverImage, alt: post.title }]
@@ -70,28 +142,10 @@ export async function generateMetadata({
 export default async function PostDetailPage({ params }: PostPageProps) {
   const { slug } = await params;
 
-  let post = await prisma.post.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      author: { select: { name: true } },
-    },
-  });
-
-  if (!post) {
-    post = await prisma.post.findFirst({
-      where: {
-        slug: {
-          equals: slug,
-          mode: "insensitive",
-        },
-      },
-      include: {
-        category: true,
-        author: { select: { name: true } },
-      },
-    });
-  }
+  const [post, categories] = await Promise.all([
+    getPostBySlug(slug),
+    getGlobalCategories(),
+  ]);
 
   // If not found in DB and not the default mock VCB slug, return 404
   if (!post && slug !== "vcb-co-dat-sau-bao-cao-quy-2") {
@@ -99,17 +153,7 @@ export default async function PostDetailPage({ params }: PostPageProps) {
   }
 
   const [relatedPosts, comments] = await Promise.all([
-    prisma.post
-      .findMany({
-        where: {
-          status: "PUBLISHED",
-          ...(post?.id ? { NOT: { id: post.id } } : {}),
-        },
-        include: { category: true },
-        orderBy: { createdAt: "desc" },
-        take: 3,
-      })
-      .catch(() => []),
+    getRelatedPosts(post?.id),
     post?.id
       ? prisma.comment
           .findMany({
@@ -176,7 +220,7 @@ export default async function PostDetailPage({ params }: PostPageProps) {
         </aside>
       )}
       <TopBar />
-      <Navbar />
+      <Navbar initialCategories={categories} />
       <MarketTickerBar />
       <ArticleView
         post={post || undefined}
