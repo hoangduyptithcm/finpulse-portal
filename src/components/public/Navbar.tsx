@@ -12,12 +12,18 @@ interface CategoryNav {
   slug: string;
 }
 
-export default function Navbar() {
+export default function Navbar({
+  initialCategories,
+}: {
+  initialCategories?: CategoryNav[];
+} = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categories, setCategories] = useState<CategoryNav[]>(CATEGORIES);
+  const [categories, setCategories] = useState<CategoryNav[]>(
+    initialCategories || CATEGORIES
+  );
 
   useEffect(() => {
     fetch("/api/categories")

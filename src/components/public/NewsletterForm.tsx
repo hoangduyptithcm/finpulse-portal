@@ -36,9 +36,16 @@ export default function NewsletterForm() {
           </button>
         </form>
       )}
-      <span className="text-[13px] text-[#5E636B]">
-        Một email mỗi tuần. Hủy bất cứ lúc nào.
-      </span>
+      <div className="flex items-center gap-2 text-[13px] text-[#4B5563] pt-0.5">
+        <div className="flex -space-x-1.5 overflow-hidden">
+          <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-[#0A7A45] text-white text-[9px] font-bold text-center leading-5">MA</span>
+          <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-[#133A63] text-white text-[9px] font-bold text-center leading-5">HN</span>
+          <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-[#D97706] text-white text-[9px] font-bold text-center leading-5">VT</span>
+        </div>
+        <span>
+          <strong>1.250+</strong> nhà đầu tư & chuyên viên đang theo dõi · Hủy bất cứ lúc nào.
+        </span>
+      </div>
     </div>
   );
 }

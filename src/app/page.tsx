@@ -6,6 +6,7 @@ import NewsletterForm from "@/components/public/NewsletterForm";
 import Top10Widget from "@/components/public/Top10Widget";
 import MarketTickerBar from "@/components/public/MarketTickerBar";
 import MarketWatchlist from "@/components/public/MarketWatchlist";
+import MiniSparkline from "@/components/public/MiniSparkline";
 import { prisma } from "@/lib/prisma";
 import {
   KEY_STATS,
@@ -16,9 +17,9 @@ import { ArrowRight, BookOpen, Clock, FileText } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Nhịp đập tài chính | Sổ phân tích của Minh Anh",
+  title: "Nhịp đập tài chính | Sổ phân tích thị trường & Doanh nghiệp",
   description:
-    "Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, trả lời bằng số liệu công bố. Sổ ghi chép cá nhân, không phải tin tức hay lời khuyên đầu tư.",
+    "Nhịp đập thị trường mỗi ngày & phân tích chuyên sâu doanh nghiệp niêm yết qua góc nhìn số liệu công bố thực tế.",
 };
 
 export default async function HomePage() {
@@ -48,13 +49,32 @@ export default async function HomePage() {
   const featuredPost =
     publishedPosts.find((p) => p.featured) || publishedPosts[0];
 
+  const featuredWords = (featuredPost?.content || featuredPost?.excerpt || "")
+    .replace(/<[^>]*>/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+  const featuredReadTime = Math.max(3, Math.min(12, Math.round(featuredWords / 160) || 4));
+
+  const initialNavbarCategories = categoriesWithPosts.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+  }));
+
+  // Filter categories with at least 2 posts to prevent orphaned 1-post columns
+  const visibleCategories = categoriesWithPosts.filter((c) => c.posts.length >= 2);
+
+  // Recent notes excluding the featured article to avoid duplication
+  const recentNotes = publishedPosts.filter((p) => p.id !== featuredPost?.id).slice(0, 5);
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#111827]">
       {/* 1. Disclaimer Top Bar */}
       <TopBar />
 
-      {/* 2. Brand Sticky Navbar */}
-      <Navbar />
+      {/* 2. Brand Sticky Navbar with preloaded categories to prevent hydration flicker */}
+      <Navbar initialCategories={initialNavbarCategories} />
 
       {/* 2.1 Live Market Ticker */}
       <MarketTickerBar />
@@ -66,10 +86,10 @@ export default async function HomePage() {
           {/* Left Column: Mission statement & Newsletter */}
           <div className="flex-1 basis-[420px] flex flex-col gap-5 min-w-0">
             <h1 className="m-0 font-serif font-bold text-[32px] sm:text-[40px] lg:text-[46px] leading-[1.12] tracking-[-0.02em] text-balance text-[#111827]">
-              Mỗi tuần một câu hỏi về doanh nghiệp niêm yết, trả lời bằng số liệu công bố.
+              Nhịp thị trường mỗi ngày qua góc nhìn số liệu.
             </h1>
             <p className="m-0 text-[17px] leading-[1.6] text-[#4B5563] max-w-[560px]">
-              Tôi đọc báo cáo tài chính, nghị quyết ĐHĐCĐ và dữ liệu HOSE/HNX, rồi ghi lại cách tôi hiểu những con số đó. Đây là sổ ghi chép cá nhân, không phải tin tức hay lời khuyên đầu tư.
+              Ghi chép độc lập về dữ liệu vĩ mô, biến động dòng tiền và bóc tách báo cáo tài chính doanh nghiệp niêm yết. Số liệu công bố thực tế, minh bạch nguồn trích dẫn, không khuyến nghị đầu tư.
             </p>
             <NewsletterForm />
           </div>
@@ -80,19 +100,28 @@ export default async function HomePage() {
               href={`/posts/${featuredPost.slug}`}
               className="flex-1 basis-[440px] min-w-0 flex flex-col gap-4 p-7 bg-white border border-[#111827] text-[#111827] no-underline hover:no-underline transition-all duration-200 hover:shadow-[6px_6px_0_#111827] group"
             >
-              <span className="text-[13px] text-[#6B7280]">
-                <strong className="text-[#1E40AF]">
-                  Bài mới nhất · {featuredPost.category?.name || "Báo cáo"}
-                </strong>{" "}
-                ·{" "}
-                {new Date(featuredPost.createdAt).toLocaleDateString("vi-VN", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })}{" "}
-                · {featuredPost.views.toLocaleString("vi-VN")} lượt xem
-              </span>
-              <span className="font-serif font-bold text-[26px] sm:text-[30px] lg:text-[34px] leading-[1.15] tracking-[-0.015em] group-hover:text-[#1E40AF] transition-colors">
+              <div className="flex items-center justify-between gap-2 text-[13px] text-[#6B7280]">
+                <span>
+                  <strong className="text-[#1E40AF]">
+                    Bài mới nhất · {featuredPost.category?.name || "Báo cáo"}
+                  </strong>{" "}
+                  ·{" "}
+                  {new Date(featuredPost.createdAt).toLocaleDateString("vi-VN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+                </span>
+                <span className="flex items-center gap-2 font-medium text-[#4B5563]">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-[#9CA3AF]" />
+                    {featuredReadTime} phút đọc
+                  </span>
+                  <span>·</span>
+                  <span>{featuredPost.views.toLocaleString("vi-VN")} lượt đọc</span>
+                </span>
+              </div>
+              <span className="font-serif font-bold text-[26px] sm:text-[30px] lg:text-[34px] leading-[1.15] tracking-[-0.015em] text-[#111827] group-hover:text-[#1E40AF] transition-colors">
                 {featuredPost.title}
               </span>
               {featuredPost.excerpt && (
@@ -128,48 +157,67 @@ export default async function HomePage() {
         </section>
 
         {/* Section 2: Category Columns Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {categoriesWithPosts.map((c) => (
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {visibleCategories.map((c) => (
             <div
               key={c.id}
-              className="flex flex-col gap-1.5 border-t-2 border-[#111827] pt-3"
+              className="flex flex-col gap-2 border-t-2 border-[#111827] pt-3.5"
             >
-              <Link
-                href={`/categories/${c.slug}`}
-                className="font-serif font-bold text-[22px] text-[#111827] hover:text-[#1E40AF] transition-colors"
-              >
-                {c.name}
-              </Link>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <Link
+                  href={`/categories/${c.slug}`}
+                  className="font-serif font-bold text-[22px] text-[#111827] hover:text-[#1E40AF] transition-colors"
+                >
+                  {c.name}
+                </Link>
+                <span className="text-[12px] font-semibold text-[#6B7280]">
+                  {c.posts.length} bài
+                </span>
+              </div>
               {c.description && (
-                <span className="text-[13px] text-[#6B7280] leading-[1.45] mb-1.5 line-clamp-2">
+                <span className="text-[13px] text-[#6B7280] leading-[1.45] mb-1 line-clamp-2">
                   {c.description}
                 </span>
               )}
               <div className="flex flex-col">
-                {c.posts.length === 0 ? (
-                  <span className="py-4 text-[13px] text-[#9CA3AF] italic">
-                    Đang cập nhật bài viết mới...
-                  </span>
-                ) : (
-                  c.posts.map((it) => (
+                {c.posts.map((it, idx) => {
+                  const words = (it.content || it.excerpt || "").replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+                  const readTime = Math.max(3, Math.min(12, Math.round(words / 160) || 4));
+                  const showSparkline = (c.slug === "vi-mo" || c.slug === "chung-khoan" || c.slug === "crypto") && idx === 0;
+                  const isUp = it.title.toLowerCase().includes("tăng") || it.title.toLowerCase().includes("bứt phá") || it.title.toLowerCase().includes("kỷ lục") || !it.title.toLowerCase().includes("giảm");
+
+                  return (
                     <Link
                       key={it.id}
                       href={`/posts/${it.slug}`}
-                      className="flex flex-col gap-1 py-3 border-t border-[#E5E7EB] text-[#111827] hover:text-[#1E40AF] hover:no-underline transition-colors group"
+                      className="flex flex-col gap-1.5 py-3 border-t border-[#E5E7EB] text-[#111827] hover:no-underline transition-colors group"
                     >
-                      <span className="font-serif font-semibold text-[16px] leading-[1.35] group-hover:text-[#1E40AF] line-clamp-2">
-                        {it.title}
-                      </span>
-                      <span className="text-[12px] text-[#6B7280]">
-                        {new Date(it.createdAt).toLocaleDateString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                        })}{" "}
-                        · {it.views.toLocaleString("vi-VN")} lượt xem
-                      </span>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-serif font-semibold text-[16px] leading-[1.35] text-[#111827] group-hover:text-[#1E40AF] transition-colors line-clamp-2">
+                          {it.title}
+                        </span>
+                        {showSparkline && (
+                          <MiniSparkline trend={isUp ? "up" : "down"} className="mt-0.5" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-[12px] text-[#6B7280]">
+                        <span>
+                          {new Date(it.createdAt).toLocaleDateString("vi-VN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                          })}
+                        </span>
+                        <span>·</span>
+                        <span className="flex items-center gap-1 font-medium">
+                          <Clock className="w-3 h-3 text-[#9CA3AF]" />
+                          {readTime} phút đọc
+                        </span>
+                        <span>·</span>
+                        <span>{it.views.toLocaleString("vi-VN")} lượt đọc</span>
+                      </div>
                     </Link>
-                  ))
-                )}
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -247,15 +295,17 @@ export default async function HomePage() {
               </div>
 
               <div className="flex flex-col">
-                {publishedPosts.length === 0 ? (
+                {recentNotes.length === 0 ? (
                   <div className="py-8 text-center text-[14px] text-[#6B7280] italic">
                     Chưa có ghi chép mới. Các phân tích sẽ xuất hiện tại đây khi xuất bản.
                   </div>
                 ) : (
-                  publishedPosts.slice(0, 5).map((n) => {
+                  recentNotes.map((n) => {
                     const d = new Date(n.createdAt);
                     const dayStr = d.getDate().toString().padStart(2, "0");
                     const monthStr = `T${d.getMonth() + 1}`;
+                    const words = (n.content || n.excerpt || "").replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+                    const readTime = Math.max(3, Math.min(12, Math.round(words / 160) || 4));
 
                     return (
                       <Link
@@ -272,7 +322,7 @@ export default async function HomePage() {
                           </span>
                         </span>
                         <span className="flex flex-col gap-1.5">
-                          <span className="font-serif font-bold text-[19px] leading-[1.3] group-hover:text-[#1E40AF] transition-colors line-clamp-1">
+                          <span className="font-serif font-bold text-[19px] leading-[1.3] text-[#111827] group-hover:text-[#1E40AF] transition-colors line-clamp-1">
                             {n.title}
                           </span>
                           {n.excerpt && (
@@ -280,6 +330,16 @@ export default async function HomePage() {
                               {n.excerpt}
                             </span>
                           )}
+                          <div className="flex items-center gap-2 text-[12px] text-[#6B7280]">
+                            <span>{n.category?.name || "Ghi chép"}</span>
+                            <span>·</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-[#9CA3AF]" />
+                              {readTime} phút đọc
+                            </span>
+                            <span>·</span>
+                            <span>{n.views.toLocaleString("vi-VN")} lượt đọc</span>
+                          </div>
                         </span>
                       </Link>
                     );

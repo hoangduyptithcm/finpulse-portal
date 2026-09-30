@@ -45,28 +45,40 @@ export interface RecentNote {
 
 export const CATEGORIES: NavCategory[] = [
   {
+    name: "Vĩ mô & Tiền tệ",
+    slug: "vi-mo",
+    desc: "Lãi suất, Fed, Ngân hàng Nhà nước và tỷ giá.",
+    count: 12,
+  },
+  {
+    name: "Chứng khoán",
+    slug: "chung-khoan",
+    desc: "Thị trường VN-Index, VN30 và cổ phiếu.",
+    count: 6,
+  },
+  {
     name: "Đọc BCTC",
     slug: "doc-bctc",
-    desc: "Tách số từ báo cáo, so sánh nhiều kỳ.",
-    count: 18,
+    desc: "Tách số từ báo cáo tài chính, so sánh nhiều kỳ.",
+    count: 5,
   },
   {
-    name: "Giải thích khái niệm",
-    slug: "giai-thich-khai-niem",
-    desc: "P/E, biên lợi nhuận, dòng tiền, thuế.",
-    count: 14,
+    name: "Tiền mã hóa",
+    slug: "crypto",
+    desc: "Thị trường tiền mã hóa và tài sản số.",
+    count: 3,
   },
   {
-    name: "Nhật ký quan sát",
+    name: "Ghi chép quan sát",
     slug: "nhat-ky-quan-sat",
-    desc: "Hôm nay tôi chú ý điều gì, và vì sao.",
-    count: 27,
+    desc: "Nhật ký quan sát thị trường và dòng tiền thực tế.",
+    count: 3,
   },
   {
-    name: "Checklist",
-    slug: "checklist",
-    desc: "Khung phân tích tôi dùng lại nhiều lần.",
-    count: 9,
+    name: "Hỏi & Đáp",
+    slug: "hoi-dap",
+    desc: "Mỗi tuần một câu hỏi về doanh nghiệp niêm yết.",
+    count: 3,
   },
 ];
 

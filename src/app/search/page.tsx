@@ -147,6 +147,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         </span>
                         <span>·</span>
                         <span>{dateStr}</span>
+                        <span>·</span>
+                        <span>{p.views.toLocaleString("vi-VN")} lượt đọc</span>
                       </span>
 
                       <span className="font-serif font-bold text-[20px] sm:text-[23px] leading-[1.25] group-hover:text-[#1E40AF] transition-colors">
@@ -158,14 +160,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                           {p.excerpt}
                         </span>
                       )}
+
+                      <span className="text-[12px] font-semibold text-[#1E40AF] group-hover:underline flex items-center gap-1 pt-1">
+                        Đọc toàn văn bài phân tích →
+                      </span>
                     </span>
 
-                    <span className="flex flex-col justify-center items-center gap-1 p-3.5 bg-[#F9FAFB] border border-[#F3F4F6] self-start rounded-[4px] text-center">
-                      <span className="text-[20px] font-bold tabular-nums leading-tight text-[#111827]">
-                        {p.views.toLocaleString("vi-VN")}
+                    <span className="hidden sm:flex flex-col justify-center items-center gap-1.5 p-3.5 bg-[#F9FAFB] border border-[#E5E7EB] self-start rounded-[4px] text-center w-full">
+                      <span className="text-[12px] font-bold text-[#1E40AF] uppercase tracking-wider">
+                        Phân tích
                       </span>
                       <span className="text-[12px] text-[#6B7280]">
-                        lượt xem
+                        Số liệu đầy đủ
                       </span>
                     </span>
                   </Link>

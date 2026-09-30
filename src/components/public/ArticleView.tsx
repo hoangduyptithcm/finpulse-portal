@@ -192,7 +192,7 @@ export default function ArticleView({
                     {data.author}
                   </Link>
                   <span className="text-[#6B7280]">
-                    {data.date} · {views > 0 ? `${views.toLocaleString("vi-VN")} lượt xem · ` : ""}{data.readTime} · {data.metaNote}
+                    {data.date} · {data.readTime} · {views.toLocaleString("vi-VN")} lượt đọc
                   </span>
                 </span>
               </div>
@@ -227,10 +227,36 @@ export default function ArticleView({
 
             {/* Article Body */}
             {post ? (
-              <div
-                className="font-serif leading-[1.75] text-[#16181D] flex flex-col gap-5.5 transition-all prose prose-lg max-w-none py-2 text-[18px] sm:text-[19px]"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+              <div className="flex flex-col gap-6">
+                <div
+                  className="font-serif leading-[1.75] text-[#16181D] flex flex-col gap-5.5 transition-all prose prose-lg max-w-none py-2 text-[18px] sm:text-[19px]"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
+
+                {/* Section Nguồn số liệu & Thời điểm ghi nhận */}
+                <div className="p-5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-[4px] flex flex-col gap-3 font-sans mt-4">
+                  <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-2">
+                    <span className="text-[14px] font-bold text-[#111827]">
+                      Nguồn số liệu & Thời điểm ghi nhận
+                    </span>
+                    <span className="text-[12px] text-[#6B7280]">
+                      Cập nhật: {new Date(post.createdAt).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                    </span>
+                  </div>
+                  <p className="m-0 text-[13px] leading-[1.6] text-[#4B5563]">
+                    Số liệu trong bài được trích xuất từ các kênh công bố thông tin chính thức: HOSE/HNX, Ủy ban Chứng khoán Nhà nước, Báo cáo tài chính doanh nghiệp, hoặc dữ liệu thị trường vĩ mô độc lập. Tác giả tự bóc tách và phân tích theo phương pháp độc lập.
+                  </p>
+                  <div className="flex items-center gap-3 pt-1 text-[13px] font-semibold text-[#1E40AF]">
+                    <Link href="/about#nguon-so-lieu" className="hover:underline">
+                      Xem nguyên tắc nguồn số liệu →
+                    </Link>
+                    <span className="text-[#D1D5DB]">·</span>
+                    <Link href="/about#mien-tru" className="text-[#6B7280] hover:text-[#111827]">
+                      Miễn trừ trách nhiệm
+                    </Link>
+                  </div>
+                </div>
+              </div>
             ) : (
             <div
               className="font-serif leading-[1.75] text-[#16181D] flex flex-col gap-5.5 transition-all text-[18px] sm:text-[19px]"

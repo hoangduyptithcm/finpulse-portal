@@ -5,7 +5,7 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import Top10Widget from "@/components/public/Top10Widget";
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BookOpen, Calendar, Eye, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -72,6 +72,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   if (!category) {
+    if (slug === "giai-thich-khai-niem" || slug === "checklist") {
+      redirect("/categories/doc-bctc");
+    }
     notFound();
   }
 
@@ -157,6 +160,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                         </span>
                         <span>·</span>
                         <span>{dateStr}</span>
+                        <span>·</span>
+                        <span>{p.views.toLocaleString("vi-VN")} lượt đọc</span>
                       </span>
 
                       <span className="font-serif font-bold text-[20px] sm:text-[23px] leading-[1.25] group-hover:text-[#1E40AF] transition-colors">
@@ -170,12 +175,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                       )}
                     </span>
 
-                    <span className="flex flex-col justify-center items-center gap-1 p-3.5 bg-[#F9FAFB] border border-[#F3F4F6] self-start rounded-[4px] text-center">
-                      <span className="text-[20px] font-bold tabular-nums leading-tight text-[#111827]">
-                        {p.views.toLocaleString("vi-VN")}
+                    <span className="hidden sm:flex flex-col justify-center items-end gap-1.5 self-center text-right shrink-0">
+                      <span className="text-[14px] font-semibold text-[#111827] flex items-center gap-1.5 group-hover:text-[#1E40AF] transition-colors">
+                        <span>Đọc toàn văn</span>
+                        <ArrowLeft className="w-3.5 h-3.5 rotate-180 group-hover:translate-x-1 transition-transform" />
                       </span>
                       <span className="text-[12px] text-[#6B7280]">
-                        lượt xem
+                        Bóc tách số liệu
                       </span>
                     </span>
                   </Link>

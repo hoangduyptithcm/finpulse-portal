@@ -10,7 +10,8 @@ interface TopArticleItem {
   title: string;
   slug: string;
   cat: string;
-  views: string;
+  readTime?: string;
+  views?: string;
   numColor: string;
 }
 
@@ -47,7 +48,7 @@ export default function Top10Widget() {
     <div className="flex flex-col">
       <div className="flex flex-wrap justify-between items-baseline gap-x-3 gap-y-1 pb-2.5 border-b-2 border-[#111827]">
         <h2 className="m-0 text-[15px] font-bold whitespace-nowrap text-[#111827]">
-          Top được đọc nhiều
+          Tiêu điểm phân tích
         </h2>
         <span className="flex gap-3">
           <button
@@ -98,11 +99,11 @@ export default function Top10Widget() {
                 {p.n}
               </span>
               <span className="flex flex-col gap-[3px] min-w-0">
-                <span className="text-[14px] font-semibold leading-[1.4] group-hover:text-[#1E40AF] line-clamp-2">
+                <span className="text-[14px] font-semibold leading-[1.4] text-[#111827] group-hover:text-[#1E40AF] transition-colors line-clamp-2">
                   {p.title}
                 </span>
                 <span className="text-[12px] text-[#6B7280]">
-                  {p.cat} · {p.views} lượt xem
+                  {p.cat} · {p.readTime || "4 phút đọc"}{p.views ? ` · ${p.views} lượt đọc` : ""}
                 </span>
               </span>
             </Link>

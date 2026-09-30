@@ -45,15 +45,20 @@ export async function GET(request: Request) {
       });
     }
 
-    const items = posts.map((p, idx) => ({
-      id: p.id,
-      n: (idx + 1).toString().padStart(2, "0"),
-      title: p.title,
-      slug: p.slug,
-      cat: p.category?.name || "Phân tích",
-      views: p.views.toLocaleString("vi-VN"),
-      numColor: idx < 3 ? "#1E40AF" : "#6B7280",
-    }));
+    const items = posts.map((p, idx) => {
+      const words = (p.content || "").replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+      const mins = Math.max(3, Math.min(12, Math.round(words / 160)));
+      return {
+        id: p.id,
+        n: (idx + 1).toString().padStart(2, "0"),
+        title: p.title,
+        slug: p.slug,
+        cat: p.category?.name || "Phân tích",
+        readTime: `${mins} phút đọc`,
+        views: p.views.toLocaleString("vi-VN"),
+        numColor: idx < 3 ? "#111827" : "#6B7280",
+      };
+    });
 
     return NextResponse.json({ success: true, items });
   } catch (error) {

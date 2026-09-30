@@ -21,20 +21,14 @@ export default function MarketTickerBar() {
               }`}
             >
               <span className="font-semibold text-[#111827]">{item.name}</span>
-              <span
-                className={`tabular-nums transition-colors duration-300 ${
-                  item.flash === "up"
-                    ? "text-[#16A34A] font-bold"
-                    : item.flash === "down"
-                    ? "text-[#DC2626] font-bold"
-                    : "text-[#374151]"
-                }`}
-              >
+              <span className="tabular-nums font-semibold text-[#111827]">
                 {item.value}
               </span>
               <span
-                className={`font-semibold tabular-nums text-[12px] ${
-                  item.isUp ? "text-[#16A34A]" : "text-[#DC2626]"
+                className={`font-semibold tabular-nums text-[12px] px-1 py-0.2 rounded ${
+                  item.isUp
+                    ? "text-[#16A34A] bg-emerald-50"
+                    : "text-[#DC2626] bg-rose-50"
                 }`}
               >
                 {item.change}

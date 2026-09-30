@@ -36,15 +36,7 @@ export default function MarketWatchlist() {
               <td className="py-[9px] border-b border-[#E5E7EB] font-semibold text-[#111827]">
                 {t.name}
               </td>
-              <td
-                className={`py-[9px] border-b border-[#E5E7EB] text-right font-medium transition-colors duration-300 ${
-                  t.flash === "up"
-                    ? "text-[#16A34A] font-bold"
-                    : t.flash === "down"
-                    ? "text-[#DC2626] font-bold"
-                    : "text-[#374151]"
-                }`}
-              >
+              <td className="py-[9px] border-b border-[#E5E7EB] text-right font-semibold text-[#111827]">
                 {t.value}
               </td>
               <td

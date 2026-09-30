@@ -64,16 +64,16 @@ function decodeIndexRealtimeProtobuf(buf: Uint8Array): {
     if (wireType === 0) {
       const val = readVarint();
       if (fieldNo === 11) {
-        // indexValue (scaled)
-        result.indexValue = val > 10000 ? val / 100 : val;
+        // indexValue (scaled: integer with 3 decimal places e.g. 1777460 / 1000 = 1777.46)
+        result.indexValue = val > 50000 ? val / 1000 : val > 10000 ? val / 100 : val;
       } else if (fieldNo === 12) {
-        // change (sint32 zigzag)
+        // change (sint32 zigzag, scaled by 1000 or 100)
         const zz = decodeZigZag(val);
-        result.change = Math.abs(zz) > 50 ? zz / 100 : zz;
+        result.change = Math.abs(zz) > 500 ? zz / 1000 : Math.abs(zz) > 50 ? zz / 100 : zz;
       } else if (fieldNo === 13) {
-        // changePercent (sint32 zigzag)
+        // changePercent (sint32 zigzag, e.g. 320 / 1000 = 0.32%)
         const zz = decodeZigZag(val);
-        result.changePercent = Math.abs(zz) > 10 ? zz / 100 : zz;
+        result.changePercent = Math.abs(zz) > 100 ? zz / 1000 : Math.abs(zz) > 10 ? zz / 100 : zz;
       }
     } else if (wireType === 1) {
       pos += 8;
@@ -401,16 +401,18 @@ export function useMarketRealtime() {
                 );
 
                 setWatchList((prevList) =>
-                  prevList.map((item) =>
-                    item.name.includes(indexKey)
-                      ? {
-                          ...item,
-                          value: formattedPrice,
-                          change: formattedChange,
-                          color: isUp ? "#0A7A45" : "#C0271D",
-                        }
-                      : item
-                  )
+                  prevList.map((item) => {
+                    const isTarget =
+                      item.name === indexKey ||
+                      (indexKey === "HNX" && item.name === "HNX-Index");
+                    if (!isTarget) return item;
+                    return {
+                      ...item,
+                      value: formattedPrice,
+                      change: formattedChange,
+                      color: isUp ? "#0A7A45" : "#C0271D",
+                    };
+                  })
                 );
               }
             }
