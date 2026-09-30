@@ -1,6 +1,6 @@
-import StockDetailPage, { generateMetadata } from "@/app/ma/[ticker]/page";
+import StockDetailPage, { generateMetadata, generateStaticParams } from "@/app/ma/[ticker]/page";
 
 export const revalidate = 30;
 
-export { generateMetadata };
+export { generateMetadata, generateStaticParams };
 export default StockDetailPage;

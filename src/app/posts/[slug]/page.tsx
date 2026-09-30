@@ -87,6 +87,19 @@ const getGlobalCategories = cache(async () => {
   });
 });
 
+export async function generateStaticParams() {
+  const posts = await prisma.post
+    .findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true },
+    })
+    .catch(() => []);
+
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {

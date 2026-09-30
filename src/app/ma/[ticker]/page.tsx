@@ -92,6 +92,12 @@ const getGlobalCategories = cache(async () => {
   });
 });
 
+export async function generateStaticParams() {
+  return KNOWN_TICKERS.map((ticker) => ({
+    ticker,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: StockPageProps): Promise<Metadata> {
