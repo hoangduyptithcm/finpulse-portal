@@ -4,42 +4,80 @@ import path from "path";
 import fs from "fs/promises";
 import sharp from "sharp";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    const apiKey = req.headers.get("x-api-key") || req.headers.get("authorization")?.replace("Bearer ", "").trim();
+    const secret = process.env.API_SECRET_KEY || process.env.AUTH_SECRET || "finpulse_secret_crawler_2026";
+    const isApiKeyValid = Boolean(apiKey && apiKey === secret);
+
+    if (!session?.user && !isApiKeyValid) {
       return NextResponse.json(
-        { error: "Unauthorized: Vui lòng đăng nhập quyền Admin" },
+        { error: "Unauthorized: Vui lòng đăng nhập quyền Admin hoặc cung cấp API Key qua Header x-api-key" },
         { status: 401 }
       );
     }
 
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    const contentType = req.headers.get("content-type") || "";
+    let buffer: Buffer | null = null;
+    let originalName = "image";
 
-    if (!file) {
+    // 1. Nếu client gửi JSON chứa Base64 (phù hợp cho bot/crawler)
+    if (contentType.includes("application/json")) {
+      const body = await req.json().catch(() => ({}));
+      const rawBase64 = (body.image || body.base64 || body.file || "").trim();
+
+      if (!rawBase64) {
+        return NextResponse.json(
+          { error: "Vui lòng truyền chuỗi Base64 qua trường 'image' hoặc 'base64'" },
+          { status: 400 }
+        );
+      }
+
+      // Xóa tiền tố data:image/...;base64, nếu có
+      const matches = rawBase64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      const base64Data = matches ? matches[2] : rawBase64;
+      buffer = Buffer.from(base64Data, "base64");
+      if (body.filename) originalName = body.filename;
+    } else {
+      // 2. Nếu client gửi Multipart FormData (file nhị phân thông thường)
+      const formData = await req.formData();
+      const file = formData.get("file") as File | null;
+
+      if (!file) {
+        return NextResponse.json(
+          { error: "Không tìm thấy file tải lên" },
+          { status: 400 }
+        );
+      }
+
+      if (!file.type.startsWith("image/")) {
+        return NextResponse.json(
+          { error: "Định dạng file không hợp lệ, vui lòng chọn file ảnh" },
+          { status: 400 }
+        );
+      }
+
+      const bytes = await file.arrayBuffer();
+      buffer = Buffer.from(bytes);
+      originalName = file.name;
+    }
+
+    if (!buffer || buffer.length === 0) {
       return NextResponse.json(
-        { error: "Không tìm thấy file tải lên" },
+        { error: "Dữ liệu ảnh không hợp lệ hoặc bị rỗng" },
         { status: 400 }
       );
     }
-
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json(
-        { error: "Định dạng file không hợp lệ, vui lòng chọn file ảnh" },
-        { status: 400 }
-      );
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
 
     // Thư mục lưu trữ: public/uploads
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     await fs.mkdir(uploadDir, { recursive: true });
 
     // Tên file chuẩn hóa kèm timestamp
-    const safeName = file.name
+    const safeName = originalName
       .replace(/\.[^/.]+$/, "")
       .replace(/[^a-zA-Z0-9_-]/g, "_")
       .toLowerCase();
