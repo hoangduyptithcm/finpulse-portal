@@ -16,21 +16,36 @@ interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-const getPostBySlug = cache(async (slug: string) => {
-  return withMemoryCache(`post-${slug}`, 60, async () => {
+const getPostBySlug = cache(async (rawSlug: string) => {
+  let decodedSlug = rawSlug;
+  try {
+    decodedSlug = decodeURIComponent(rawSlug);
+  } catch {}
+
+  return withMemoryCache(`post-${decodedSlug}`, 60, async () => {
     let post = await prisma.post.findUnique({
-      where: { slug },
+      where: { slug: decodedSlug },
       include: {
         category: true,
         author: { select: { name: true } },
       },
     });
 
+    if (!post && decodedSlug !== rawSlug) {
+      post = await prisma.post.findUnique({
+        where: { slug: rawSlug },
+        include: {
+          category: true,
+          author: { select: { name: true } },
+        },
+      });
+    }
+
     if (!post) {
       post = await prisma.post.findFirst({
         where: {
           slug: {
-            equals: slug,
+            equals: decodedSlug,
             mode: "insensitive",
           },
         },

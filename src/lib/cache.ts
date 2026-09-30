@@ -22,10 +22,14 @@ export async function withMemoryCache<T>(
   }
 
   const fresh = await fetcher();
-  memoryCache.set(key, {
-    data: fresh,
-    expiresAt: now + ttlSeconds * 1000,
-  });
+
+  // Never cache null or undefined results to avoid false 404s persisting
+  if (fresh !== null && fresh !== undefined) {
+    memoryCache.set(key, {
+      data: fresh,
+      expiresAt: now + ttlSeconds * 1000,
+    });
+  }
 
   return fresh;
 }
