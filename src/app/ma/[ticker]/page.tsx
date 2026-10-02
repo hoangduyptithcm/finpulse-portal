@@ -6,6 +6,7 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import MarketTickerBar from "@/components/public/MarketTickerBar";
 import Top10Widget from "@/components/public/Top10Widget";
+import SidebarBanner from "@/components/public/SidebarBanner";
 import { prisma } from "@/lib/prisma";
 import { getStockByTicker, STOCKS_DATA, KNOWN_TICKERS } from "@/data/stocksData";
 import { fetchStockQuoteData } from "@/lib/stockQuoteService";
@@ -527,6 +528,7 @@ export default async function StockDetailPage({ params }: StockPageProps) {
             </div>
 
             <Top10Widget />
+            <SidebarBanner />
           </aside>
         </div>
       </main>

@@ -4,6 +4,7 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import NewsletterForm from "@/components/public/NewsletterForm";
 import Top10Widget from "@/components/public/Top10Widget";
+import SidebarBanner from "@/components/public/SidebarBanner";
 import MarketTickerBar from "@/components/public/MarketTickerBar";
 import MarketWatchlist from "@/components/public/MarketWatchlist";
 import MiniSparkline from "@/components/public/MiniSparkline";
@@ -392,6 +393,9 @@ export default async function HomePage() {
 
             {/* Số liệu tôi đang theo dõi (Realtime Market Watchlist) */}
             <MarketWatchlist />
+
+            {/* Cộng đồng & Fanpage Banner */}
+            <SidebarBanner />
           </aside>
         </section>
       </main>

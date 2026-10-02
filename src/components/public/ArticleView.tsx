@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Top10Widget from "@/components/public/Top10Widget";
+import SidebarBanner from "@/components/public/SidebarBanner";
 import CommentsSection, { CommentItem } from "@/components/public/CommentsSection";
 import ArticleSourceBadge from "@/components/public/ArticleSourceBadge";
+import ArticleAudioPlayer from "@/components/public/ArticleAudioPlayer";
 import InteractiveFinancialCharts from "@/components/public/InteractiveFinancialCharts";
 import { enrichArticleContent } from "@/lib/autoLinker";
 import { KNOWN_TICKERS } from "@/data/stocksData";
@@ -221,6 +223,15 @@ export default function ArticleView({
                   : "ORIGINAL_ANALYSIS"
               }
               sourceName={post ? undefined : "BCTC VCB 2021-2026, HOSE"}
+            />
+
+            {/* AI Audio Article Briefing Player */}
+            <ArticleAudioPlayer
+              title={post ? post.title : data.title}
+              excerpt={post ? post.excerpt : data.excerpt}
+              content={post ? post.content : undefined}
+              shortAnswer={!post ? data.shortAnswer : undefined}
+              shortAnswerBullets={!post ? data.shortAnswerBullets : undefined}
             />
 
             {/* "Trả lời ngắn" Callout Box (chỉ hiển thị khi có phần tóm tắt riêng biệt cho bài mẫu) */}
@@ -591,40 +602,44 @@ export default function ArticleView({
             </Link>
           </article>
 
-          {/* Sticky Right Sidebar (TOC & Top 10) */}
+          {/* Sticky Right Sidebar (TOC & Top 10 & Banner) */}
           <aside className="w-full lg:w-[340px] xl:w-[380px] shrink-0 flex flex-col gap-8">
             <Top10Widget />
 
-            {/* Sticky Table of Contents (TOC) - Only for default demo article */}
-            {!post && (
-              <nav className="sticky top-[84px] flex flex-col bg-white p-4 border border-[#E5E7EB] rounded-[2px]">
-                <h2 className="m-0 mb-1.5 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
-                  Trong bài này
-                </h2>
-                <div className="flex flex-col">
-                  {TOC.map((t) => {
-                    const isActive = activeSec === t.id;
-                    return (
-                      <a
-                        key={t.id}
-                        href={`#${t.id}`}
-                        onClick={scrollTo(t.id)}
-                        className={`py-2 pl-3 text-[14px] leading-[1.4] border-l-2 transition-colors hover:no-underline hover:text-[#111827] ${
-                          isActive
-                            ? "border-[#1E40AF] text-[#111827] font-semibold"
-                            : "border-[#E5E7EB] text-[#6B7280] font-normal"
-                        }`}
-                      >
-                        {t.label}
-                      </a>
-                    );
-                  })}
-                </div>
-                <span className="mt-3 text-[13px] text-[#6B7280]">
-                  {readLeft}
-                </span>
-              </nav>
-            )}
+            <div className="sticky top-[84px] flex flex-col gap-6">
+              <SidebarBanner />
+
+              {/* Sticky Table of Contents (TOC) - Only for default demo article */}
+              {!post && (
+                <nav className="flex flex-col bg-white p-4 border border-[#E5E7EB] rounded-[2px]">
+                  <h2 className="m-0 mb-1.5 text-[14px] font-bold pb-2 border-b-2 border-[#111827] text-[#111827]">
+                    Trong bài này
+                  </h2>
+                  <div className="flex flex-col">
+                    {TOC.map((t) => {
+                      const isActive = activeSec === t.id;
+                      return (
+                        <a
+                          key={t.id}
+                          href={`#${t.id}`}
+                          onClick={scrollTo(t.id)}
+                          className={`py-2 pl-3 text-[14px] leading-[1.4] border-l-2 transition-colors hover:no-underline hover:text-[#111827] ${
+                            isActive
+                              ? "border-[#1E40AF] text-[#111827] font-semibold"
+                              : "border-[#E5E7EB] text-[#6B7280] font-normal"
+                          }`}
+                        >
+                          {t.label}
+                        </a>
+                      );
+                    })}
+                  </div>
+                  <span className="mt-3 text-[13px] text-[#6B7280]">
+                    {readLeft}
+                  </span>
+                </nav>
+              )}
+            </div>
           </aside>
         </div>
 

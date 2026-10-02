@@ -4,6 +4,7 @@ import TopBar from "@/components/public/TopBar";
 import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import Top10Widget from "@/components/public/Top10Widget";
+import SidebarBanner from "@/components/public/SidebarBanner";
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { BookOpen, Calendar, Eye, ArrowLeft } from "lucide-react";
@@ -234,6 +235,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           {/* Sidebar */}
           <aside className="w-full lg:w-[340px] xl:w-[380px] shrink-0 flex flex-col gap-8">
             <Top10Widget />
+            <SidebarBanner />
           </aside>
         </div>
       </main>
