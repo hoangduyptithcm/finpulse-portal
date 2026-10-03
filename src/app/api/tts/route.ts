@@ -113,8 +113,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Priority 1: Check if Kokoro-Vietnamese Microservice URL is configured
-    const kokoroUrl = process.env.KOKORO_TTS_URL;
+    // Priority 1: Check if Kokoro-Vietnamese Microservice is available
+    // Default to IPv4 http://127.0.0.1:8880/api/tts (avoids Node.js IPv6 ::1 ECONNREFUSED on Linux)
+    const rawKokoroUrl = process.env.KOKORO_TTS_URL || "http://127.0.0.1:8880/api/tts";
+    const kokoroUrl = rawKokoroUrl.replace("//localhost:", "//127.0.0.1:");
+
     if (kokoroUrl) {
       try {
         console.log(`[TTS] Calling Kokoro microservice at ${kokoroUrl} (voice: ${requestedVoice})...`);
