@@ -14,10 +14,10 @@ import numpy as np
 import soundfile as sf
 import torch
 
-# Multi-threading optimization for CPU inference
-num_threads = max(1, min(os.cpu_count() or 4, 8))
+# Multi-threading optimization for CPU inference (cap at 2 threads to prevent starving host SSH/OS)
+num_threads = min(os.cpu_count() or 2, 2)
 torch.set_num_threads(num_threads)
-torch.set_num_interop_threads(min(num_threads, 4))
+torch.set_num_interop_threads(1)
 if hasattr(torch, "set_float32_matmul_precision"):
     torch.set_float32_matmul_precision("high")
 
@@ -80,20 +80,8 @@ def get_tts_pipeline(voice: str = DEFAULT_VOICE):
 
 @app.on_event("startup")
 async def startup_event():
-    """Tải trước các giọng đọc chính vào RAM ở chế độ nền, không làm chậm việc mở cổng 8880"""
-    import asyncio
-
-    def preload_models():
-        logger.info("Đang tải trước mô hình giọng đọc vào RAM ở chế độ nền...")
-        try:
-            get_tts_pipeline("diem_trinh")
-            get_tts_pipeline("hung_thinh")
-            logger.info("Đã tải xong các giọng đọc mặc định (Diễm Trinh, Hưng Thịnh). Sẵn sàng nhận yêu cầu!")
-        except Exception as e:
-            logger.warning(f"Chưa tải được mô hình lúc khởi động: {e}")
-
-    loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, preload_models)
+    """Khởi động nhanh trong 0.1s, mô hình sẽ được lazy load khi có request đầu tiên để tiết kiệm RAM và bảo vệ hệ thống"""
+    logger.info("Dịch vụ Kokoro-Vietnamese TTS đã sẵn sàng lắng nghe trên cổng 8880.")
 
 
 def int_to_vietnamese(n: int) -> str:

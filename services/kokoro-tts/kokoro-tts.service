@@ -12,6 +12,9 @@ Environment="DEVICE=cpu"
 Environment="DEFAULT_VOICE=diem_trinh"
 Environment="PYTHONUNBUFFERED=1"
 ExecStart=/opt/kokoro-tts/venv/bin/uvicorn app:app --host 0.0.0.0 --port 8880 --workers 1
+Nice=10
+MemoryMax=1800M
+CPUQuota=180%
 
 Restart=always
 RestartSec=5s
