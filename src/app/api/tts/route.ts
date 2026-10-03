@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
             voice: requestedVoice,
             speed: 1.0,
           }),
-          signal: AbortSignal.timeout(30000),
+          signal: AbortSignal.timeout(120000), // 120s timeout for model loading and long texts
         });
 
         if (kokoroRes.ok) {

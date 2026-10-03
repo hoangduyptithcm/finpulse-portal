@@ -56,6 +56,18 @@ def get_tts_pipeline(voice: str = DEFAULT_VOICE):
     return tts_pipelines[voice]
 
 
+@app.on_event("startup")
+async def startup_event():
+    """Tải trước các giọng đọc chính vào RAM ngay khi service khởi động"""
+    logger.info("Đang tải trước mô hình giọng đọc vào RAM...")
+    try:
+        get_tts_pipeline("diem_trinh")
+        get_tts_pipeline("hung_thinh")
+        logger.info("Đã tải xong các giọng đọc mặc định (Diễm Trinh, Hưng Thịnh). Sẵn sàng nhận yêu cầu!")
+    except Exception as e:
+        logger.warning(f"Chưa tải được mô hình lúc khởi động: {e}")
+
+
 def int_to_vietnamese(n: int) -> str:
     """Chuyển đổi số nguyên dương sang chuỗi chữ Tiếng Việt chuẩn ngữ âm"""
     if n == 0:
