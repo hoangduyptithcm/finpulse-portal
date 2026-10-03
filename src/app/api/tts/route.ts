@@ -81,6 +81,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const text = body.text || "";
+    const requestedVoice = (
+      body.voice ||
+      process.env.KOKORO_TTS_VOICE ||
+      "duet"
+    )
+      .toLowerCase()
+      .trim();
 
     if (!text || typeof text !== "string" || text.trim().length === 0) {
       return NextResponse.json(
@@ -92,19 +99,70 @@ export async function POST(req: NextRequest) {
     // Limit length to ~3,500 characters
     const truncatedText = text.slice(0, 3500);
 
-    // Check cache
-    const cacheKey = truncatedText.trim();
+    // Check cache with voice identifier (v3 to invalidate old fallback responses)
+    const cacheKey = `v3_${truncatedText.trim()}_${requestedVoice}`;
     if (ttsCache.has(cacheKey)) {
       const cachedBuffer = ttsCache.get(cacheKey)!;
       return new NextResponse(new Uint8Array(cachedBuffer), {
         status: 200,
         headers: {
-          "Content-Type": "audio/mpeg",
+          "Content-Type": "audio/wav",
           "Cache-Control": "public, max-age=86400, s-maxage=86400",
+          "X-TTS-Voice": requestedVoice,
         },
       });
     }
 
+    // Priority 1: Check if Kokoro-Vietnamese Microservice URL is configured
+    const kokoroUrl = process.env.KOKORO_TTS_URL;
+    if (kokoroUrl) {
+      try {
+        const kokoroRes = await fetch(kokoroUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: truncatedText,
+            voice: requestedVoice,
+            speed: 1.0,
+          }),
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (kokoroRes.ok) {
+          const audioArrayBuf = await kokoroRes.arrayBuffer();
+          const kokoroBuffer = Buffer.from(audioArrayBuf);
+          const contentType =
+            kokoroRes.headers.get("content-type") || "audio/wav";
+
+          if (ttsCache.size >= MAX_CACHE_SIZE) {
+            const firstKey = ttsCache.keys().next().value;
+            if (firstKey) ttsCache.delete(firstKey);
+          }
+          ttsCache.set(cacheKey, kokoroBuffer);
+
+          return new NextResponse(new Uint8Array(kokoroBuffer), {
+            status: 200,
+            headers: {
+              "Content-Type": contentType,
+              "Cache-Control": "public, max-age=86400, s-maxage=86400",
+              "X-TTS-Engine": "Kokoro-Vietnamese",
+              "X-TTS-Voice": requestedVoice,
+            },
+          });
+        } else {
+          console.warn(
+            `[TTS] Kokoro microservice returned status ${kokoroRes.status}, falling back to default TTS.`
+          );
+        }
+      } catch (kokoroErr: any) {
+        console.warn(
+          "[TTS] Kokoro microservice unreachable, falling back to default TTS:",
+          kokoroErr?.message
+        );
+      }
+    }
+
+    // Priority 2: Fallback TTS Engine
     const chunks = splitTextIntoChunks(truncatedText);
     if (chunks.length === 0) {
       return NextResponse.json(
@@ -139,6 +197,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
+        "X-TTS-Engine": "Fallback",
       },
     });
   } catch (err: any) {

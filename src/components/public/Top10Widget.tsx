@@ -90,6 +90,7 @@ export default function Top10Widget() {
             <Link
               key={p.id}
               href={`/posts/${p.slug}`}
+              prefetch={false}
               className="flex gap-3 py-3 border-b border-[#E5E7EB] text-[#111827] hover:text-[#1E40AF] hover:no-underline transition-colors group"
             >
               <span

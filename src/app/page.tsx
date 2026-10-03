@@ -135,6 +135,7 @@ export default async function HomePage() {
           {featuredPost ? (
             <Link
               href={`/posts/${featuredPost.slug}`}
+              prefetch={false}
               className="flex-1 basis-[440px] min-w-0 flex flex-col gap-4 p-7 bg-white border border-[#111827] text-[#111827] no-underline hover:no-underline transition-all duration-200 hover:shadow-[6px_6px_0_#111827] group"
             >
               <div className="flex items-center justify-between gap-2 text-[13px] text-[#6B7280]">
@@ -227,6 +228,7 @@ export default async function HomePage() {
                     <Link
                       key={it.id}
                       href={`/posts/${it.slug}`}
+                      prefetch={false}
                       className="flex flex-col gap-1.5 py-3 border-t border-[#E5E7EB] text-[#111827] hover:no-underline transition-colors group"
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -348,6 +350,7 @@ export default async function HomePage() {
                       <Link
                         key={n.id}
                         href={`/posts/${n.slug}`}
+                        prefetch={false}
                         className="grid grid-cols-[72px_minmax(0,1fr)] gap-5 py-4.5 border-b border-[#E5E7EB] text-[#111827] hover:no-underline group"
                       >
                         <span className="flex flex-col leading-[1.1]">

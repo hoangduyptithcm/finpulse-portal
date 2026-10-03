@@ -1,0 +1,22 @@
+[Unit]
+Description=Kokoro-Vietnamese AI TTS Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/kokoro-tts
+Environment="PATH=/opt/kokoro-tts/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PORT=8880"
+Environment="DEVICE=cpu"
+Environment="DEFAULT_VOICE=diem_trinh"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/opt/kokoro-tts/venv/bin/uvicorn app:app --host 0.0.0.0 --port 8880 --workers 1
+
+Restart=always
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

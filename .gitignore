@@ -40,3 +40,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python / tts
+**/__pycache__/
+**/*.py[cod]
+**/venv/
+**/.venv/
+services/kokoro-tts/huggingface_cache/
+

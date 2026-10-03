@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  kokoro-tts:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finpulse-kokoro-tts
+    restart: always
+    ports:
+      - "8880:8880"
+    environment:
+      - PORT=8880
+      - DEFAULT_VOICE=diem_trinh # Các giọng: diem_trinh, mai_linh, hung_thinh, duc_an
+      - DEVICE=cpu # Đổi thành "cuda" nếu VPS có GPU Nvidia
+      - MAX_CACHE_ITEMS=500
+    volumes:
+      # Giữ lại cache model HuggingFace để không phải tải lại mỗi lần khởi động
+      - huggingface_cache:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8880/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Nếu VPS có GPU Nvidia, mở ghi chú đoạn dưới đây:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  huggingface_cache:

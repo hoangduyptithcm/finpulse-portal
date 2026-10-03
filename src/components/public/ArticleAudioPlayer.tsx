@@ -24,6 +24,14 @@ interface ArticleAudioPlayerProps {
 
 type AudioMode = "summary" | "full";
 
+export const VOICE_OPTIONS = [
+  { id: "duet", label: "🎙️ Song ca Nam & Nữ (Xen kẽ)", desc: "Xen kẽ Diễm Trinh & Hưng Thịnh" },
+  { id: "diem_trinh", label: "👩 Diễm Trinh (Nữ - Truyền cảm)", desc: "Trầm ấm, diễn cảm tự nhiên" },
+  { id: "hung_thinh", label: "👨 Hưng Thịnh (Nam - Trầm ấm)", desc: "Trầm, dứt khoát, tin cậy" },
+  { id: "mai_linh", label: "👩 Mai Linh (Nữ - Trong trẻo)", desc: "Tươi sáng, năng động" },
+  { id: "duc_an", label: "👨 Đức An (Nam - Phát thanh viên)", desc: "Ấm áp, phát thanh viên" },
+];
+
 export default function ArticleAudioPlayer({
   title,
   excerpt,
@@ -34,18 +42,17 @@ export default function ArticleAudioPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<AudioMode>("summary");
+  const [voice, setVoice] = useState<string>("duet");
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isStickyVisible, setIsStickyVisible] = useState(false);
   const [isSpeedMenuOpen, setIsSpeedMenuOpen] = useState(false);
+  const [isVoiceMenuOpen, setIsVoiceMenuOpen] = useState(false);
 
   const playerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioBlobCache = useRef<Record<AudioMode, string | null>>({
-    summary: null,
-    full: null,
-  });
+  const audioBlobCache = useRef<Record<string, string>>({});
 
   // Prepare clean text for summary
   const summaryText = useMemo(() => {
@@ -66,10 +73,13 @@ export default function ArticleAudioPlayer({
   const fullText = useMemo(() => {
     let body = "";
     if (content) {
-      // Strip HTML tags and entities
+      // Strip HTML tags and entities, maintaining pauses between blocks and tables
       body = content
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+        .replace(/<\/(p|div|h[1-6]|li|tr|table|blockquote)>/gi, ". ")
+        .replace(/<(br|hr)\s*\/?>/gi, ". ")
+        .replace(/<\/td>\s*<td[^>]*>/gi, ", ")
         .replace(/<[^>]+>/g, " ")
         .replace(/&nbsp;/g, " ")
         .replace(/&amp;/g, "&")
@@ -114,26 +124,27 @@ export default function ArticleAudioPlayer({
         audioRef.current = null;
       }
       // Revoke any blob URLs
-      if (audioBlobCache.current.summary) {
-        URL.revokeObjectURL(audioBlobCache.current.summary);
-      }
-      if (audioBlobCache.current.full) {
-        URL.revokeObjectURL(audioBlobCache.current.full);
-      }
+      Object.values(audioBlobCache.current).forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
     };
   }, []);
 
-  // Fetch or retrieve audio blob URL for given mode
-  const getAudioUrl = async (targetMode: AudioMode): Promise<string> => {
-    if (audioBlobCache.current[targetMode]) {
-      return audioBlobCache.current[targetMode]!;
+  // Fetch or retrieve audio blob URL for given mode and voice
+  const getAudioUrl = async (
+    targetMode: AudioMode,
+    targetVoice: string = voice
+  ): Promise<string> => {
+    const cacheKey = `${targetMode}_${targetVoice}`;
+    if (audioBlobCache.current[cacheKey]) {
+      return audioBlobCache.current[cacheKey];
     }
 
     const textToRead = targetMode === "summary" ? summaryText : fullText;
     const res = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: textToRead }),
+      body: JSON.stringify({ text: textToRead, voice: targetVoice }),
     });
 
     if (!res.ok) {
@@ -142,8 +153,60 @@ export default function ArticleAudioPlayer({
 
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-    audioBlobCache.current[targetMode] = url;
+    audioBlobCache.current[cacheKey] = url;
     return url;
+  };
+
+  // Switch voice dynamically
+  const handleVoiceChange = async (newVoice: string) => {
+    if (newVoice === voice) {
+      setIsVoiceMenuOpen(false);
+      return;
+    }
+    setIsVoiceMenuOpen(false);
+    setVoice(newVoice);
+
+    const wasPlaying = isPlaying;
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setIsPlaying(false);
+    setIsLoading(true);
+
+    try {
+      const url = await getAudioUrl(mode, newVoice);
+      const audio = new Audio(url);
+      audio.playbackRate = playbackRate;
+
+      audio.onloadedmetadata = () => {
+        setDuration(audio.duration);
+        setIsLoading(false);
+      };
+
+      audio.ontimeupdate = () => {
+        setCurrentTime(audio.currentTime);
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
+
+      audio.onerror = (e) => {
+        console.error("[Audio Player Error]:", e);
+        setIsPlaying(false);
+        setIsLoading(false);
+      };
+
+      audioRef.current = audio;
+      if (wasPlaying) {
+        await audio.play();
+        setIsPlaying(true);
+      }
+    } catch (err) {
+      console.error("[Voice Switch Error]:", err);
+      setIsLoading(false);
+    }
   };
 
   // Initialize or play audio
@@ -381,11 +444,71 @@ export default function ArticleAudioPlayer({
               )}
             </span>
 
+            {/* Voice Selector Dropdown (Song ca Nam Nữ / Đơn giọng) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVoiceMenuOpen(!isVoiceMenuOpen);
+                  setIsSpeedMenuOpen(false);
+                }}
+                title="Chọn giọng đọc AI hoặc song ca"
+                className="px-2.5 py-1 bg-white border border-[#D1D5DB] rounded text-[12px] font-bold text-[#111827] hover:border-[#111827] flex items-center gap-1.5 cursor-pointer transition-colors"
+              >
+                <span>
+                  {VOICE_OPTIONS.find((v) => v.id === voice)?.label ||
+                    "🎙️ Giọng đọc"}
+                </span>
+                {isVoiceMenuOpen ? (
+                  <ChevronUp className="w-3 h-3 text-[#6B7280]" />
+                ) : (
+                  <ChevronDown className="w-3 h-3 text-[#6B7280]" />
+                )}
+              </button>
+
+              {isVoiceMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-[#111827] shadow-[3px_3px_0_#111827] rounded py-1 z-30 min-w-[230px] flex flex-col">
+                  <div className="px-3 py-1 border-b border-[#E5E7EB] text-[10.5px] font-bold uppercase tracking-wider text-[#6B7280]">
+                    Chọn giọng đọc AI Kokoro
+                  </div>
+                  {VOICE_OPTIONS.map((v) => (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => handleVoiceChange(v.id)}
+                      className={`px-3 py-2 text-left hover:bg-[#EFF6FF] cursor-pointer transition-colors border-0 bg-transparent flex flex-col gap-0.5 ${
+                        voice === v.id ? "bg-[#F3F4F6]" : ""
+                      }`}
+                    >
+                      <span
+                        className={`text-[12px] font-bold flex items-center justify-between ${
+                          voice === v.id ? "text-[#1E40AF]" : "text-[#111827]"
+                        }`}
+                      >
+                        {v.label}
+                        {voice === v.id && (
+                          <span className="text-[10px] bg-[#EFF6FF] text-[#1E40AF] px-1.5 py-0.2 rounded font-bold">
+                            Đang chọn
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[11px] text-[#6B7280]">
+                        {v.desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Playback Speed Dropdown */}
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setIsSpeedMenuOpen(!isSpeedMenuOpen)}
+                onClick={() => {
+                  setIsSpeedMenuOpen(!isSpeedMenuOpen);
+                  setIsVoiceMenuOpen(false);
+                }}
                 className="px-2 py-1 bg-white border border-[#D1D5DB] rounded text-[12px] font-bold text-[#111827] hover:border-[#111827] flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <span>{playbackRate}x</span>
@@ -404,7 +527,9 @@ export default function ArticleAudioPlayer({
                       type="button"
                       onClick={() => handleSpeedChange(rate)}
                       className={`px-3 py-1 text-[12px] text-left hover:bg-[#EFF6FF] hover:text-[#1E40AF] cursor-pointer transition-colors border-0 bg-transparent ${
-                        playbackRate === rate ? "font-bold text-[#1E40AF]" : "text-[#374151]"
+                        playbackRate === rate
+                          ? "font-bold text-[#1E40AF]"
+                          : "text-[#374151]"
                       }`}
                     >
                       {rate}x
