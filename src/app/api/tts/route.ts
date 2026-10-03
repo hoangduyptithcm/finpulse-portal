@@ -117,6 +117,7 @@ export async function POST(req: NextRequest) {
     const kokoroUrl = process.env.KOKORO_TTS_URL;
     if (kokoroUrl) {
       try {
+        console.log(`[TTS] Calling Kokoro microservice at ${kokoroUrl} (voice: ${requestedVoice})...`);
         const kokoroRes = await fetch(kokoroUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -139,6 +140,7 @@ export async function POST(req: NextRequest) {
             if (firstKey) ttsCache.delete(firstKey);
           }
           ttsCache.set(cacheKey, kokoroBuffer);
+          console.log(`[TTS] Kokoro audio generated successfully (${kokoroBuffer.length} bytes).`);
 
           return new NextResponse(new Uint8Array(kokoroBuffer), {
             status: 200,
@@ -151,15 +153,18 @@ export async function POST(req: NextRequest) {
           });
         } else {
           console.warn(
-            `[TTS] Kokoro microservice returned status ${kokoroRes.status}, falling back to default TTS.`
+            `[TTS] Kokoro microservice at ${kokoroUrl} returned status ${kokoroRes.status}, falling back to default TTS.`
           );
         }
       } catch (kokoroErr: any) {
         console.warn(
-          "[TTS] Kokoro microservice unreachable, falling back to default TTS:",
-          kokoroErr?.message
+          `[TTS] Cannot reach Kokoro microservice at ${kokoroUrl} (${kokoroErr?.message}), falling back to default TTS.`
         );
       }
+    } else {
+      console.warn(
+        "[TTS] KOKORO_TTS_URL is NOT set in environment variables! Using fallback TTS."
+      );
     }
 
     // Priority 2: Fallback TTS Engine
