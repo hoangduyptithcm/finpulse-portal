@@ -30,6 +30,7 @@ apt-get install -y --no-install-recommends \
 
 echo "📁 [2/6] Thiết lập thư mục ứng dụng tại $APP_DIR..."
 mkdir -p "$APP_DIR"
+mkdir -p "$APP_DIR/cache"
 
 # Nếu chạy script từ thư mục chứa mã nguồn, copy sang $APP_DIR nếu chưa ở đó
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -137,21 +137,25 @@ export async function POST(req: NextRequest) {
           const kokoroBuffer = Buffer.from(audioArrayBuf);
           const contentType =
             kokoroRes.headers.get("content-type") || "audio/wav";
+          const xCache = kokoroRes.headers.get("x-cache") || "MISS";
+          const xSynthTime = kokoroRes.headers.get("x-synthesis-time") || "";
 
           if (ttsCache.size >= MAX_CACHE_SIZE) {
             const firstKey = ttsCache.keys().next().value;
             if (firstKey) ttsCache.delete(firstKey);
           }
           ttsCache.set(cacheKey, kokoroBuffer);
-          console.log(`[TTS] Kokoro audio generated successfully (${kokoroBuffer.length} bytes).`);
+          console.log(`[TTS] Kokoro audio generated successfully (${kokoroBuffer.length} bytes, cache: ${xCache}).`);
 
           return new NextResponse(new Uint8Array(kokoroBuffer), {
             status: 200,
             headers: {
               "Content-Type": contentType,
-              "Cache-Control": "public, max-age=86400, s-maxage=86400",
+              "Cache-Control": "public, max-age=604800, s-maxage=604800",
               "X-TTS-Engine": "Kokoro-Vietnamese",
               "X-TTS-Voice": requestedVoice,
+              "X-Cache": xCache,
+              ...(xSynthTime ? { "X-Synthesis-Time": xSynthTime } : {}),
             },
           });
         } else {

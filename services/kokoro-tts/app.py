@@ -3,6 +3,8 @@ import io
 import re
 import hashlib
 import logging
+import time
+from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response, JSONResponse
@@ -12,6 +14,13 @@ import numpy as np
 import soundfile as sf
 import torch
 
+# Multi-threading optimization for CPU inference
+num_threads = max(1, min(os.cpu_count() or 4, 8))
+torch.set_num_threads(num_threads)
+torch.set_num_interop_threads(min(num_threads, 4))
+if hasattr(torch, "set_float32_matmul_precision"):
+    torch.set_float32_matmul_precision("high")
+
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("kokoro-vietnamese-service")
@@ -19,7 +28,7 @@ logger = logging.getLogger("kokoro-vietnamese-service")
 app = FastAPI(
     title="Kokoro Vietnamese TTS Service",
     description="High-quality Vietnamese Text-To-Speech microservice based on Kokoro architecture (iamdinhthuan/Kokoro-Vietnamese)",
-    version="1.0.0"
+    version="1.1.0"
 )
 
 app.add_middleware(
@@ -34,8 +43,11 @@ app.add_middleware(
 DEVICE = os.getenv("DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
 DEFAULT_VOICE = os.getenv("DEFAULT_VOICE", "diem_trinh")
 SAMPLE_RATE = 24000
+USE_ONNX = os.getenv("USE_ONNX", "true").lower() in ("true", "1", "yes")
 
-# Cache storage
+# Persistent Disk & RAM Cache storage
+CACHE_DIR = Path(os.getenv("CACHE_DIR", "/opt/kokoro-tts/cache" if os.path.exists("/opt/kokoro-tts") else "./cache"))
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 AUDIO_CACHE = {}
 MAX_CACHE_ITEMS = int(os.getenv("MAX_CACHE_ITEMS", "300"))
 
@@ -43,13 +55,23 @@ MAX_CACHE_ITEMS = int(os.getenv("MAX_CACHE_ITEMS", "300"))
 tts_pipelines = {}
 
 def get_tts_pipeline(voice: str = DEFAULT_VOICE):
-    """Lazy load pipeline for requested voice"""
+    """Lazy load pipeline for requested voice with ONNX Runtime acceleration and PyTorch fallback"""
     if voice not in tts_pipelines:
-        logger.info(f"Loading Kokoro-Vietnamese model for voice '{voice}' on device '{DEVICE}'...")
+        if USE_ONNX:
+            try:
+                from kokoro_vietnamese.onnx_cli import KokoroVietnameseONNX
+                logger.info(f"Loading ONNX Runtime engine for voice '{voice}' on device '{DEVICE}'...")
+                tts_pipelines[voice] = KokoroVietnameseONNX(voice=voice, device=DEVICE)
+                logger.info(f"ONNX Model for voice '{voice}' loaded successfully (Speed boost enabled).")
+                return tts_pipelines[voice]
+            except Exception as onnx_err:
+                logger.warning(f"Could not load ONNX model for '{voice}': {onnx_err}. Falling back to PyTorch...")
+
+        logger.info(f"Loading Kokoro-Vietnamese PyTorch model for voice '{voice}' on device '{DEVICE}'...")
         try:
             from kokoro_vietnamese import KokoroVietnamese
             tts_pipelines[voice] = KokoroVietnamese(device=DEVICE, voice=voice)
-            logger.info(f"Model for voice '{voice}' loaded successfully.")
+            logger.info(f"PyTorch Model for voice '{voice}' loaded successfully.")
         except Exception as e:
             logger.error(f"Failed to load Kokoro-Vietnamese voice '{voice}': {e}")
             raise HTTPException(status_code=500, detail=f"Không thể tải mô hình giọng đọc '{voice}': {str(e)}")
@@ -417,7 +439,7 @@ def preprocess_financial_text(text: str) -> str:
 
 
 def split_sentences(text: str, max_chars: int = 120) -> list[str]:
-    """
+    r"""
     Chia nhỏ văn bản đảm bảo không bao giờ vượt quá giới hạn 510 phonemes của Kokoro.
     Tách ưu tiên theo:
     1. Dấu câu kết thúc câu: [.!?\n]
@@ -494,25 +516,52 @@ VOICES_CATALOG = [
 
 def split_turns_for_duet(text: str) -> list[str]:
     """
-    Tách bài viết thành các lượt nói (turns) để giọng Nam & Nữ thay phiên nhau dẫn dắt
+    Tách bài viết thành các lượt nói (turns) tự nhiên để giọng Nam & Nữ thay phiên nhau.
+    Mỗi lượt nói dài khoảng 200-350 ký tự, mang phong cách podcast/bản tin chuyên nghiệp,
+    tránh đổi giọng liên tục sau từng câu ngắn gây chậm và giật cục.
     """
-    # 1. Tách theo đoạn văn nếu có
-    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
-    
+    # Nếu là tóm tắt ngắn (<= 160 ký tự), tách làm 2 lượt nếu đủ dài
+    if len(text) <= 160:
+        clauses = split_sentences(text, max_chars=85)
+        return clauses if len(clauses) > 1 else [text]
+
+    # Tách theo đoạn văn trước
+    raw_paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
+    if not raw_paragraphs:
+        raw_paragraphs = [text]
+
     turns = []
-    for p in paragraphs:
-        # Nếu đoạn dài hơn 150 ký tự, tách tiếp theo câu
-        if len(p) > 150:
-            sentences = split_sentences(p, max_chars=120)
-            turns.extend(sentences)
-        else:
+    for p in raw_paragraphs:
+        if len(p) <= 350:
             turns.append(p)
-            
-    # Nếu chỉ có 1 lượt duy nhất nhưng đủ dài, tách làm đôi để có cả Nam & Nữ
-    if len(turns) == 1 and len(turns[0]) > 80:
-        sentences = split_sentences(turns[0], max_chars=100)
-        if len(sentences) >= 2:
-            turns = sentences
+        else:
+            # Tách đoạn dài thành các câu/mệnh đề an toàn (max 280 ký tự)
+            parts = split_sentences(p, max_chars=280)
+            current_turn = ""
+            for part in parts:
+                if not current_turn:
+                    current_turn = part
+                elif len(current_turn) + len(part) + 1 <= 320:
+                    current_turn = f"{current_turn} {part}"
+                else:
+                    turns.append(current_turn)
+                    current_turn = part
+            if current_turn:
+                turns.append(current_turn)
+
+    # Đảm bảo có ít nhất 2 lượt nếu bài viết đủ dài (> 90 ký tự)
+    if len(turns) == 1 and len(turns[0]) > 90:
+        half = len(turns[0]) // 2 + 10
+        turns = split_sentences(turns[0], max_chars=max(60, half))
+
+    # Giới hạn tối đa 6 lượt để tối ưu thời gian tạo trên CPU (dưới 10-15s)
+    if len(turns) > 6:
+        merged_turns = []
+        step = (len(turns) + 5) // 6
+        for i in range(0, len(turns), step):
+            group = " ".join(turns[i:i+step])
+            merged_turns.append(group)
+        turns = [m for m in merged_turns if m.strip()]
 
     return turns if turns else [text]
 
@@ -527,12 +576,17 @@ class TTSRequest(BaseModel):
 @app.get("/health")
 @app.get("/api/voices")
 def health_check():
+    disk_cached_count = len(list(CACHE_DIR.glob("*.wav"))) if CACHE_DIR.exists() else 0
     return {
         "status": "healthy",
         "service": "Kokoro-Vietnamese TTS",
         "device": DEVICE,
+        "onnx_enabled": USE_ONNX,
+        "cpu_threads": num_threads,
         "available_voices": VOICES_CATALOG,
-        "cache_entries": len(AUDIO_CACHE),
+        "ram_cache_entries": len(AUDIO_CACHE),
+        "disk_cache_entries": disk_cached_count,
+        "cache_dir": str(CACHE_DIR),
     }
 
 
@@ -554,19 +608,43 @@ async def generate_speech(payload: TTSRequest):
     # Giới hạn 4500 ký tự cho một request
     clean_text = clean_text[:4500]
 
-    # Kiểm tra Cache
     cache_key = hashlib.md5(f"{clean_text}_{voice}_{speed}".encode("utf-8")).hexdigest()
+
+    # 1. Kiểm tra RAM Cache (Trả về ngay lập tức < 1ms)
     if cache_key in AUDIO_CACHE:
-        logger.info(f"Serving audio from cache ({cache_key})")
+        logger.info(f"Serving audio from RAM cache ({cache_key})")
         return Response(
             content=AUDIO_CACHE[cache_key],
             media_type="audio/wav",
             headers={
-                "Cache-Control": "public, max-age=86400, s-maxage=86400",
-                "X-Cache": "HIT",
+                "Cache-Control": "public, max-age=604800, s-maxage=604800",
+                "X-Cache": "RAM-HIT",
                 "X-TTS-Voice": voice
             }
         )
+
+    # 2. Kiểm tra Persistent Disk Cache (Trả về ngay < 5ms)
+    disk_file = CACHE_DIR / f"{cache_key}.wav"
+    if disk_file.exists():
+        try:
+            with open(disk_file, "rb") as f:
+                disk_wav = f.read()
+            if len(disk_wav) > 0:
+                logger.info(f"Serving audio from Persistent Disk Cache ({disk_file.name}, {len(disk_wav)} bytes)")
+                AUDIO_CACHE[cache_key] = disk_wav
+                return Response(
+                    content=disk_wav,
+                    media_type="audio/wav",
+                    headers={
+                        "Cache-Control": "public, max-age=604800, s-maxage=604800",
+                        "X-Cache": "DISK-HIT",
+                        "X-TTS-Voice": voice
+                    }
+                )
+        except Exception as e:
+            logger.warning(f"Lỗi đọc file disk cache {disk_file}: {e}")
+
+    start_time = time.time()
 
     try:
         combined_audio = []
@@ -582,20 +660,18 @@ async def generate_speech(payload: TTSRequest):
             pipeline_male = get_tts_pipeline("hung_thinh")
 
             silence_speaker_switch = np.zeros(int(SAMPLE_RATE * 0.35), dtype=np.float32)  # 350ms nghỉ khi đổi giọng
-            silence_sentence_gap = np.zeros(int(SAMPLE_RATE * 0.20), dtype=np.float32)    # 200ms nghỉ trong cùng 1 giọng
 
             for t_idx, turn in enumerate(turns):
                 # Chẵn: Nữ (Diễm Trinh), Lẻ: Nam (Hưng Thịnh)
                 is_female = (t_idx % 2 == 0)
                 current_pipeline = pipeline_female if is_female else pipeline_male
 
-                turn_sentences = split_sentences(turn, max_chars=220)
-                for s_idx, sentence in enumerate(turn_sentences):
-                    audio, _ = current_pipeline.synthesize(sentence)
+                # Đảm bảo mỗi lượt không vượt quá giới hạn an toàn âm vị (phonemes)
+                turn_parts = split_sentences(turn, max_chars=280)
+                for part in turn_parts:
+                    audio, _ = current_pipeline.synthesize(part, speed=speed)
                     if audio is not None and len(audio) > 0:
                         combined_audio.append(audio)
-                        if s_idx < len(turn_sentences) - 1:
-                            combined_audio.append(silence_sentence_gap)
 
                 # Khoảng nghỉ khi đổi người đọc
                 if t_idx < len(turns) - 1:
@@ -605,16 +681,16 @@ async def generate_speech(payload: TTSRequest):
         # CHẾ ĐỘ 2: ĐƠN GIỌNG (SINGLE VOICE)
         # ==========================================
         else:
-            chunks = split_sentences(clean_text)
+            chunks = split_sentences(clean_text, max_chars=280)
             if not chunks:
                 raise HTTPException(status_code=400, detail="Không thể phân đoạn văn bản")
 
             logger.info(f"Synthesizing {len(chunks)} chunks with voice '{voice}' on {DEVICE}...")
             pipeline = get_tts_pipeline(voice)
-            silence_gap = np.zeros(int(SAMPLE_RATE * 0.25), dtype=np.float32)
+            silence_gap = np.zeros(int(SAMPLE_RATE * 0.20), dtype=np.float32)
 
             for idx, chunk in enumerate(chunks):
-                audio, _ = pipeline.synthesize(chunk)
+                audio, _ = pipeline.synthesize(chunk, speed=speed)
                 if audio is not None and len(audio) > 0:
                     combined_audio.append(audio)
                     if idx < len(chunks) - 1:
@@ -630,22 +706,32 @@ async def generate_speech(payload: TTSRequest):
         sf.write(buffer, final_waveform, SAMPLE_RATE, format="WAV", subtype="PCM_16")
         wav_bytes = buffer.getvalue()
 
-        # Lưu cache
+        elapsed = time.time() - start_time
+        logger.info(f"Synthesis completed in {elapsed:.2f}s ({len(wav_bytes)} bytes audio).")
+
+        # Lưu RAM Cache
         if len(AUDIO_CACHE) >= MAX_CACHE_ITEMS:
-            # Xoá bớt 20% item cũ nhất
             keys_to_remove = list(AUDIO_CACHE.keys())[:int(MAX_CACHE_ITEMS * 0.2)]
             for k in keys_to_remove:
                 AUDIO_CACHE.pop(k, None)
-
         AUDIO_CACHE[cache_key] = wav_bytes
+
+        # Lưu Persistent Disk Cache để các request sau đó phản hồi tức thì (< 5ms)
+        try:
+            with open(disk_file, "wb") as f:
+                f.write(wav_bytes)
+            logger.info(f"Saved to persistent disk cache: {disk_file.name}")
+        except Exception as e:
+            logger.warning(f"Lỗi ghi disk cache {disk_file}: {e}")
 
         return Response(
             content=wav_bytes,
             media_type="audio/wav",
             headers={
                 "Content-Type": "audio/wav",
-                "Cache-Control": "public, max-age=86400, s-maxage=86400",
-                "X-Cache": "MISS"
+                "Cache-Control": "public, max-age=604800, s-maxage=604800",
+                "X-Cache": "MISS",
+                "X-Synthesis-Time": f"{elapsed:.2f}s"
             }
         )
     except Exception as e:

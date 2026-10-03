@@ -73,24 +73,25 @@ export default function ArticleAudioPlayer({
   const fullText = useMemo(() => {
     let body = "";
     if (content) {
-      // Strip HTML tags and entities, maintaining pauses between blocks and tables
+      // Strip HTML tags and entities, maintaining paragraph breaks for podcast duet
       body = content
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-        .replace(/<\/(p|div|h[1-6]|li|tr|table|blockquote)>/gi, ". ")
-        .replace(/<(br|hr)\s*\/?>/gi, ". ")
+        .replace(/<\/(p|div|h[1-6]|li|tr|table|blockquote)>/gi, "\n\n")
+        .replace(/<(br|hr)\s*\/?>/gi, "\n")
         .replace(/<\/td>\s*<td[^>]*>/gi, ", ")
         .replace(/<[^>]+>/g, " ")
         .replace(/&nbsp;/g, " ")
         .replace(/&amp;/g, "&")
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'")
-        .replace(/\s+/g, " ")
+        .replace(/[ \t]+/g, " ")
+        .replace(/\n\s*\n/g, "\n\n")
         .trim();
     }
-    // Limit to reasonable full briefing
-    return `${title}. ${summaryText}. ${body}`.slice(0, 3200).trim();
-  }, [title, summaryText, content]);
+    // Limit to reasonable full briefing without repeating title
+    return `${title}.\n\n${body}`.slice(0, 3000).trim();
+  }, [title, content]);
 
   // Format MM:SS helper
   const formatTime = (secs: number) => {
@@ -130,7 +131,9 @@ export default function ArticleAudioPlayer({
     };
   }, []);
 
-  // Fetch or retrieve audio blob URL for given mode and voice
+  const pendingRequests = useRef<Record<string, Promise<string> | undefined>>({});
+
+  // Fetch or retrieve audio blob URL for given mode and voice (with promise deduplication)
   const getAudioUrl = async (
     targetMode: AudioMode,
     targetVoice: string = voice
@@ -139,23 +142,47 @@ export default function ArticleAudioPlayer({
     if (audioBlobCache.current[cacheKey]) {
       return audioBlobCache.current[cacheKey];
     }
-
-    const textToRead = targetMode === "summary" ? summaryText : fullText;
-    const res = await fetch("/api/tts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: textToRead, voice: targetVoice }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`TTS server error: ${res.status}`);
+    const existingPromise = pendingRequests.current[cacheKey];
+    if (existingPromise) {
+      return existingPromise;
     }
 
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    audioBlobCache.current[cacheKey] = url;
-    return url;
+    const textToRead = targetMode === "summary" ? summaryText : fullText;
+    const fetchPromise = (async () => {
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: textToRead, voice: targetVoice }),
+        });
+
+        if (!res.ok) {
+          throw new Error(`TTS server error: ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        audioBlobCache.current[cacheKey] = url;
+        return url;
+      } finally {
+        delete pendingRequests.current[cacheKey];
+      }
+    })();
+
+    pendingRequests.current[cacheKey] = fetchPromise;
+    return fetchPromise;
   };
+
+  // Pre-generate summary audio in background after 1.5s idle so clicking Play is instantaneous
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (summaryText && summaryText.trim().length > 0) {
+        getAudioUrl("summary", voice).catch(() => {});
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [summaryText, voice]);
 
   // Switch voice dynamically
   const handleVoiceChange = async (newVoice: string) => {
