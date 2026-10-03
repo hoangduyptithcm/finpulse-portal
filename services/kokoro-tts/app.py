@@ -58,14 +58,20 @@ def get_tts_pipeline(voice: str = DEFAULT_VOICE):
 
 @app.on_event("startup")
 async def startup_event():
-    """Tải trước các giọng đọc chính vào RAM ngay khi service khởi động"""
-    logger.info("Đang tải trước mô hình giọng đọc vào RAM...")
-    try:
-        get_tts_pipeline("diem_trinh")
-        get_tts_pipeline("hung_thinh")
-        logger.info("Đã tải xong các giọng đọc mặc định (Diễm Trinh, Hưng Thịnh). Sẵn sàng nhận yêu cầu!")
-    except Exception as e:
-        logger.warning(f"Chưa tải được mô hình lúc khởi động: {e}")
+    """Tải trước các giọng đọc chính vào RAM ở chế độ nền, không làm chậm việc mở cổng 8880"""
+    import asyncio
+
+    def preload_models():
+        logger.info("Đang tải trước mô hình giọng đọc vào RAM ở chế độ nền...")
+        try:
+            get_tts_pipeline("diem_trinh")
+            get_tts_pipeline("hung_thinh")
+            logger.info("Đã tải xong các giọng đọc mặc định (Diễm Trinh, Hưng Thịnh). Sẵn sàng nhận yêu cầu!")
+        except Exception as e:
+            logger.warning(f"Chưa tải được mô hình lúc khởi động: {e}")
+
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, preload_models)
 
 
 def int_to_vietnamese(n: int) -> str:
